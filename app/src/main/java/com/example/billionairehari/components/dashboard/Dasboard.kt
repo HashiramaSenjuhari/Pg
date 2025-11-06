@@ -1,0 +1,254 @@
+package com.example.billionairehari.components.dashboard
+
+import android.util.Log
+import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowDropDown
+import androidx.compose.material.icons.filled.DateRange
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconButtonDefaults
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Outline
+import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.Density
+import androidx.compose.ui.unit.LayoutDirection
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.compose.ui.zIndex
+import com.example.billionairehari.components.DatePickerRange
+import com.example.billionairehari.components.convertMilliToDate
+import com.example.billionairehari.screens.formatIndianRupee
+import java.text.SimpleDateFormat
+import java.time.LocalDate
+
+
+@Composable
+fun DashboardBoard(){
+    val is_open = rememberSaveable { mutableStateOf(false) }
+    val is_dialog_open = rememberSaveable { mutableStateOf(false) }
+
+    val localDate = LocalDate.now()
+    val start = localDate.withDayOfMonth(1).dayOfMonth
+    val end = localDate.withDayOfMonth(LocalDate.now().lengthOfMonth()).dayOfMonth
+    val _month = localDate.month.name
+    val year = localDate.year
+    val month =  _month.slice(if(_month == "SEPTEMBER") 0..3 else 0..2)
+
+    val format = "$start-$end $month $year"
+    val filtered_date = remember { mutableStateOf(format) }
+    val is_filtered = remember { mutableStateOf(false) }
+
+    val dynamic_height = if(is_open.value) 340.dp else 180.dp
+    Box(
+        modifier = Modifier.fillMaxWidth()
+    ){
+        Card(
+            modifier = Modifier
+                .clip(RoundedCornerShape(24.dp))
+                .fillMaxWidth()
+                .animateContentSize()
+                .height(dynamic_height),
+
+            elevation = CardDefaults.cardElevation(
+                defaultElevation = 2.dp
+            ),
+            colors = CardDefaults.cardColors(
+                containerColor = Color(0xFF1B1B1B),
+                contentColor = Color.White
+            ),
+            shape = RevenueBoardShape()
+        ){
+            val money = formatIndianRupee("6000")
+            val fontSize = when {
+                money.length > 9 -> {
+                    30.sp
+                }
+                else -> {
+                    40.sp
+                }
+            }
+            Column(
+                modifier =  Modifier.fillMaxWidth().heightIn(160.dp)
+                    .background(Color(0xFF1B1B1B))
+                    .padding(top = 24.dp, start = 24.dp, bottom = 16.dp, end = 16.dp)
+                    .zIndex(0f),
+            ){
+                Column(
+                    verticalArrangement = Arrangement.spacedBy(3.dp)
+                ) {
+                    Text("REVENUE", fontSize = 24.sp, fontWeight = FontWeight.SemiBold, color = Color(0xFFF8F8FF))
+                    Text("₹${money}",fontSize = fontSize, fontWeight = FontWeight.Black,color = Color(0xFFF8F8FF))
+                }
+                Spacer(modifier = Modifier.height(13.dp))
+                Row (
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ){
+                    Column(
+                        verticalArrangement =  Arrangement.spacedBy(4.dp)
+                    ) {
+                        Text("+ 0.13%",fontSize =13.sp, fontWeight = FontWeight.Black, color = Color.Green)
+                        Text("From last month",fontSize =12.sp,color = Color(0xFFDCDCDC))
+                    }
+                    IconButton(
+                        onClick = {
+                            is_open.value = !is_open.value
+                        },
+                        colors = IconButtonDefaults.iconButtonColors(
+                            containerColor = Color(0xFFF8F8FF),
+                            contentColor = Color(0xFF1B1B1B)
+                        ),
+                        modifier = Modifier.padding(0.dp)
+                    ) {
+                        Icon(
+                            Icons.Default.ArrowDropDown,
+                            contentDescription = "",
+                            tint =  Color(0xFF1B1B1B),
+                            modifier = Modifier.size(24.dp).rotate(if(is_open.value)180f else 0f)
+                        )
+                    }
+                }
+                if(is_open.value){
+                    Text("Billionaire")
+                }
+            }
+
+        }
+        Box(
+            modifier = Modifier.fillMaxWidth(0.47f)
+                .height(32.dp)
+                .clip(RoundedCornerShape(24.dp))
+                .background(Color.White)
+                .border(1.dp, color = Color.Black.copy(alpha = 0.9f), shape = RoundedCornerShape(24.dp))
+                .zIndex(1f)
+                .align(Alignment.TopEnd)
+                .clickable(
+                    enabled = true,
+                    onClick = {
+                        is_dialog_open.value = true
+                    }
+                ),
+            contentAlignment = Alignment.Center
+        ){
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(6.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    filtered_date.value,
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color(0xFF1B1B1B)
+                )
+                if(!is_filtered.value){
+                    Icon(Icons.Default.DateRange, contentDescription = "",modifier = Modifier.size(16.dp),tint = Color(0xFF1B1B1B))
+                }
+            }
+        }
+    }
+    if(is_dialog_open.value){
+        DatePickerRange(
+            onDismiss = {
+                is_dialog_open.value = false
+            },
+            onConfirm = {
+                start,end ->
+                start?.let { start ->
+                    end?.let { end ->
+                        filtered_date.value = "$start - $end"
+                        is_filtered.value = true
+                    }
+                }
+            }
+        )
+    }
+}
+
+
+class RevenueBoardShape : Shape {
+    override fun createOutline(
+        size: Size,
+        layoutDirection: LayoutDirection,
+        density: Density
+    ): Outline {
+        return Outline.Generic(path = drawBoard(size))
+    }
+}
+
+private fun drawBoard(size: Size):Path{
+    val scaleX = size.width / 399f
+    val scaleY = 2.53f
+    val height = 509f
+
+    Log.d("Greatest",scaleY.toString())
+    return Path().apply {
+        moveTo(0f * scaleX, 24f * scaleY)
+        cubicTo(
+            0f * scaleX, 10.7452f * scaleY,
+            10.7452f * scaleX, 0f * scaleY,
+            24f * scaleX, 0f * scaleY
+        )
+        lineTo(169.194f * scaleX, 0f * scaleY)
+        cubicTo(
+            176.639f * scaleX, 0f * scaleY,
+            183.662f * scaleX, 3.45473f * scaleY,
+            188.206f * scaleX, 9.35188f * scaleY
+        )
+        lineTo(220.794f * scaleX, 51.6481f * scaleY)
+        cubicTo(
+            225.338f * scaleX, 57.5453f * scaleY,
+            232.361f * scaleX, 61f * scaleY,
+            239.806f * scaleX, 61f * scaleY
+        )
+        lineTo(375f * scaleX, 61f * scaleY)
+        cubicTo(
+            388.255f * scaleX, 61f * scaleY,
+            399f * scaleX, 71.7452f * scaleY,
+            399f * scaleX, 85f * scaleY
+        )
+        lineTo(399f * scaleX, 176f * height)
+        cubicTo(
+            399f * scaleX, 189.255f * height,
+            388.255f * scaleX, 200f * height,
+            375f * scaleX, 200f * height
+        )
+        lineTo(24f * scaleX, 200f * height)
+        cubicTo(
+            10.7452f * scaleX, 200f * scaleY,
+            0f * scaleX, 189.255f * scaleY,
+            0f * scaleX, 176f * scaleY
+        )
+        lineTo(0f * scaleX, 24f * height)
+        close()
+    }
+}

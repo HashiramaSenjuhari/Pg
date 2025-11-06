@@ -1,0 +1,8 @@
+<resources xmlns:android="http://schemas.android.com/apk/res/android">
+    <string name="app_name">Billionaire</string>
+    <string name="remove_tenant_title" translatable="false">Remove Title</string>
+    <string name="remove_tenant_description" translatable="false">Are you sure to remove the tenant? you can see  tenant for 7 days in your trash</string>
+
+    <string name="remove_room_title" translatable="false">Remove Room</string>
+    <string name="remove_room_description" translatable="false">Are you sure to remove the room? you can see room for 7 days in your trash</string>
+</resources>

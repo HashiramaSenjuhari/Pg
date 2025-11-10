@@ -22,6 +22,7 @@ import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
@@ -45,13 +46,14 @@ import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
-import com.example.billionairehari.components.DatePickerRange
+import com.example.billionairehari.components.DateFilterSheet
 import com.example.billionairehari.components.convertMilliToDate
 import com.example.billionairehari.screens.formatIndianRupee
 import java.text.SimpleDateFormat
 import java.time.LocalDate
 
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DashboardBoard(){
     val is_open = rememberSaveable { mutableStateOf(false) }
@@ -177,7 +179,8 @@ fun DashboardBoard(){
         }
     }
     if(is_dialog_open.value){
-        DatePickerRange(
+        DateFilterSheet(
+            is_open = is_dialog_open,
             onDismiss = {
                 is_dialog_open.value = false
             },

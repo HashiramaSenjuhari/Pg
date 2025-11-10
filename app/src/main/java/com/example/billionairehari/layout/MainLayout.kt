@@ -104,7 +104,7 @@ fun MainLayout(
     // mutableState
     val is_open = rememberSaveable { mutableStateOf<Boolean>(true) }
     val is_dialog_open = rememberSaveable { mutableStateOf<Boolean>(false) }
-    val current_action = remember { mutableStateOf<MODAL_TYPE>(MODAL_TYPE.ANNOUNCE()) }
+    val current_action = remember { mutableStateOf<MODAL_TYPE>(MODAL_TYPE.NONE) }
     val current_dialog_action = remember { mutableStateOf<DIALOG_TYPE>(DIALOG_TYPE.NONE) }
 
     val title = when (current_action.value){

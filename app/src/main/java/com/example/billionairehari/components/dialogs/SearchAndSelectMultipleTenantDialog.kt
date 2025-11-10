@@ -36,6 +36,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.referentialEqualityPolicy
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -68,7 +69,8 @@ fun SearchAndSelectMultipleTenants(
 ){
 
     val focusRequest = remember { FocusRequester() }
-    val selected = remember { mutableStateOf<HashSet<String>>() }
+    val selected = remember { mutableStateOf<HashSet<String>>(hashSetOf<String>(), policy = referentialEqualityPolicy()) }
+
     if(expanded.value) {
         Dialog(
             onDismissRequest = {
@@ -128,10 +130,13 @@ fun SearchAndSelectMultipleTenants(
                                                 onClick = {
                                                     search.value = ""
                                                     if(selected.value.contains(it)){
-                                                        selected.value.remove(it)
+//                                                        selected.value = selected.value.toMutableSet().apply {
+//                                                            remove(it)
+//                                                        }
                                                     }else{
-                                                        selected.value.add(it)
-//                                                        selected.value = HashSet(selected.value)
+//                                                        selected.value = selected.value.toMutableSet().apply {
+//                                                            add(it)
+//                                                        }
                                                     }
                                                 }
                                             )
@@ -168,10 +173,14 @@ fun SearchAndSelectMultipleTenants(
                                                 .clickable(
                                                     enabled = true,
                                                     onClick = {
-                                                        if(selected.value.contains(it)){
-                                                            selected.value.remove(it)
-                                                        }else{
-                                                            selected.value.add(it)
+                                                         if(selected.value.contains(it)){
+//                                                            selected.value = selected.value.toMutableSet().apply {
+//                                                                remove(it)
+//                                                            }
+                                                         }else{
+//                                                            selected.value = selected.value.toMutableSet().apply {
+//                                                                add(it)
+//                                                            }
                                                         }
                                                     }
                                                 ),

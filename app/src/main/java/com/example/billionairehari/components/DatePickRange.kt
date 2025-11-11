@@ -92,6 +92,20 @@ fun DateFilterSheet(
     val selected = remember { mutableStateOf<String>(selectedOption) }
     val isSelected = remember { mutableStateOf<Int>(0) }
 
+    // custom date selection part
+    val localDate = LocalDate.now()
+    val currentTime = localDate
+    val lastTime = localDate.minusMonths(1)
+
+    val startDateInMilli = remember { mutableStateOf<Long>(
+            convertLocalToLong(lastTime)
+        )
+    }
+    val endDateInMilli = remember { mutableStateOf<Long>(
+            convertLocalToLong(currentTime)
+        )
+    }
+
     ModalBottomSheet(
         sheetState = sheetState,
         onDismissRequest = {
@@ -135,17 +149,23 @@ fun DateFilterSheet(
                             isSelected.value = 5
                         }
                     )
-                    if(isSelected.value === 5 || selected.value.contains("-")){
+                    if(isSelected.value === 5 && selected.value.contains("-")){
                         CustomDatePicker(
-                            date = selected,
-                            is_open = is_open
+                            is_open = is_open,
+                            startDateInMilli = startDateInMilli,
+                            endDateInMilli = endDateInMilli
                         )
                     }
                 }
             }
             AppButton(
                 onClick = {
-                    onConfirm(selected.value)
+                    if(isSelected.value <= 4){
+                        onConfirm(selected.value)
+                    }else {
+                        selected.value = "${convertMilliToDate(startDateInMilli.value)} - ${convertMilliToDate(endDateInMilli.value)}"
+                        onConfirm(selected.value)
+                    }
                 },
                 modifier = Modifier.fillMaxWidth(),
                 containerColor = Color.Black,
@@ -204,26 +224,21 @@ fun convertMilliToDate(milli:Long): String{
 
 @Composable
 fun CustomDatePicker(
-    date: MutableState<String>,
+    startDateInMilli: MutableState<Long>,
+    endDateInMilli: MutableState<Long>,
     is_open: MutableState<Boolean>,
 ){
 
-    val localDate = LocalDate.now()
-    val currentTime = localDate
-    val lastTime = localDate.minusMonths(1)
 
-    val startDateInMilli = convertLocalToLong(lastTime)
-    val endDateInMilli = convertLocalToLong(currentTime)
-
-    val startDate = convertMilliToDate(startDateInMilli)
-    val endDate = convertMilliToDate(endDateInMilli)
+    val startDateString = convertMilliToDate(startDateInMilli.value)
+    val endDateString = convertMilliToDate(endDateInMilli.value)
 
     // date dialog state
     val firstDateDialog = remember { mutableStateOf<Boolean>(false) }
     val nextDateDialog = remember { mutableStateOf<Boolean>(false) }
 
-    val selectedFirstRange = remember { mutableStateOf<String>(startDate) }
-    val selectedSecondRange = remember { mutableStateOf<String>(endDate) }
+    val startDate = remember { mutableStateOf<String>(startDateString) }
+    val endDate = remember { mutableStateOf<String>(endDateString) }
 
         ROw(
             modifier = Modifier
@@ -235,7 +250,7 @@ fun CustomDatePicker(
             ) {
                 OutlinedInput(
                     modifier = Modifier.fillMaxWidth(0.5f),
-                    value = selectedFirstRange.value ?: "",
+                    value = startDate.value ?: "",
                     onValueChange = {},
                     readOnly = true,
                     onClick = {
@@ -253,7 +268,7 @@ fun CustomDatePicker(
                 OutlinedInput(
                     modifier = Modifier.fillMaxWidth(),
                     label = "End Date",
-                    value = selectedSecondRange.value ?: "",
+                    value = endDate.value ?: "",
                     readOnly = true,
                     onValueChange = {
 
@@ -273,10 +288,11 @@ fun CustomDatePicker(
             is_open = firstDateDialog,
             onConfirm = {
                 it?.let {
-                    selectedFirstRange.value = convertMilliToDate(it)
+                    startDate.value = convertMilliToDate(it)
+                    startDateInMilli.value = it
                 }
             },
-            selectedDate = startDateInMilli
+            selectedDate = startDateInMilli.value
         )
     }
     if(nextDateDialog.value){
@@ -284,10 +300,11 @@ fun CustomDatePicker(
             is_open = nextDateDialog,
             onConfirm = {
                 it?.let {
-                    selectedSecondRange.value = convertMilliToDate(it)
+                    endDate.value = convertMilliToDate(it)
+                    startDateInMilli.value = it
                 }
             },
-            selectedDate = endDateInMilli
+            selectedDate = endDateInMilli.value
         )
     }
 }

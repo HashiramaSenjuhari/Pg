@@ -62,8 +62,12 @@ import com.example.billionairehari.components.dashboard.DisableRippleEffect
 import com.example.billionairehari.screens.ROw
 import kotlinx.coroutines.selects.select
 import java.text.SimpleDateFormat
+import java.time.LocalDate
+import java.time.LocalTime
+import java.time.ZoneId
 import java.util.Date
 import java.util.Locale
+import java.util.TimeZone
 
 data class MonthFilterOption(
     val name:String
@@ -79,26 +83,31 @@ val options = listOf<MonthFilterOption>(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DateFilterSheet(
+    selectedOption:String,
     is_open: MutableState<Boolean>,
     sheetState: SheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
     onDismiss:() -> Unit,
-    onConfirm:(String?,String?) -> Unit
+    onConfirm:(String) -> Unit
 ){
+    val selected = remember { mutableStateOf<String>(selectedOption) }
     val isSelected = remember { mutableStateOf<Int>(0) }
-    val is_custom_date = remember { mutableStateOf<Boolean>(false) }
 
     ModalBottomSheet(
         sheetState = sheetState,
         onDismissRequest = {
             is_open.value = false
-        }
+        },
+        dragHandle = null
     ) {
         Column(
             modifier = Modifier
-                .padding(start = 20.dp, end = 20.dp, bottom = 20.dp),
-            verticalArrangement = Arrangement.spacedBy(6.dp)
+                .padding(20.dp),
         ) {
-            Text("Select Time Period to Filter", fontWeight = FontWeight.Bold)
+            Text(
+                "Select Time Period to Filter",
+                fontWeight = FontWeight.Bold,
+                fontSize = 16.sp
+            )
             Column(
                 modifier = Modifier.fillMaxWidth()
                     .padding(vertical = 30.dp),
@@ -108,9 +117,9 @@ fun DateFilterSheet(
                     FilterOption(
                         selected = isSelected.value == index,
                         onClick = {
-                            is_custom_date.value = false
                             if(index !== isSelected.value){
                                 isSelected.value = index
+                                selected.value = option.name
                             }
                         },
                         option = option.name
@@ -124,16 +133,20 @@ fun DateFilterSheet(
                         selected = isSelected.value == 5,
                         onClick = {
                             isSelected.value = 5
-                            is_custom_date.value = true
                         }
                     )
-                    if(is_custom_date.value){
-                        CustomDatePicker(is_open = is_open)
+                    if(isSelected.value === 5 || selected.value.contains("-")){
+                        CustomDatePicker(
+                            date = selected,
+                            is_open = is_open
+                        )
                     }
                 }
             }
             AppButton(
-                onClick = {},
+                onClick = {
+                    onConfirm(selected.value)
+                },
                 modifier = Modifier.fillMaxWidth(),
                 containerColor = Color.Black,
                 contentColor = Color.White
@@ -191,26 +204,26 @@ fun convertMilliToDate(milli:Long): String{
 
 @Composable
 fun CustomDatePicker(
+    date: MutableState<String>,
     is_open: MutableState<Boolean>,
 ){
+
+    val localDate = LocalDate.now()
+    val currentTime = localDate
+    val lastTime = localDate.minusMonths(1)
+
+    val startDateInMilli = convertLocalToLong(lastTime)
+    val endDateInMilli = convertLocalToLong(currentTime)
+
+    val startDate = convertMilliToDate(startDateInMilli)
+    val endDate = convertMilliToDate(endDateInMilli)
+
     // date dialog state
     val firstDateDialog = remember { mutableStateOf<Boolean>(false) }
     val nextDateDialog = remember { mutableStateOf<Boolean>(false) }
 
-    // date value state
-    val calendar = Calendar.getInstance()
-    val startRange = remember { mutableStateOf<Long>(
-        Calendar.getInstance().apply {
-            set(2025, Calendar.SEPTEMBER,24)
-        }.timeInMillis)
-    }
-    val endRange = remember { mutableStateOf<Long>(
-        calendar.timeInMillis
-    )
-    }
-
-    val selectedFirstRange = remember { mutableStateOf<String?>(null) }
-    val selectedSecondRange = remember { mutableStateOf<String?>(null) }
+    val selectedFirstRange = remember { mutableStateOf<String>(startDate) }
+    val selectedSecondRange = remember { mutableStateOf<String>(endDate) }
 
         ROw(
             modifier = Modifier
@@ -257,28 +270,24 @@ fun CustomDatePicker(
 
     if(firstDateDialog.value){
         DateDialog(
-            min = startRange.value,
-            max = endRange.value,
             is_open = firstDateDialog,
             onConfirm = {
                 it?.let {
-                    startRange.value = it
                     selectedFirstRange.value = convertMilliToDate(it)
                 }
-            }
+            },
+            selectedDate = startDateInMilli
         )
     }
     if(nextDateDialog.value){
         DateDialog(
-            min = startRange.value,
-            max = endRange.value,
             is_open = nextDateDialog,
             onConfirm = {
                 it?.let {
-                    endRange.value = it
                     selectedSecondRange.value = convertMilliToDate(it)
                 }
-            }
+            },
+            selectedDate = endDateInMilli
         )
     }
 }
@@ -286,20 +295,18 @@ fun CustomDatePicker(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DateDialog(
-    min:Long,
-    max: Long,
+    selectedDate:Long,
     is_open: MutableState<Boolean>,
     onConfirm:(Long?) -> Unit
 ){
-    Log.d(
-        "MinDate",convertMilliToDate(min)
-    )
+    /* TODO */
     val datePickerState = rememberDatePickerState(
-        selectableDates = object : SelectableDates {
-            override fun isSelectableDate(utcTimeMillis: Long): Boolean {
-                return utcTimeMillis in min..max
-            }
-        }
+        initialSelectedDateMillis = selectedDate,
+//        selectableDates = object : SelectableDates {
+//            override fun isSelectableDate(utcTimeMillis: Long): Boolean {
+//                return utcTimeMillis in min..max
+//            }
+//        },
     )
 
     DatePickerDialog(
@@ -331,4 +338,10 @@ fun DateDialog(
             state = datePickerState
         )
     }
+}
+
+fun convertLocalToLong(date: LocalDate): Long {
+    val zone = ZoneId.of("Asia/Kolkata")
+    val localDate = date.atStartOfDay(zone).toInstant().toEpochMilli()
+    return localDate
 }

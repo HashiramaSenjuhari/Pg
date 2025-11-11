@@ -51,6 +51,7 @@ import com.example.billionairehari.components.convertMilliToDate
 import com.example.billionairehari.screens.formatIndianRupee
 import java.text.SimpleDateFormat
 import java.time.LocalDate
+import java.util.Calendar
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -60,13 +61,14 @@ fun DashboardBoard(){
     val is_dialog_open = rememberSaveable { mutableStateOf(false) }
 
     val localDate = LocalDate.now()
-    val start = localDate.withDayOfMonth(1).dayOfMonth
     val end = localDate.withDayOfMonth(LocalDate.now().lengthOfMonth()).dayOfMonth
-    val _month = localDate.month.name
+
+    val _month = localDate.month.name.lowercase().replaceFirstChar { it.uppercaseChar() }
+    Log.d("Month",_month)
     val year = localDate.year
     val month =  _month.slice(if(_month == "SEPTEMBER") 0..3 else 0..2)
 
-    val format = "$start-$end $month $year"
+    val format = "$01 $month $year - $end $month $year"
     val filtered_date = remember { mutableStateOf(format) }
     val is_filtered = remember { mutableStateOf(false) }
 
@@ -180,18 +182,15 @@ fun DashboardBoard(){
     }
     if(is_dialog_open.value){
         DateFilterSheet(
+            selectedOption = filtered_date.value,
             is_open = is_dialog_open,
             onDismiss = {
                 is_dialog_open.value = false
             },
             onConfirm = {
-                start,end ->
-                start?.let { start ->
-                    end?.let { end ->
-                        filtered_date.value = "$start - $end"
-                        is_filtered.value = true
-                    }
-                }
+                date ->
+                filtered_date.value = date
+                is_dialog_open.value = false
             }
         )
     }
@@ -254,4 +253,9 @@ private fun drawBoard(size: Size):Path{
         lineTo(0f * scaleX, 24f * height)
         close()
     }
+}
+
+/* get current month start and end day*/
+fun getCurrentMonthDateFormat(){
+
 }

@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -47,32 +48,20 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
 import com.example.billionairehari.components.DateFilterSheet
+import com.example.billionairehari.components.convertLocalToLong
 import com.example.billionairehari.components.convertMilliToDate
+import com.example.billionairehari.components.mergeDates
 import com.example.billionairehari.screens.formatIndianRupee
 import java.text.SimpleDateFormat
 import java.time.LocalDate
 import java.util.Calendar
 
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DashboardBoard(){
     val is_open = rememberSaveable { mutableStateOf(false) }
-    val is_dialog_open = rememberSaveable { mutableStateOf(false) }
-
-    val localDate = LocalDate.now()
-    val end = localDate.withDayOfMonth(LocalDate.now().lengthOfMonth()).dayOfMonth
-
-    val _month = localDate.month.name.lowercase().replaceFirstChar { it.uppercaseChar() }
-    Log.d("Month",_month)
-    val year = localDate.year
-    val month =  _month.slice(if(_month == "SEPTEMBER") 0..3 else 0..2)
-
-    val format = "$01 $month $year - $end $month $year"
-    val filtered_date = remember { mutableStateOf(format) }
-    val is_filtered = remember { mutableStateOf(false) }
-
     val dynamic_height = if(is_open.value) 340.dp else 180.dp
+
     Box(
         modifier = Modifier.fillMaxWidth()
     ){
@@ -146,53 +135,8 @@ fun DashboardBoard(){
                     Text("Billionaire")
                 }
             }
-
         }
-        Box(
-            modifier = Modifier.fillMaxWidth(0.47f)
-                .height(32.dp)
-                .clip(RoundedCornerShape(24.dp))
-                .background(Color.White)
-                .border(1.dp, color = Color.Black.copy(alpha = 0.9f), shape = RoundedCornerShape(24.dp))
-                .zIndex(1f)
-                .align(Alignment.TopEnd)
-                .clickable(
-                    enabled = true,
-                    onClick = {
-                        is_dialog_open.value = true
-                    }
-                ),
-            contentAlignment = Alignment.Center
-        ){
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(6.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    filtered_date.value,
-                    fontSize = 12.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = Color(0xFF1B1B1B)
-                )
-                if(!is_filtered.value){
-                    Icon(Icons.Default.DateRange, contentDescription = "",modifier = Modifier.size(16.dp),tint = Color(0xFF1B1B1B))
-                }
-            }
-        }
-    }
-    if(is_dialog_open.value){
-        DateFilterSheet(
-            selectedOption = filtered_date.value,
-            is_open = is_dialog_open,
-            onDismiss = {
-                is_dialog_open.value = false
-            },
-            onConfirm = {
-                date ->
-                filtered_date.value = date
-                is_dialog_open.value = false
-            }
-        )
+        FilterDateChip()
     }
 }
 
@@ -255,7 +199,85 @@ private fun drawBoard(size: Size):Path{
     }
 }
 
-/* get current month start and end day*/
-fun getCurrentMonthDateFormat(){
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun FilterDateChip(){
+    val isSheetOpen = rememberSaveable { mutableStateOf(false) }
 
+    /** custom date selection part **/
+    val localDate = LocalDate.now()
+
+    val currentTime = localDate.withDayOfMonth(1)
+    val lastTime = localDate.withDayOfMonth(localDate.lengthOfMonth())
+
+    val startDateInMilli = remember { mutableStateOf<Long>(
+            convertLocalToLong(currentTime)
+        )
+    }
+    val endDateInMilli = remember { mutableStateOf<Long>(
+            convertLocalToLong(lastTime)
+        )
+    }
+
+    val date_range = remember { mutableStateOf(mergeDates(startDateInMilli.value,endDateInMilli.value)) }
+    val selectedOptionIndex = remember { mutableStateOf<Int>(5) }
+
+    Box(
+        modifier = Modifier.offset(x = 190.dp)
+            .fillMaxWidth(0.47f)
+            .height(32.dp)
+            .clip(RoundedCornerShape(24.dp))
+            .background(Color.White)
+            .border(1.dp, color = Color.Black.copy(alpha = 0.9f), shape = RoundedCornerShape(24.dp))
+            .zIndex(1f)
+            .clickable(
+                enabled = true,
+                onClick = {
+                    isSheetOpen.value = true
+                }
+            )
+            .padding(horizontal = 6.dp),
+        contentAlignment = Alignment.Center
+    ){
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(6.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                date_range.value,
+                fontSize = 12.sp,
+                fontWeight = FontWeight.Bold,
+                color = Color(0xFF1B1B1B)
+            )
+        }
+    }
+    /** Filter Sheet **/
+    if(isSheetOpen.value){
+        DateFilterSheet(
+            selectedOption = date_range.value,
+            selectedOptionIndex = selectedOptionIndex,
+            startDateInMilli = startDateInMilli,
+            endDateInMilli = endDateInMilli,
+            is_open = isSheetOpen,
+            onDismiss = {
+                isSheetOpen.value = false
+            },
+            onConfirm = {
+                    date ->
+                date_range.value = date
+                isSheetOpen.value = false
+            }
+        )
+    }
+}
+
+fun getCurrentDate(localDate: LocalDate):String{
+    val end = localDate.withDayOfMonth(LocalDate.now().lengthOfMonth()).dayOfMonth
+
+    val full_month = localDate.month.name.lowercase().replaceFirstChar { it.uppercaseChar() }
+    val year = localDate.year
+    val month = full_month.slice(if(full_month == "SEPTEMBER") 0..3 else 0..2)
+
+    val format = "$01 $month $year - $end $month $year"
+    return format
 }

@@ -259,7 +259,7 @@ fun ActionButton(
                 Icon(
                     icon,
                     contentDescription = name,
-                    modifier = Modifier.border(width = 1.3.dp, color = Color(0xFF909090),shape = CircleShape)
+                    modifier = Modifier.border(width = 1.3.dp, color = Color.Black.copy(0.1f),shape = CircleShape)
                         .background(Color.White)
                         .padding(16.dp),
                     tint = Color(0xFF404040)

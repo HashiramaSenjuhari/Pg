@@ -323,7 +323,7 @@ fun TenantPreview(
     ) {
         ROw(
             modifier = Modifier.fillMaxWidth()
-                .padding(16.dp)
+                .padding(13.dp)
         ) {
             ROw(
                 horizontalArrangement = Arrangement.spacedBy(13.dp)

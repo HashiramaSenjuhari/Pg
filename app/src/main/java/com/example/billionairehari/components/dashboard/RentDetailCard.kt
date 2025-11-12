@@ -23,19 +23,21 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.billionairehari.components.AppButton
 import com.example.billionairehari.icons.RemaindIcon
 import com.example.billionairehari.screens.ROw
+import com.example.billionairehari.ui.theme.robotoFontFamily
 
 @Composable
 fun RentDetails(){
     ROw(
         modifier = Modifier.fillMaxWidth()
             .border(1.dp, color = Color.Black.copy(0.1f), shape = RoundedCornerShape(13.dp))
-            .padding(vertical = 16.dp, horizontal = 13.dp),
+            .padding(vertical = 13.dp, horizontal = 13.dp),
         horizontalArrangement = Arrangement.spacedBy(13.dp)
     ) {
         Column(
@@ -76,7 +78,7 @@ fun RentDetails(){
             AppButton(
                 modifier = Modifier.fillMaxWidth()
                     .background(Color.White),
-                border = BorderStroke(1.dp, color = Color.Black),
+                border = BorderStroke(2.dp, color = Color.Black.copy(0.1f)),
                 onClick = {},
             ) {
                 Row(
@@ -103,8 +105,10 @@ fun RentDetailCard(
 ){
     Row(
         modifier = Modifier.then(modifier)
+            .shadow(elevation = 1.dp, shape = RoundedCornerShape(13.dp), spotColor = Color.Black.copy(0.1f))
+            .background(Color.White)
+            .border(1.dp, color = Color.Black.copy(0.1f), shape = RoundedCornerShape(13.dp))
             .clip(RoundedCornerShape(13.dp))
-            .background(Color.Black.copy(0.03f))
             .padding(13.dp),
         verticalAlignment = Alignment.Top,
         horizontalArrangement = Arrangement.SpaceBetween
@@ -116,12 +120,13 @@ fun RentDetailCard(
                 "Not-Paid"
             },
             fontSize = 13.sp,
+            fontFamily = robotoFontFamily,
             fontWeight = FontWeight.Medium
         )
         Column(
         ) {
-            Text("300", fontSize = 24.sp, fontWeight = FontWeight.Bold, color =  if(type == RentDetailType.PAID) {Color.Black} else {Color.Red})
-            Text("Tenants",color = Color(0xFF909090), fontSize = 12.sp)
+            Text("300", fontSize = 24.sp, fontWeight = FontWeight.Bold, fontFamily = robotoFontFamily,color =  if(type == RentDetailType.PAID) {Color.Black} else {Color.Red})
+            Text("Tenants",color = Color(0xFF909090), fontSize = 12.sp, fontFamily = robotoFontFamily)
         }
     }
 }

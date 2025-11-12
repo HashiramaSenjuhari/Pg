@@ -113,9 +113,11 @@ fun AddRoomSheet(
                         contentPadding = PaddingValues(horizontal = 13.dp),
                         onImageChange = {
                             onImageAdd(it)
+                            images.add(it)
                         },
                         onImageRemove = {
                             onImageRemove(it)
+                            images.removeAt(it)
                         },
                         onError = {
                             onImageError()

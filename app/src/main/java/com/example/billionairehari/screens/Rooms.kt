@@ -4,6 +4,9 @@ import android.graphics.Rect
 import android.graphics.drawable.VectorDrawable
 import android.util.Log
 import android.view.RoundedCorner
+import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.MutatePriority
@@ -35,7 +38,9 @@ import androidx.compose.foundation.layout.windowInsetsEndWidth
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -70,15 +75,21 @@ import androidx.compose.material3.TooltipDefaults
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.material3.rememberTooltipState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.SnapshotMutationPolicy
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.pointer.pointerInput
@@ -92,6 +103,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.toLowerCase
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.lerp
 import androidx.compose.ui.unit.min
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
@@ -125,6 +137,7 @@ import com.example.billionairehari.R.drawable
 import com.example.billionairehari.icons.CalendarIcon
 import com.example.billionairehari.model.RoomCardDetails
 import com.example.billionairehari.viewmodels.RoomsViewModel
+import com.example.billionairehari.viewmodels.current_rooms
 
 
 @OptIn(ExperimentalFoundationApi::class)
@@ -133,63 +146,79 @@ fun RoomsScreen(
     modifier:Modifier,
     navController: NavController
 ) {
-    val rooms = hiltViewModel<RoomsViewModel>()
-    val filtered_rooms = rooms.rooms.collectAsState()
+    val scrollState = rememberScrollState()
+
+//    Log.d("OffsetBillionaire",scrollState.value.toFloat().toString())
+    val maxOffset = 100f
+    val progress = (scrollState.value.toFloat() / maxOffset).coerceIn(0f,1f)
+//    Log.d("OffsetBillionaire",progress.toString())
+
+    val padding = animateDpAsState(targetValue = lerp(50.dp, 9.dp,progress))
+    val spacing = animateDpAsState(targetValue = lerp(13.dp,3.dp,progress))
+    val fontSize = animateFloatAsState(targetValue = lerp(24.sp, 21.sp,progress).value)
+
+
+
+//    val rooms = hiltViewModel<RoomsViewModel>()
+//    val filtered_rooms = rooms.rooms.collectAsState()
 
     val search = rememberSaveable { mutableStateOf<String>("") }
-    val final_rooms = filtered_rooms.value
+    val final_rooms = current_rooms
 
     val is_open = rememberSaveable { mutableStateOf<Boolean>(false) }
 
-    LazyColumn(
-        modifier = Modifier.then(modifier)
+    Column(
+        modifier = Modifier
+            .animateContentSize()
+            .fillMaxSize()
             .background(Color.White)
-            .padding(top = 6.dp, start = 13.dp,end = 13.dp),
-        verticalArrangement = Arrangement.spacedBy(6.dp)
+            .padding(top = padding.value)
     ) {
-        stickyHeader {
-            Column(
-                verticalArrangement = Arrangement.spacedBy(13.dp),
-                modifier =  Modifier.background(Color.White)
-                    .padding(vertical = 6.dp)
-            ) {
-                SearchBar(
-                    value = search.value,
-                    onValueChange = {
-                        search.value = it
-                    },
-                    placeholder = "Search \"Room 6\"",
-                    trailingIcon = {
-                        IconButton(
-                            onClick = {
-                                is_open.value = true
-                            }
-                        ) {
-                            Icon(FilterIcon, contentDescription = "")
-                        }
-                    }
-                )
-//                FilterCards(
-//                    onFilter = {
-//                        rooms.update_filter(it)
-//                    },
-//                    filter_type = filter,
-//                    all_count = all_count,
-//                    available_count = available_count,
-//                    notice_count = notice_count,
-//                    rent_dues_count = rent_dues_count
-//                )
+        Column(
+            verticalArrangement = Arrangement.spacedBy(space = spacing.value),
+            modifier =  Modifier
+                .animateContentSize()
+                .padding(horizontal = 13.dp, vertical = 19.dp)
+        ) {
+                ROw(
+                    modifier = Modifier.padding(6.dp)
+                ) {
+                    Text("Rooms", fontSize = fontSize.value.sp, fontWeight = FontWeight.Bold)
+                }
+            Box(
+                modifier = Modifier.fillMaxWidth()
+                    .border(1.dp, color = Color.Black.copy(0.1f), shape = CircleShape)
+                    .padding(vertical = 13.dp, horizontal = 13.dp)
+            ){
+                ROw(
+                    horizontalArrangement = Arrangement.spacedBy(13.dp)
+                ) {
+                    Icon(
+                        Icons.Default.Search,
+                        contentDescription = "",
+                        modifier = Modifier.size(30.dp)
+                    )
+                    Text("Search Room", fontSize = 16.sp, color = Color.Black.copy(0.6f))
+                }
             }
         }
-//        itemsIndexed(final_rooms){
-//            index,room ->
-//            RoomCard(
-//                room_detail = room,
-//                onClick = {
-//                    navController.navigate("rooms/${room.id}")
-//                }
-//            )
-//        }
+                Column(
+                    modifier = Modifier
+                        .fillMaxHeight()
+                        .background(Color.White)
+                        .verticalScroll(scrollState),
+                    verticalArrangement = Arrangement.spacedBy(6.dp)
+                ) {
+                    final_rooms.forEach {
+                            room ->
+                        RoomCard(
+                            room_detail = room,
+                            onClick = {
+                                navController.navigate("rooms/${room.id}")
+                            }
+                        )
+                    }
+                }
     }
 }
 

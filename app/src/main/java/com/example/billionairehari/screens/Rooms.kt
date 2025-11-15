@@ -10,8 +10,10 @@ import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.MutatePriority
+import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.FlingBehavior
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.gestures.detectTapGestures
@@ -101,7 +103,9 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.toLowerCase
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.DpSize
+import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.lerp
 import androidx.compose.ui.unit.min
@@ -135,6 +139,7 @@ import kotlinx.coroutines.launch
 import com.example.billionairehari.components.rooms.RoomFilterTypes
 import com.example.billionairehari.R.drawable
 import com.example.billionairehari.icons.CalendarIcon
+import com.example.billionairehari.icons.Rupee
 import com.example.billionairehari.model.RoomCardDetails
 import com.example.billionairehari.viewmodels.RoomsViewModel
 import com.example.billionairehari.viewmodels.current_rooms
@@ -146,6 +151,9 @@ fun RoomsScreen(
     modifier:Modifier,
     navController: NavController
 ) {
+
+
+    /** header Animation module - Start **/
     val scrollState = rememberScrollState()
 
 //    Log.d("OffsetBillionaire",scrollState.value.toFloat().toString())
@@ -156,14 +164,14 @@ fun RoomsScreen(
     val padding = animateDpAsState(targetValue = lerp(50.dp, 9.dp,progress))
     val spacing = animateDpAsState(targetValue = lerp(13.dp,3.dp,progress))
     val fontSize = animateFloatAsState(targetValue = lerp(24.sp, 21.sp,progress).value)
+    /** header Animation module - End **/
 
+    /** viewmodel - start **/
+    val rooms = hiltViewModel<RoomsViewModel>()
+    val filtered_rooms = rooms.rooms.collectAsState()
+    /** viewmodel - end **/
 
-
-//    val rooms = hiltViewModel<RoomsViewModel>()
-//    val filtered_rooms = rooms.rooms.collectAsState()
-
-    val search = rememberSaveable { mutableStateOf<String>("") }
-    val final_rooms = current_rooms
+    val final_rooms = filtered_rooms.value
 
     val is_open = rememberSaveable { mutableStateOf<Boolean>(false) }
 
@@ -174,147 +182,128 @@ fun RoomsScreen(
             .background(Color.White)
             .padding(top = padding.value)
     ) {
-        Column(
-            verticalArrangement = Arrangement.spacedBy(space = spacing.value),
-            modifier =  Modifier
-                .animateContentSize()
-                .padding(horizontal = 13.dp, vertical = 19.dp)
+        DynamicTopHeader(
+            onClickFilter = {},
+            onClickSearch = {},
+            fontSize = fontSize.value.sp,
+            spacing = spacing.value
+        )
+        RoomCards(
+            scrollState = scrollState,
+            navController = navController,
+            final_rooms = final_rooms
+        )
+    }
+}
+
+
+@Composable
+fun DynamicTopHeader(
+    spacing: Dp,
+    fontSize: TextUnit,
+    onClickSearch: () -> Unit,
+    onClickFilter: () -> Unit
+){
+    Column(
+        verticalArrangement = Arrangement.spacedBy(space = spacing),
+        modifier =  Modifier
+            .animateContentSize()
+            .padding(horizontal = 13.dp, vertical = 13.dp)
+    ) {
+        ROw(
+            modifier = Modifier.padding(6.dp)
         ) {
-                ROw(
-                    modifier = Modifier.padding(6.dp)
-                ) {
-                    Text("Rooms", fontSize = fontSize.value.sp, fontWeight = FontWeight.Bold)
-                }
-            Box(
-                modifier = Modifier.fillMaxWidth()
-                    .border(1.dp, color = Color.Black.copy(0.1f), shape = CircleShape)
-                    .padding(vertical = 13.dp, horizontal = 13.dp)
-            ){
-                ROw(
-                    horizontalArrangement = Arrangement.spacedBy(13.dp)
-                ) {
-                    Icon(
-                        Icons.Default.Search,
-                        contentDescription = "",
-                        modifier = Modifier.size(30.dp)
-                    )
-                    Text("Search Room", fontSize = 16.sp, color = Color.Black.copy(0.6f))
-                }
-            }
+            Text("Rooms", fontSize = fontSize, fontWeight = FontWeight.Bold)
         }
-                Column(
-                    modifier = Modifier
-                        .fillMaxHeight()
-                        .background(Color.White)
-                        .verticalScroll(scrollState),
-                    verticalArrangement = Arrangement.spacedBy(6.dp)
-                ) {
-                    final_rooms.forEach {
-                            room ->
-                        RoomCard(
-                            room_detail = room,
-                            onClick = {
-                                navController.navigate("rooms/${room.id}")
-                            }
-                        )
-                    }
-                }
+        StaticSearchBar(
+            onClick = {},
+            onClickFilter = {}
+        )
     }
 }
 
 @Composable
-fun RoomSearchBar(
-    value:String,
-    onValueChange:(String) -> Unit
+fun RoomCards(
+    scrollState: ScrollState,
+    navController: NavController,
+    final_rooms: List<RoomCardDetails>,
 ){
-    TextField(
-        value = value,
-        onValueChange = {
-            onValueChange(it)
-        },
-        leadingIcon = {
-            Icon(Icons.Default.Search, tint = Color.Black,contentDescription = "")
-        },
-        trailingIcon = {
-            IconButton(
-                onClick = {}
-            ) {
-                Icon(FilterIcon,contentDescription = "")
-            }
-        },
-        colors = TextFieldDefaults.colors(
-            unfocusedContainerColor = Color.Transparent,
-            focusedContainerColor = Color.Transparent,
-            unfocusedIndicatorColor = Color.Transparent,
-            focusedIndicatorColor = Color.Transparent
-        ),
-        placeholder = {
-            Text("Search \"Room 6\"")
-        },
-        maxLines = 1,
-        modifier =  Modifier.fillMaxWidth()
-            .clip(CircleShape)
-            .border(1.dp, color = Color(0xFF909090), shape = CircleShape)
-            .padding(horizontal = 13.dp)
-    )
-}
-
-
-@Composable
-fun FilterCards(
-    onFilter:(RoomFilterTypes) -> Unit,
-    filter_type: RoomFilterTypes,
-    all_count:Int,
-    available_count:Int,
-    notice_count:Int,
-    rent_dues_count:Int
-) {
-    val filters = listOf<FilterOption<RoomFilterTypes>>(
-        FilterOption(name = "All", count = "$all_count",type = RoomFilterTypes.ALL_ROOMS),
-        FilterOption(name = "Available", count = "$available_count", type = RoomFilterTypes.AVAILABLE),
-        FilterOption(name = "Notice", count = "$notice_count", type = RoomFilterTypes.NOTICE),
-        FilterOption(name = "Rent Due", count = "$rent_dues_count", type = RoomFilterTypes.RENT_DUE)
-    )
-
-    LazyRow(
-       horizontalArrangement = Arrangement.spacedBy(6.dp)
+    Column(
+        modifier = Modifier
+            .fillMaxHeight()
+            .background(Color.White)
+            .verticalScroll(scrollState)
+            .padding(start = 6.dp, end = 6.dp,bottom = 90.dp),
+        verticalArrangement = Arrangement.spacedBy(6.dp)
     ) {
-        items(filters.size){
-            FilterCard(
-                name = filters[it].name,
-                count = filters[it].count,
+        final_rooms.forEach {
+                room ->
+            RoomCard(
+                room_detail = room,
                 onClick = {
-                    onFilter(filters[it].type)
-                },
-                isClicked = filter_type == filters[it].type
+                    navController.navigate("rooms/${room.id}")
+                }
             )
         }
     }
 }
 
-
-enum class RoomCardTools {
-    EDIT,
-    SEND_MESSAGE,
-    NONE
+@Composable
+fun StaticSearchBar(
+    onClick: () -> Unit,
+    onClickFilter:() -> Unit
+){
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .border(1.dp, color = Color.Black.copy(0.1f), shape = CircleShape)
+            .padding(vertical = 3.dp, horizontal = 13.dp)
+    ){
+        ROw(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            ROw(
+                modifier = Modifier.clickable(
+                    enabled = true,
+                    onClick = onClickFilter
+                ),
+                horizontalArrangement = Arrangement.spacedBy(13.dp)
+            ) {
+                Icon(
+                    Icons.Default.Search,
+                    contentDescription = "",
+                    modifier = Modifier.size(30.dp)
+                )
+                Text("Search Room", fontSize = 16.sp, color = Color.Black.copy(0.6f))
+            }
+            IconButton(
+                onClick = onClickFilter
+            ){
+                Icon(
+                    FilterIcon,
+                    contentDescription = ""
+                )
+            }
+        }
+    }
 }
-
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun RoomCard(room_detail: RoomCardDetails,onClick:() -> Unit) {
     val is_open = rememberSaveable { mutableStateOf<Boolean>(false) }
-    Box() {
         Card(
-            modifier = Modifier.fillMaxWidth()
-                .shadow(2.dp, spotColor = Color(0xFF909090), shape = RoundedCornerShape(13.dp))
-                .background(Color(0xFFFFFFF)),
+            modifier = Modifier
+                .fillMaxWidth()
+                .border(1.dp, color = Color.Black.copy(0.1f), shape = RoundedCornerShape(13.dp))
+                .background(Color(0xFFFFFFF))
+                .padding(vertical = 3.dp),
             colors = CardDefaults.cardColors(
                 containerColor = Color.White
             ),
             onClick = onClick
         ) {
-            Column {
                 RoomCardHeader(
                     name = room_detail.name,
                     availability = room_detail.is_available,
@@ -331,9 +320,7 @@ fun RoomCard(room_detail: RoomCardDetails,onClick:() -> Unit) {
                 RoomCardContent(
                     room_detail = room_detail
                 )
-            }
         }
-    }
 }
 
 @Composable
@@ -362,11 +349,12 @@ fun RoomCardIconIntLabel(
     width: Float = 1f
 ){
     ROw(
-        modifier = Modifier.fillMaxWidth(width)
+        modifier = Modifier
+            .fillMaxWidth(width)
             .clip(RoundedCornerShape(13.dp))
             .background(Color.White)
-            .border(1.dp,color = Color(0xFFF3F4F6),shape = RoundedCornerShape(13.dp))
-            .padding(vertical = 6.dp, horizontal =13.dp),
+            .border(1.dp, color = Color(0xFFF3F4F6), shape = RoundedCornerShape(13.dp))
+            .padding(vertical = 6.dp, horizontal = 13.dp),
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
         ROw(
@@ -381,9 +369,14 @@ fun RoomCardIconIntLabel(
             Text(name, color =  Color(0xFF606060), fontSize = 12.sp)
         }
         Box(
-            modifier = Modifier.clip(RoundedCornerShape(9.dp))
-                .border(1.dp, color = if(value > 0) Color(border) else Color(0xFFDFE0E1),shape=RoundedCornerShape(9.dp))
-                .background(if(value > 0) Color(bg) else Color(0xFFF9FAFB))
+            modifier = Modifier
+                .clip(RoundedCornerShape(9.dp))
+                .border(
+                    1.dp,
+                    color = if (value > 0) Color(border) else Color(0xFFDFE0E1),
+                    shape = RoundedCornerShape(9.dp)
+                )
+                .background(if (value > 0) Color(bg) else Color(0xFFF9FAFB))
                 .padding(horizontal = 9.dp, vertical = 4.dp),
             contentAlignment = Alignment.Center
         ){
@@ -397,72 +390,31 @@ fun RoomCardIconIntLabel(
 }
 
 @Composable
-fun RoomCardIconStringLabel(
-    name: String,
-    value: String,
-    drawable: Int? = null,
-    icon: ImageVector? = null,
-    bg:Long,
-    border:Long,
-    text:Long,
-    width: Float = 1f
-){
-    ROw(
-        modifier = Modifier.fillMaxWidth(width)
-            .clip(RoundedCornerShape(13.dp))
-            .background(Color.White)
-            .border(1.dp,color = Color(0xFFF3F4F6),shape = RoundedCornerShape(13.dp))
-            .padding(vertical = 6.dp, horizontal =13.dp),
-        horizontalArrangement = Arrangement.SpaceBetween
-    ) {
-        ROw(
-            horizontalArrangement = Arrangement.spacedBy(13.dp)
-        ) {
-            if(icon != null){
-                Icon(icon, contentDescription = "",modifier = Modifier.size(16.dp))
-            }
-            if(drawable != null){
-                Icon(painter = painterResource(id = drawable), contentDescription = "",modifier = Modifier.size(16.dp))
-            }
-            Text(name, color =  Color(0xFF606060), fontSize = 12.sp)
-        }
-        Box(
-            modifier = Modifier.clip(RoundedCornerShape(9.dp))
-                .border(1.dp, color = Color(0xFFDFE0E1),shape=RoundedCornerShape(9.dp))
-                .background(Color(0xFFF9FAFB))
-                .padding(horizontal = 9.dp, vertical = 4.dp),
-            contentAlignment = Alignment.Center
-        ){
-            Text(value,
-                fontSize = 13.sp,
-                fontWeight = FontWeight.Bold,
-                color = if(value == "null") Color(0xFF6A7282) else Color(text)
-            )
-        }
-    }
-}
-@Composable
 fun RoomCardLabel(
     name:String,
     icon: ImageVector,
     value:String,
     width:Float = 1f
 ){
-    ROw(
-        modifier = Modifier.fillMaxWidth(width)
+    Column(
+        modifier = Modifier
+            .fillMaxWidth(width)
             .clip(RoundedCornerShape(13.dp))
             .background(Color(0xFFF9FAFB))
-            .padding(vertical = 6.dp, horizontal = 13.dp),
-        horizontalArrangement = Arrangement.SpaceBetween
+            .padding(13.dp),
+        verticalArrangement = Arrangement.spacedBy(6.dp)
     ) {
         ROw(
             horizontalArrangement = Arrangement.spacedBy(13.dp)
         ) {
-            Icon(icon, contentDescription = "",modifier = Modifier.clip(RoundedCornerShape(9.dp))
-                .size(24.dp).background(Color(0xFFB2B0E8)).padding(6.dp))
-            Text(name,fontSize = 12.sp,color =  Color(0xFF606060))
+            Icon(icon, contentDescription = "",modifier = Modifier
+                .clip(RoundedCornerShape(9.dp))
+                .size(24.dp)
+                .background(Color(0xFFB2B0E8).copy(0.6f))
+                .padding(6.dp))
+            Text(value,fontSize = 16.sp, fontWeight = FontWeight.Bold)
         }
-        Text(value,fontSize = 13.sp, fontWeight = FontWeight.Bold)
+        Text(name,fontSize = 13.sp,color =  Color(0xFF606060))
     }
 }
 
@@ -479,113 +431,53 @@ fun RoomCardHeader(
     val tooltipState = rememberTooltipState(isPersistent = true)
     val coroutine = rememberCoroutineScope()
     ROw(
-        modifier = Modifier.fillMaxWidth().padding(start = 13.dp)
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(start = 13.dp)
     ) {
         ROw(
             horizontalArrangement =  Arrangement.spacedBy(13.dp)
         ) {
-            Icon(RoomIcon,
-                contentDescription = "RoomIcon",
-                modifier = Modifier.size(30.dp).clip(RoundedCornerShape(13.dp)).background(Color(0xFFF3F4F6)).padding(6.dp)
-            )
-            Text(name, fontSize = 16.sp, fontWeight = FontWeight.Bold)
-        }
-        ROw {
-            val border = if(availability){1.dp} else {0.dp}
-            val color = if(availability) Color(0xFFB9F8CF) else Color(0xFFE5E7EB)
-            val bg = if(availability) Color(0xFFF0FDF4) else Color(0xFFF9FAFB)
-            val content = if(availability) Color(0xFF008236) else Color(0xFF68717F)
-            Badge(
-                modifier = Modifier
-                    .clip(RoundedCornerShape(9.dp))
-                    .border(width = border,color = color,shape = RoundedCornerShape(9.dp))
-                    .background(bg)
-                    .padding(horizontal = 13.dp, vertical = 6.dp),
-                containerColor = bg,
-                contentColor = content
-            ){
-                Text(if(availability)"Available" else "Full")
-            }
-            TooltipBox(
-                positionProvider = TooltipDefaults.rememberPlainTooltipPositionProvider(),
-                state = tooltipState,
-                tooltip = {
-                    RichTooltip(
-                        modifier = Modifier.width(100.dp)
-                            .padding(0.dp)
-                            .shadow(2.dp, shape =  RoundedCornerShape(13.dp))
-                            .background(Color.White),
-                        colors = TooltipDefaults.richTooltipColors(
-                            containerColor = Color.Transparent
-                        ),
-                        shadowElevation = 0.dp,
-                        tonalElevation = 0.dp
-                    ) {
-                        Column(
-                            modifier = Modifier.fillMaxWidth(),
-                        ) {
-                            TextButton(
-                                onClick = onEdit,
-                                modifier = Modifier.fillMaxWidth(),
-                                colors = ButtonDefaults.textButtonColors(
-                                    containerColor = Color.Transparent,
-                                    contentColor = Color.Black
-                                ),
-                                shape = RoundedCornerShape(0.dp),
-                                contentPadding = PaddingValues(0.dp)
-                            ) {
-                                Text("Edit", modifier = Modifier.fillMaxWidth(),textAlign = TextAlign.Start)
-                            }
-                            TextButton(
-                                onClick = onSendMessage,
-                                modifier = Modifier.fillMaxWidth(),
-                                colors = ButtonDefaults.textButtonColors(
-                                    containerColor = Color.Transparent,
-                                    contentColor = Color.Black
-                                ),
-                                shape = RoundedCornerShape(0.dp),
-                                contentPadding = PaddingValues(0.dp)
-                            ) {
-                                Text("Edit")
-                            }
-                            TextButton(
-                                    onClick = onShare,
-                            modifier = Modifier.fillMaxWidth(),
-                            colors = ButtonDefaults.textButtonColors(
-                                containerColor = Color.Transparent,
-                                contentColor = Color.Black
-                            ),
-                            shape = RoundedCornerShape(0.dp),
-                            contentPadding = PaddingValues(0.dp)
-                            ) {
-                                Text("Edit")
-                            }
-                            TextButton(
-                                onClick = {},
-                                modifier = Modifier.fillMaxWidth(),
-                                colors = ButtonDefaults.textButtonColors(
-                                    containerColor = Color.Black,
-                                    contentColor = Color.Black
-                                ),
-                                shape = RoundedCornerShape(0.dp),
-                                contentPadding = PaddingValues(0.dp)
-                            ) {
-                                Text("Edit")
-                            }
-                        }
-                    }
-                }
+            ROw(
+                horizontalArrangement =  Arrangement.spacedBy(13.dp)
             ) {
-                IconButton(
-                    onClick = {
-                        coroutine.launch {
-                            tooltipState.show()
-                        }
+                Icon(RoomIcon,
+                    contentDescription = "RoomIcon",
+                    modifier = Modifier
+                        .size(30.dp)
+                        .clip(RoundedCornerShape(13.dp))
+                        .background(Color(0xFFF3F4F6))
+                        .padding(6.dp)
+                )
+                Text(name, fontSize = 16.sp, fontWeight = FontWeight.Bold)
+            }
+            ROw {
+                val border = if(availability){1.dp} else {0.dp}
+                val color = if(availability) Color(0xFFB9F8CF) else Color(0xFFE5E7EB)
+                val bg = if(availability) Color(0xFFF0FDF4) else Color(0xFFF9FAFB)
+                val content = if(availability) Color(0xFF008236) else Color(0xFF68717F)
+                Badge(
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(9.dp))
+                        .border(width = border, color = color, shape = RoundedCornerShape(9.dp))
+                        .background(bg)
+                        .padding(horizontal = 6.dp, vertical = 3.dp),
+                    containerColor = bg,
+                    contentColor = content
+                ){
+                    ROw(
+                        horizontalArrangement = Arrangement.spacedBy(6.dp)
+                    ) {
+                        Box(modifier = Modifier.clip(CircleShape).size(10.dp).background(if(!availability) Color.Green.copy(0.4f) else Color.Red.copy(0.8f)))
+                        Text(if(!availability)"Available" else "Full")
                     }
-                ) {
-                    Icon(Icons.Default.MoreVert, contentDescription = "tooolbar")
                 }
             }
+        }
+        IconButton(
+            onClick = {}
+        ){
+            Icon(Icons.Default.MoreVert, contentDescription = "")
         }
     }
 }
@@ -593,84 +485,44 @@ fun RoomCardHeader(
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun RoomCardContent(room_detail: RoomCardDetails){
-    ROw(
-        modifier = Modifier.fillMaxWidth().height(160.dp).padding(horizontal = 13.dp),
-        horizontalArrangement = Arrangement.SpaceBetween
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(13.dp),
+        verticalArrangement = Arrangement.spacedBy(13.dp)
     ) {
-        Column(
-            modifier = Modifier.fillMaxWidth().fillMaxHeight().padding(vertical = 13.dp),
-            verticalArrangement = Arrangement.spacedBy(13.dp),
+        ROw(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(6.dp)
+        ){
+            RoomCardLabel(
+                name = "beds",
+                value = "${room_detail.total_beds}",
+                icon = BedIcon,
+                width = 0.30f
+            )
+            RoomCardLabel(
+                name = "Due Date",
+                value = "${room_detail.total_beds}",
+                icon = CalendarIcon,
+                width = 0.50f
+            )
+            RoomCardLabel(
+                name = "Rent",
+                value = "₹${room_detail.rent_per_tenant}",
+                icon = Rupee,
+                width = 1f
+            )
+        }
+        AppButton(
+            modifier = Modifier.fillMaxWidth(),
+            onClick = {},
+            containerColor = Color.Black.copy(0.8f),
+            contentColor = Color.White,
+            shape = CircleShape,
+            border = BorderStroke(1.dp, color = Color.Black.copy(0.1f))
         ) {
-                ROw(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(6.dp)
-                ){
-                    RoomCardLabel(
-                        name = "Beds",
-                        value = "${room_detail.total_beds}",
-                        icon = BedIcon,
-                        width = 0.36f
-                    )
-                    RoomCardIconStringLabel(
-                        name = "Due Date",
-                        value = "20/03/2024",
-                        border = 0xFFF8F8FF,
-                        icon = CalendarIcon,
-                        text = 0xFF000000,
-                        bg = 0xFFF9FAFB
-                    )
-                }
-            ROw(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(6.dp)
-            ){
-                RoomCardIconIntLabel(
-                    name = "Rent Due",
-                    value = room_detail.rent_dues,
-                    icon = RentDueIcon,
-                    width = 0.46f,
-                    bg = 0xFFF7CAC9,
-                    text = 0xFFDC143C,
-                    border = 0xFFF75270
-                )
-            }
-            ROw(
-                modifier = Modifier.fillMaxSize(),
-                horizontalArrangement = Arrangement.SpaceBetween
-            ){
-                FlowRow (
-                    modifier = Modifier.fillMaxWidth(0.6f)
-                        .clip(RoundedCornerShape(13.dp))
-                        .padding(vertical = 6.dp, horizontal =13.dp),
-                    verticalArrangement = Arrangement.spacedBy(6.dp)
-                ) {
-                    Icon(PersonIcon, contentDescription = "", tint = Color(0xFFB0B0B0),modifier = Modifier.size(24.dp))
-                    Icon(PersonIcon, contentDescription = "",tint = Color(0xFFB0B0B0),modifier = Modifier.size(24.dp))
-                    Icon(PersonIcon, contentDescription = "",modifier = Modifier.size(24.dp))
-                    Icon(PersonIcon, contentDescription = "",modifier = Modifier.size(24.dp))
-                }
-                AppButton(
-                    onClick = {},
-                    modifier =Modifier.fillMaxWidth()
-                        .clip(RoundedCornerShape(13.dp)),
-                    containerColor = Color(0xFF000401),
-                    contentColor = Color.White,
-                    enabled = room_detail.is_available
-                ) {
-                    val button_name = if(room_detail.is_available) "Add Tenant" else "Full"
-                    ROw(
-                        horizontalArrangement = Arrangement.spacedBy(6.dp)
-                    ) {
-                        Icon(
-                            painter = painterResource(id = if(room_detail.is_available)R.drawable.person_add else R.drawable.person),
-                            contentDescription = "",
-                            modifier = Modifier.size(16.dp),
-                            tint = if(room_detail.is_available) Color.White else Color.Black
-                        )
-                        Text(button_name, fontSize = 13.sp,color = if(room_detail.is_available) Color.White else Color.Black)
-                    }
-                }
-            }
+            Text("Add Room")
         }
     }
 }

@@ -88,63 +88,52 @@ fun AddRoomSheet(
     onNoOfBedChange:(String) -> Unit,
     onRentChange:(String) -> Unit,
     onDepositChange:(String) -> Unit,
-    onAminitiesChange:(ChipType) -> Unit,
-    onFeatureRemove:(Int) -> Unit,
+    onFeatureAdd:(String) -> Unit,
+    onFeatureRemove: (String) -> Unit,
     onReset:() -> Unit,
     onSubmit:() -> Unit,
+    isLoading:Boolean,
     scrollState: ScrollState
 ){
-    val feature = rememberSaveable { mutableStateOf<String>("") }
-    val images = remember { mutableStateListOf<ByteArray>() }
     Column(
         modifier = Modifier
             .fillMaxHeight()
             .verticalScroll(state = scrollState)
-            .padding(vertical = 6.dp),
+            .padding(top = 6.dp),
         verticalArrangement = Arrangement.SpaceBetween
     ) {
         Column(
             modifier = Modifier.fillMaxHeight(),
             verticalArrangement = Arrangement.spacedBy(24.dp)
         ) {
-                    ChooseMultiplePhoto(
-                        images = images,
-                        modifier = Modifier.clip(CircleShape),
-                        contentPadding = PaddingValues(horizontal = 13.dp),
-                        onImageChange = {
-                            onImageAdd(it)
-                            images.add(it)
-                        },
-                        onImageRemove = {
-                            onImageRemove(it)
-                            images.removeAt(it)
-                        },
-                        onError = {
-                            onImageError()
-                        },
-                        size = 90.dp
-                    )
-                if(images_error != null){
-                    Text(images_error.toString(), fontSize = 13.sp, color =  Color.Red)
-                }
-                OutlinedInput(
-                    value = room_name,
-                    onValueChange = {
-                            value ->
-                        onRoomNameChange(value)
-                    },
-                    label = "Room Name",
-                    error = room_name_error,
-                    leadingIcon = RoomIcon,
-                    modifier = Modifier.fillMaxWidth()
-                )
+            ChooseMultiplePhoto(
+                images = images,
+                modifier = Modifier.clip(CircleShape),
+                contentPadding = PaddingValues(horizontal = 13.dp),
+                onImageChange = { onImageAdd(it) },
+                onImageRemove = { onImageRemove(it) },
+                onError = { onImageError() },
+                size = 90.dp
+            )
+            if(images_error != null){
+                Text(images_error.toString(), fontSize = 13.sp, color =  Color.Red)
+            }
+            OutlinedInput(
+                value = room_name,
+                onValueChange = { value ->
+                    onRoomNameChange(value) },
+                label = "Room Name",
+                error = room_name_error,
+                leadingIcon = RoomIcon,
+                modifier = Modifier.fillMaxWidth()
+            )
             ROw(
                 horizontalArrangement = Arrangement.spacedBy(13.dp)
             ) {
                 Input(
                     value = bed_count,
                     onValueChange = {
-                            value ->
+                        value ->
                         onNoOfBedChange(value)
                     },
                     label = "No. Of Beds",
@@ -189,26 +178,25 @@ fun AddRoomSheet(
             }
             HorizontalDivider(color = Color.Black.copy(alpha = 0.1f))
             Aminities(
+                features = features,
+                onFeatureAdd = {
+                    onFeatureAdd(it)
+                },
                 onFeatureRemove = {
                     onFeatureRemove(it)
                 },
-                onAminitiesChange = {
-                    onAminitiesChange(it)
-                },
-                features = features,
-                feature = feature,
                 features_error = features_error
             )
         }
-        FormButton(
-            isLoading = false,
-            onReset = {
-                onReset()
-            },
-            onSubmit = {
-                onSubmit()
-            }
-        )
+        Box(
+            modifier = Modifier.padding(top = 60.dp)
+        ){
+            FormButton(
+                isLoading = isLoading,
+                onReset = onReset,
+                onSubmit = onSubmit
+            )
+        }
     }
 }
 
@@ -216,10 +204,9 @@ fun AddRoomSheet(
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun Aminities(
-    onFeatureRemove: (Int) -> Unit,
-    onAminitiesChange: (ChipType) -> Unit,
-    features: List<String>,
-    feature: MutableState<String>,
+    features:List<String>,
+    onFeatureAdd:(String) -> Unit,
+    onFeatureRemove: (String) -> Unit,
     features_error:String? = null
 ){
     val aminities = listOf<String>("Wi-fi",
@@ -230,7 +217,6 @@ fun Aminities(
         "Laundry",
         "Balcony"
     )
-    val selected = remember { mutableStateListOf<String>() }
     Column {
         Column(
             verticalArrangement = Arrangement.spacedBy(16.dp)
@@ -256,13 +242,13 @@ fun Aminities(
                 modifier = Modifier.offset(x = (-6).dp)
             ) {
                 aminities.forEach { aminitie ->
-                    val is_selected = selected.contains(aminitie)
+                    val is_selected = features.contains(aminitie)
                     Card(
                         onClick = {
-                            if(selected.contains(aminitie)){
-                                selected.remove(aminitie)
+                            if(features.contains(aminitie)){
+                                onFeatureRemove(aminitie)
                             }else {
-                                selected.add(aminitie)
+                                onFeatureAdd(aminitie)
                             }
                         },
                         shape = CircleShape,

@@ -71,10 +71,19 @@ fun ChooseMultiplePhoto(
             Column(
                 verticalArrangement = Arrangement.spacedBy(6.dp)
             ) {
-                Label(
-                    name =  "Photos",
-                    fontSize = 16.sp
-                )
+                ROw(
+                    horizontalArrangement = Arrangement.spacedBy(6.dp)
+                ) {
+                    Label(
+                        name =  "Photos",
+                        fontSize = 16.sp
+                    )
+                    Text(
+                        "* max 4 images",
+                        fontSize = 12.sp,
+                        color = Color.Black.copy(alpha = 0.3f)
+                    )
+                }
                 Text(
                     "Choose the Image of your room \nto display and to be shared",
                     fontSize = 12.sp,
@@ -115,7 +124,7 @@ fun MultipleImageButton(
     size:Int,
     onImageAdd:(Uri) -> Unit,
     onError:() -> Unit,
-    limit:Int = 1,
+    limit:Int,
     modifier:Modifier = Modifier,
     icon: ImageVector = Photo,
     contentPadding: PaddingValues= PaddingValues(0.dp)
@@ -125,12 +134,9 @@ fun MultipleImageButton(
     ) {
             uris ->
             CoroutineScope(Dispatchers.IO).launch {
-                uris.forEach { uri ->
-                    if(size < limit){
-                        onImageAdd(uri)
-                    }else {
-                        onError()
-                    }
+                val image_uris = uris.take(limit - size)
+                image_uris.forEach { uri ->
+                    onImageAdd(uri)
                 }
             }
         }

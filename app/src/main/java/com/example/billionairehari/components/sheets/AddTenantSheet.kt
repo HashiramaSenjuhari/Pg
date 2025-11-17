@@ -368,38 +368,10 @@ fun Mannual(
                 )
             }
         }
-        ROw(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(13.dp)
-        ) {
-            AppButton(
-                onClick = onReset,
-                containerColor = Color.White,
-                contentColor = Color.Black,
-                border = BorderStroke(1.dp, color = Color.Black.copy(0.1f)),
-                shape = RoundedCornerShape(24.dp),
-                modifier = Modifier.fillMaxWidth(0.5f),
-                enabled = !isLoading
-            ) {
-                Text("Reset")
-            }
-            AppButton(
-                onClick = onSubmit,
-                containerColor = Color.Black.copy(0.8f),
-                contentColor = Color.White,
-                shape = RoundedCornerShape(24.dp),
-                modifier = Modifier.fillMaxWidth(),
-                enabled = !isLoading
-            ) {
-                if(isLoading){
-                    CircularProgressIndicator(
-                        strokeWidth = 4.dp,
-                        modifier = Modifier.size(24.dp),
-                    )
-                }else {
-                    Text("Add")
-                }
-            }
-        }
+        FormButton(
+            onReset = onReset,
+            isLoading = isLoading,
+            onSubmit = onSubmit
+        )
     }
 }

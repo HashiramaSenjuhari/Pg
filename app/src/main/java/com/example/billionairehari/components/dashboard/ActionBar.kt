@@ -39,6 +39,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.billionairehari.Destinations
 import com.example.billionairehari.NavigationAction
@@ -51,6 +52,7 @@ import com.example.billionairehari.icons.RoomIcon
 import com.example.billionairehari.icons.TenantIcon
 import com.example.billionairehari.layout.MODAL_TYPE
 import com.example.billionairehari.model.Room
+import com.example.billionairehari.viewmodels.AddRoomViewModel
 import com.example.billionairehari.viewmodels.RoomsViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 
@@ -110,90 +112,61 @@ fun ActionBar(
 
 @Composable
 fun RoomSheet(
-    room_default: Room = Room(),
-    onReset:() -> Unit,
-    onSubmit:(Room) -> Unit,
-    scrollState: ScrollState
+    scrollState: ScrollState,
+    viewmodel: AddRoomViewModel = viewModel()
 ){
-    val name = rememberSaveable { mutableStateOf<String>(room_default.name) }
-    val images = rememberSaveable { room_default.images.toMutableList() }
-    val deposit = rememberSaveable { mutableStateOf<String>(room_default.deposit_per_tenant) }
-    val bed_count = rememberSaveable { mutableStateOf<String>(room_default.total_beds) }
-    val rent = rememberSaveable { mutableStateOf<String>(room_default.rent_per_tenant) }
-    val features = rememberSaveable { room_default.features.toMutableList() }
-
-    var name_error = rememberSaveable { mutableStateOf<String?>(null) }
-    var bed_count_error = rememberSaveable { mutableStateOf<String?>(null) }
-    var rent_error = rememberSaveable { mutableStateOf<String?>(null) }
-    var features_error = rememberSaveable { mutableStateOf<String?>(null) }
-    var deposit_error = rememberSaveable { mutableStateOf<String?>(null) }
-    val image_error = rememberSaveable { mutableStateOf<String?>(null) }
+    val room = viewmodel.room.value
 
     AddRoomSheet(
-        images = images,
-        deposit = deposit.value,
-        bed_count = bed_count.value,
-        features = features,
-        rent = rent.value,
-        room_name = name.value,
+        room_name = room.name,
+        bed_count = room.no_of_beds,
+        rent = room.rent_price,
+        deposit = room.deposit,
+        features = room.features,
+        images = room.images,
+        isLoading = room.isLoading,
+
+        onRoomNameChange = {
+            viewmodel.update_name(it)
+        },
+        onRentChange = {
+            viewmodel.update_rent(it)
+        },
+        onDepositChange = {
+            viewmodel.update_deposit(it)
+        },
+        onNoOfBedChange = {
+            viewmodel.update_beds(it)
+        },
+        onImageAdd = {
+            viewmodel.update_images(it)
+        },
         onImageRemove = {
-            images.removeAt(it)
+            viewmodel.remove_images(it)
         },
         onImageError = {
 
         },
-        onImageAdd = {
-            images.add(it)
-        },
-        onAminitiesChange = {
-            features.add(it.name)
-        },
-        onDepositChange = {
-            deposit.value = it
-        },
-        onNoOfBedChange = {
-            bed_count.value = it
-        },
-        onRentChange = {
-            rent.value = it
-        },
-        onRoomNameChange = {
-            name.value = it
+        onFeatureAdd = {
+            viewmodel.update_features(it)
         },
         onFeatureRemove = {
-            features.removeAt(it)
+            viewmodel.remove_feature(it)
         },
-        images_error = image_error.value,
-        deposit_error = deposit_error.value,
-        rent_error = rent_error.value,
-        beds_error = bed_count_error.value,
-        room_name_error = name_error.value,
-        features_error = features_error.value,
-        onReset = onReset,
+
+        images_error = null,
+        room_name_error = room.nameError,
+        beds_error = room.bedError,
+        rent_error = room.rentPriceError,
+        deposit_error = room.depositError,
+        features_error = null,
+
         scrollState = scrollState,
         onSubmit = {
-            val room = Room(
-                    name = name.value,
-                    features = features,
-                    rent_per_tenant = rent.value,
-                    deposit_per_tenant = deposit.value,
-                    images = images,
-                    total_beds = bed_count.value
-                )
-            if(ValidateRoom(
-                    value = room,
-                    name_error = name_error,
-                    beds_error = bed_count_error,
-                    deposit_error = deposit_error,
-                    rent_error = rent_error,
-                    features_error = features_error,
-                    images_error = image_error
-                )){
-                onSubmit(
-                    room
-                )
-            }
-
+            viewmodel.submit()
+        },
+        onReset = {
+            viewmodel.reset()
         }
     )
 }

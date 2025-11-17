@@ -365,8 +365,6 @@ fun ModalUi(
                 context = context
             )
             MODAL_TYPE.ADD_ROOM -> RoomSheet(
-                onReset = {},
-                onSubmit = {},
                 scrollState = scrollState
             )
             is MODAL_TYPE.ADD_TENANT_WITH_PRE_ROOM -> {
@@ -377,9 +375,6 @@ fun ModalUi(
             }
             is MODAL_TYPE.UPDATE_ROOM -> {
                 RoomSheet(
-                    room_default = value.room,
-                    onReset = {},
-                    onSubmit = {},
                     scrollState = scrollState
                 )
             }

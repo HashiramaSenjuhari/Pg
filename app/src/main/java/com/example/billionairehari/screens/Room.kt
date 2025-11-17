@@ -58,6 +58,7 @@ import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.Label
 import androidx.compose.material3.RichTooltip
 import androidx.compose.material3.Text
@@ -125,6 +126,10 @@ import com.example.billionairehari.components.FormButton
 import com.example.billionairehari.components.Input
 import com.example.billionairehari.components.InputType
 import com.example.billionairehari.components.sheets.BottomModalLayout
+import com.example.billionairehari.icons.ChatIcon
+import com.example.billionairehari.icons.DeleteIcon
+import com.example.billionairehari.icons.EditIcon
+import com.example.billionairehari.icons.ShareIcon
 import com.example.billionairehari.icons.TenantIcon
 import com.example.billionairehari.layout.MODAL_TYPE
 import com.example.billionairehari.model.Room
@@ -159,6 +164,7 @@ fun RoomScreen(
     Column(
         modifier = Modifier.then(modifier)
             .wrapContentHeight()
+            .background(Color.White)
             .verticalScroll(state = scrollState)
     ) {
         val photos = listOf(
@@ -276,6 +282,12 @@ fun RoomScreen(
     }
 }
 
+data class DropDownParams(
+    val name:String,
+    val icon: ImageVector? = null,
+    val onClick:() -> Unit
+)
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun StaticBar(
@@ -286,30 +298,31 @@ fun StaticBar(
     onRoomShare:() -> Unit,
     onRoomDelete:() -> Unit
 ){
+    val dropdowns = listOf<DropDownParams>(
+        DropDownParams(name = "Edit Room", icon = EditIcon, onClick = onRoomEdit),
+        DropDownParams(name = "Message", icon = ChatIcon, onClick = onRoomMessage),
+        DropDownParams(name = "Share", icon = ShareIcon, onClick = onRoomDelete),
+        DropDownParams(name = "Delete", icon = DeleteIcon, onClick = onRoomDelete),
+    )
     val coroutine = rememberCoroutineScope()
     val expanded = rememberSaveable { mutableStateOf<Boolean>(false) }
     ROw(
         modifier = Modifier.fillMaxWidth()
             .offset(y = 24.dp)
             .padding(horizontal = 24.dp)
-            .zIndex(3f)
+            .zIndex(3f),
+        horizontalArrangement = Arrangement.End
     ) {
-        IconButton(
-            onClick = onBackNavigation,
-            modifier = Modifier.size(40.dp)
-                .shadow(6.dp, shape = CircleShape)
-                .background(Color.White)
-        ) {
-            Icon(Icons.Default.ArrowBack, contentDescription = "")
-        }
         Box{
             IconButton(
                 onClick = {
                     expanded.value = true
                 },
-                modifier = Modifier.size(40.dp)
-                    .shadow(6.dp, shape = CircleShape)
-                    .background(Color.White)
+                modifier = Modifier
+                    .shadow(6.dp, shape = CircleShape),
+                colors = IconButtonDefaults.iconButtonColors(
+                    containerColor = Color.White
+                )
             ) {
                 Icon(Icons.Default.MoreVert, contentDescription = "")
             }
@@ -319,37 +332,45 @@ fun StaticBar(
                     expanded.value = false
                 },
                 modifier = Modifier.fillMaxWidth(0.4f),
-                offset = DpOffset(x = 24.dp,y = 6.dp)
+                shape = RoundedCornerShape(13.dp),
+                containerColor = Color.White
             ) {
-                DropdownMenuItem(
-                    text = {
-                        Text("Edit Room")
-                    },
-                    onClick = onRoomEdit
-                )
-                DropdownMenuItem(
-                    text = {
-                        Text("Message")
-                    },
-                    onClick = onRoomMessage
-                )
-                DropdownMenuItem(
-                    text = {
-                        Text("Share")
-                    },
-                    onClick = onRoomShare
-                )
-                DropdownMenuItem(
-                    text = {
-                        Text("Delete")
-                    },
-                    onClick = onRoomDelete
-                )
+                dropdowns.forEach {
+                    DropDownButton(
+                        name = it.name,
+                        contentColor = if(it.name === "Delete") Color.Red else Color.Black,
+                        icon = it.icon,
+                        onClick = {
+                            it.onClick.invoke()
+                        }
+                    )
+                }
             }
         }
     }
 }
 
+@Composable
+fun DropDownButton(
+    name:String,
+    icon: ImageVector? = null,
+    contentColor:Color = Color.Black,
+    onClick:() -> Unit,
+){
+    DropdownMenuItem(
+        text = {
+            ROw(
+                horizontalArrangement = Arrangement.spacedBy(6.dp)
+            ) {
+                if(icon != null){
+                    Icon(icon, contentDescription = name,modifier = Modifier.size(16.dp), tint = contentColor)
+                }
+                Text(name, color = contentColor)
+            }
+        },
+        onClick = onClick
+    )
+}
 
 @Composable
 fun ImagePreview(
@@ -559,26 +580,6 @@ fun BedDetails(
     }
 }
 
-@Preview
-@Composable
-fun billionaire(){
-    RoomsScreen(
-        navController = rememberNavController(),
-        modifier = Modifier.padding(24.dp)
-    )
-
-    ROw (
-        modifier = Modifier
-            .clip(RoundedCornerShape(13.dp))
-            .padding(vertical = 6.dp),
-    ) {
-        Icon(PersonIcon, contentDescription = "", tint = Color(0xFFB0B0B0),modifier = Modifier.size(24.dp))
-        Icon(PersonIcon, contentDescription = "",tint = Color(0xFFB0B0B0),modifier = Modifier.size(24.dp))
-        Icon(PersonIcon, contentDescription = "",modifier = Modifier.size(24.dp))
-        Icon(PersonIcon, contentDescription = "",modifier = Modifier.size(24.dp))
-    }
-}
-
 @Composable
 fun DetailCard(
     icon: ImageVector? = null,
@@ -659,7 +660,7 @@ fun PriceDetails(
         Column(
             verticalArrangement = Arrangement.spacedBy(13.dp)
         ) {
-            PriceLabel(name = "Room Rent", price = room_rent, per_moth = "/ mo")
+            PriceLabel(name = "Room Rent", price = room_rent, per_moth = "/mo")
             PriceLabel(name = "Security Deposit", price = deposit)
             PriceLabel(name = "Current Rent Due", price = current_rent_due)
         }
@@ -675,8 +676,8 @@ fun PriceLabel(
     ROw(
         modifier = Modifier.fillMaxWidth()
     ){
-        Text(name,color = Color.Black.copy(alpha = 0.6f), fontSize = 13.sp)
-        Text("₹ ${price}${per_moth}", fontWeight = FontWeight.SemiBold)
+        Text(name,color = Color.Black.copy(alpha = 0.6f))
+        Text("₹${price}${per_moth}", fontWeight = FontWeight.SemiBold)
     }
 }
 
@@ -729,8 +730,6 @@ fun Tenants(
 ){
     Column(
         modifier = Modifier.fillMaxWidth(),
-//            .border(1.dp, color = Color.Black.copy(alpha = 0.1f), shape = RoundedCornerShape(13.dp)),
-//            .padding(vertical = 24.dp, horizontal = 13.dp),
         verticalArrangement = Arrangement.spacedBy(24.dp)
     ) {
         Text("Tenants", fontWeight = FontWeight.SemiBold, fontSize = 16.sp)
@@ -795,7 +794,6 @@ fun Tenant(
             modifier = Modifier.clip(RoundedCornerShape(13.dp))
                 .fillMaxWidth()
                 .border(1.dp,color = Color.Black.copy(alpha = 0.1f),shape = RoundedCornerShape(13.dp))
-                .background(Color(0xFFebeef3).copy(alpha = 0.3f))
                 .padding(vertical = 13.dp, horizontal = 13.dp)
         ){
             ROw(

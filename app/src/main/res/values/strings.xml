@@ -5,4 +5,10 @@
 
     <string name="remove_room_title" translatable="false">Remove Room</string>
     <string name="remove_room_description" translatable="false">Are you sure to remove the room? you can see room for 7 days in your trash</string>
+
+    <string name="name_error">Please Enter the Name</string>
+    <string name="image_error">Please Choose Image</string>
+    <string name="phone_number_error">Please Enter valid phone number</string>
+    <string name="room_error">Please Choose room</string>
+    <string name="joining_date_error">Please Choose Correct Date</string>
 </resources>

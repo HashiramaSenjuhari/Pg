@@ -81,6 +81,7 @@ import androidx.compose.ui.modifier.modifierLocalConsumer
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
@@ -116,104 +117,75 @@ import kotlinx.coroutines.launch
 
 @Composable
 fun TenantSheet(
-    tenant_default: Tenant = Tenant(),
-    onReset:() -> Unit,
-    onSubmit:(Tenant) -> Unit,
     scrollState: ScrollState,
-    context: Context
+    context: Context,
+    viewmodel: AddTenantViewModel = viewModel()
 ) {
-    val name = remember { mutableStateOf<String>(tenant_default.name) }
-    val room = remember { mutableStateOf<String>(tenant_default.room) }
-    val phone = remember { mutableStateOf<String>(tenant_default.phone_number) }
-    val image = remember { mutableStateOf<ByteArray?>(tenant_default.image) }
-    val joining_date = remember { mutableStateOf<Long>(tenant_default.joining_date) }
-    val rent_paid = remember { mutableStateOf<Boolean>(tenant_default.rent_paid_first) }
-    val deposit = remember { mutableStateOf<Boolean>(tenant_default.deposit) }
-    val auto_remainder = remember { mutableStateOf<Boolean>(tenant_default.automatic_remainder) }
 
     val nameError = rememberSaveable { mutableStateOf<String?>(null) }
     val roomError = rememberSaveable { mutableStateOf<String?>(null) }
     val dateError = rememberSaveable { mutableStateOf<String?>(null) }
     val phoneError = rememberSaveable { mutableStateOf<String?>(null) }
 
+    val tenant = viewmodel.tenant.collectAsState()
+    val tenant_error = viewmodel.tenant_error.collectAsState()
+    val name = tenant.value.name
+    val image = tenant.value.image
+    val phone = tenant.value.phone
+    val room = tenant.value.room
+    val date = tenant.value.date
+    val first_month_rent = tenant.value.first_month_rent
+    val deposit = tenant.value.security_deposit
+    val auto_remainder = tenant.value.automatic_remainder
+
     Mannual(
-        name = name.value,
-        room = room.value,
-        phone = phone.value,
-        image = image.value,
-        joining_date = joining_date.value,
-        rent_paid = rent_paid.value,
-        deposit_paid = deposit.value,
-        auto_remainder = auto_remainder.value,
-        update_name = {
-            name.value = it },
-        update_room = {
-            room.value = it },
-        update_phone = {
-            phone.value = it },
-        update_image = {
-            image.value = it },
-        update_rent_paid = {
-            rent_paid.value = it },
-            update_deposit_paid = { deposit.value = it },
-        update_joining_date = {
-            joining_date.value = it },
-        update_auto_remainder = {
-            auto_remainder.value = it },
-        name_error = nameError.value,
-        phone_error = phoneError.value,
-        room_error = roomError.value,
-        joining_date_error = dateError.value,
-        remove_image = {
-            image.value = null },
-        onReset = {
-            onReset() },
-        onDial = {
-            dial(phone.value, context = context) },
+        name = name,
+        room = room,
+        phone = phone,
+        image = image,
+        joining_date = date,
+        rent_paid = first_month_rent,
+        deposit_paid = deposit,
+        auto_remainder = auto_remainder,
+        update_name = { viewmodel.update_name(it) },
+        update_room = { viewmodel.update_room(it) },
+        update_phone = { viewmodel.update_phone(it) },
+        update_image = { viewmodel.update_image(it) },
+        update_rent_paid = { viewmodel.update_first_month_rent_paid(it) },
+        update_deposit_paid = { viewmodel.update_security_deposit(it) },
+        update_joining_date = { viewmodel.update_date(it) },
+        update_auto_remainder = { viewmodel.update_automatic_remainder(it) },
+
+        name_error = ConvertResourceToString(tenant_error.value.nameError),
+        phone_error = ConvertResourceToString(tenant_error.value.phoneError),
+        room_error = ConvertResourceToString(tenant_error.value.roomError),
+        joining_date_error = ConvertResourceToString(tenant_error.value.dateError),
+        remove_image = { viewmodel.remove_image() },
+        onReset = {},
+        onDial = { dial(phone, context = context) },
         onSubmit = {
             val tenant = Tenant(
-                name = name.value,
-                image = image.value,
-                room = room.value,
-                automatic_remainder = auto_remainder.value,
-                phone_number = phone.value,
-                joining_date = joining_date.value,
-                rent_paid_first = rent_paid.value,
-                deposit = deposit.value
+                name = name,
+                image = image,
+                room = room,
+                automatic_remainder = auto_remainder,
+                phone_number = phone,
+                joining_date = date,
+                rent_paid_first = first_month_rent,
+                deposit = deposit
             )
-            if(ValidateTenant(tenant = tenant, nameError = nameError, dateError = dateError, phoneError = phoneError, roomError = roomError
-            )){
-                onSubmit(tenant)
-            } },
+            viewmodel.submit()
+                   },
         isLoading = false,
         scrollState = scrollState
     )
 }
 
-private fun ValidateTenant(
-    tenant:Tenant,
-    nameError:MutableState<String?>,
-    roomError:MutableState<String?>,
-    phoneError:MutableState<String?>,
-    dateError:MutableState<String?>
-) : Boolean {
-    if(tenant.name.isBlank()){
-        nameError.value = "Provide Name"
-        return false
+@Composable
+fun ConvertResourceToString(id:Int?) : String? {
+    return id?.let { id ->
+        stringResource(id)
     }
-    if(tenant.room === ""){
-        roomError.value = "Please Select Room"
-        return false
-    }
-    if(tenant.phone_number.length < 10 && tenant.phone_number.length > 10){
-        phoneError.value = "Provide Correct Number"
-        return false
-    }
-    if(tenant.joining_date === 0L){
-        dateError.value = "Please Choose the Date"
-        return false
-    }
-    return true
 }
 
 data class DropDownItem(
@@ -231,24 +203,32 @@ fun Mannual(
     name:String,
     update_name:(String) -> Unit,
     name_error:String? = null,
+
     phone:String,
     update_phone:(String) -> Unit,
     phone_error:String? = null,
+
     room:String,
     update_room:(String) -> Unit,
     room_error:String? = null,
+
     joining_date:Long,
     update_joining_date:(Long) -> Unit,
     joining_date_error:String? = null,
+
     rent_paid:Boolean,
     update_rent_paid:(Boolean) -> Unit,
+
     deposit_paid:Boolean,
     update_deposit_paid:(Boolean) -> Unit,
+
     image: ByteArray?,
     update_image:(ByteArray) -> Unit,
     remove_image:() -> Unit,
+
     auto_remainder:Boolean,
     update_auto_remainder:(Boolean) -> Unit,
+
     onReset:() -> Unit,
     onSubmit:() -> Unit,
     isLoading:Boolean,

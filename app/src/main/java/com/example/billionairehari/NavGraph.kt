@@ -15,11 +15,13 @@ object Screens {
     const val CONTACTS_SCREEN = "contacts"
     const val PROFILE_SCREEN = "profile"
     const val SETTING_SCREEN = "setting"
+    const val SEARCH_SEARCH = "search"
 }
 
 object Arguments {
     const val ROOM_ID_ARGS = "roomId"
     const val TENANT_ID_ARGS = "tenantId"
+    const val SEARCH_ID_ARGS = "searchId"
 }
 
 object Destinations {
@@ -33,6 +35,8 @@ object Destinations {
     const val CONTACTS_ROUTE = "${Screens.CONTACTS_SCREEN}"
     const val PROFILE_ROUTE = "${Screens.PROFILE_SCREEN}"
     const val SETTING_ROUTE = "${Screens.SETTING_SCREEN}"
+
+    const val SEARCH_ROUTE = "${Screens.SEARCH_SEARCH}/{${Arguments.SEARCH_ID_ARGS}}"
 }
 
 class NavigationAction (private val navController: NavHostController) {

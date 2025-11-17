@@ -309,7 +309,7 @@ fun Header(
     path: String,
     navController: NavHostController
 ){
-    if(route_size >= 2){
+    if(route_size >= 2 && path != "search"){
         HeaderBar(
             name = path.replaceFirstChar { it.uppercaseChar() },
             onNavigate = {
@@ -361,8 +361,6 @@ fun ModalUi(
                 onReset = {},
             )
             MODAL_TYPE.ADD_TENANT -> TenantSheet(
-                onReset = {},
-                onSubmit = {},
                 scrollState = scrollState,
                 context = context
             )
@@ -373,9 +371,6 @@ fun ModalUi(
             )
             is MODAL_TYPE.ADD_TENANT_WITH_PRE_ROOM -> {
                 TenantSheet(
-                    tenant_default = Tenant(room = value.roomName),
-                    onSubmit = {},
-                    onReset = {},
                     scrollState = scrollState,
                     context = context
                 )
@@ -390,9 +385,6 @@ fun ModalUi(
             }
             is MODAL_TYPE.UPDATE_TENANT -> {
                 TenantSheet(
-                    tenant_default = value.tenant,
-                    onSubmit = {},
-                    onReset = {},
                     scrollState = scrollState,
                     context = context
                 )

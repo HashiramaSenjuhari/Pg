@@ -1,5 +1,6 @@
 package com.example.billionairehari.screens
 
+import android.graphics.LinearGradient
 import android.graphics.Rect
 import android.graphics.drawable.VectorDrawable
 import android.util.Log
@@ -17,6 +18,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.FlingBehavior
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -92,7 +94,9 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.TileMode
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.boundsInWindow
@@ -143,16 +147,16 @@ import com.example.billionairehari.icons.Rupee
 import com.example.billionairehari.model.RoomCardDetails
 import com.example.billionairehari.viewmodels.RoomsViewModel
 import com.example.billionairehari.viewmodels.current_rooms
+import dagger.hilt.android.lifecycle.HiltViewModel
 
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun RoomsScreen(
+    viewmodel: RoomsViewModel,
     modifier:Modifier,
     navController: NavController
 ) {
-
-
     /** header Animation module - Start **/
     val scrollState = rememberScrollState()
 
@@ -167,8 +171,7 @@ fun RoomsScreen(
     /** header Animation module - End **/
 
     /** viewmodel - start **/
-    val rooms = hiltViewModel<RoomsViewModel>()
-    val filtered_rooms = rooms.rooms.collectAsState()
+    val filtered_rooms = viewmodel.rooms.collectAsState()
     /** viewmodel - end **/
 
     val final_rooms = filtered_rooms.value
@@ -195,7 +198,6 @@ fun RoomsScreen(
         )
     }
 }
-
 
 @Composable
 fun DynamicTopHeader(
@@ -258,16 +260,18 @@ fun StaticSearchBar(
             .fillMaxWidth()
             .border(1.dp, color = Color.Black.copy(0.1f), shape = CircleShape)
             .padding(vertical = 3.dp, horizontal = 13.dp)
+            .clickable(
+                enabled = true,
+                onClick = onClickFilter,
+                indication = null,
+                interactionSource = MutableInteractionSource()
+            ),
     ){
         ROw(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
             ROw(
-                modifier = Modifier.clickable(
-                    enabled = true,
-                    onClick = onClickFilter
-                ),
                 horizontalArrangement = Arrangement.spacedBy(13.dp)
             ) {
                 Icon(

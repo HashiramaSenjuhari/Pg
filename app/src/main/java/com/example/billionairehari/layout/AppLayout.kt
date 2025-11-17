@@ -26,6 +26,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavArgs
 import androidx.navigation.NavArgument
 import androidx.navigation.NavHostController
@@ -43,9 +44,11 @@ import com.example.billionairehari.icons.Rooms
 import com.example.billionairehari.screens.DashboardScreen
 import com.example.billionairehari.screens.RoomScreen
 import com.example.billionairehari.screens.RoomsScreen
-import com.example.billionairehari.screens.SearchScreen
+import com.example.billionairehari.screens.SearchComponentScreen
 import com.example.billionairehari.screens.TenantScreen
 import com.example.billionairehari.screens.TenantsScreen
+import com.example.billionairehari.viewmodels.RoomViewModel
+import com.example.billionairehari.viewmodels.RoomsViewModel
 
 @Composable
 fun AppLayout(
@@ -105,6 +108,7 @@ fun AppLayout(
             route = Destinations.ROOMS_ROUTE
         ) {
             RoomsScreen(
+                viewmodel = hiltViewModel<RoomsViewModel>(),
                 modifier = Modifier.padding(padding),
                 navController = navController
             )
@@ -125,10 +129,14 @@ fun AppLayout(
                 }
             ),
             enterTransition = {
-                fadeIn()
+                slideInHorizontally(
+                    initialOffsetX = { fullWidth -> fullWidth }
+                ) + fadeIn()
             },
             exitTransition = {
-                ExitTransition.None
+                slideOutHorizontally(
+                    targetOffsetX = { fullWidth -> -fullWidth }
+                ) + fadeOut()
             }
         ){
             entry ->
@@ -229,6 +237,18 @@ fun AppLayout(
             Column {
                 Text(tenant_id!!)
             }
+        }
+        composable(
+            route = Destinations.SEARCH_ROUTE,
+            arguments = listOf(
+                navArgument(name = Arguments.SEARCH_ID_ARGS){
+                    type = NavType.StringType
+                }
+            )
+        ) {
+            id ->
+            val search_type = id?.arguments?.getString(Arguments.SEARCH_ID_ARGS)
+            SearchComponentScreen(id = search_type!!,modifier = Modifier.padding(padding))
         }
     }
 }

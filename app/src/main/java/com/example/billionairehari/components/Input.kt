@@ -9,9 +9,11 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Icon
@@ -253,6 +255,14 @@ fun OutlinedInput(
                     },
                 keyboardOptions = KeyboardOptions(keyboardType = keyBoardType, imeAction = ImeAction.Next)
             )
+        }
+        if(error !== null){
+            Box(
+                modifier = Modifier.fillMaxWidth()
+                    .padding(start = 40.dp, end = 40.dp,top = 6.dp)
+            ){
+                Text(error.toString(),color = Color.Red, fontSize = 12.sp)
+            }
         }
     }
 }

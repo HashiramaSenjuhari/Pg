@@ -57,7 +57,7 @@ fun DropDown(
         expanded.value = true
     }
     Column(
-        verticalArrangement = Arrangement.spacedBy(10.dp)
+        verticalArrangement = Arrangement.spacedBy(6.dp)
     ) {
         Column(
             modifier = Modifier.fillMaxWidth(size)

@@ -7,6 +7,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -79,6 +80,7 @@ fun DateInput(
     label:String,
     onDate:(Long) -> Unit,
     date:Long,
+    error:String? = null,
     modifier:Modifier = Modifier.border(1.dp,color = Color(0xFFBEBEBE),shape = RoundedCornerShape(13.dp)),
     fontSize: TextUnit = 12.sp
     ) {
@@ -91,28 +93,33 @@ fun DateInput(
     if(interactionSource.collectIsPressedAsState().value){
         is_open.value = true
     }
-    OutlinedInput(
-        modifier = Modifier.then(modifier),
-        value = dateFormats,
-        onValueChange = {},
-        interactionSource = interactionSource,
-        label = label,
-        label_font_size = 12.sp,
-        trailingIcon = {
-            IconButton(
-                onClick = {
-                    is_open.value = true
+    Column {
+        OutlinedInput(
+            modifier = Modifier.then(modifier),
+            value = dateFormats,
+            onValueChange = {},
+            interactionSource = interactionSource,
+            label = label,
+            label_font_size = 12.sp,
+            trailingIcon = {
+                IconButton(
+                    onClick = {
+                        is_open.value = true
+                    }
+                ) {
+                    Icon(
+                        imageVector = CalendarIcon,
+                        contentDescription = "calender",
+                        modifier = Modifier.size(20.dp)
+                    )
                 }
-            ) {
-                Icon(
-                    imageVector = CalendarIcon,
-                    contentDescription = "calender",
-                    modifier = Modifier.size(20.dp)
-                )
-            }
-        },
-        readOnly = true
-    )
+            },
+            readOnly = true
+        )
+        if(error != null){
+            Text(error!!, color = Color.Red,fontSize = 12.sp,modifier = Modifier.padding(top = 6.dp))
+        }
+    }
     if(is_open.value) {
         DatePick(
             onDateChange = {

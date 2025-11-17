@@ -7,6 +7,7 @@ import android.net.Uri
 import android.util.Log
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.updateTransition
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -40,6 +41,7 @@ import androidx.compose.material.icons.outlined.Call
 import androidx.compose.material.icons.outlined.Person
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -127,8 +129,7 @@ fun TenantSheet(
     val dateError = rememberSaveable { mutableStateOf<String?>(null) }
     val phoneError = rememberSaveable { mutableStateOf<String?>(null) }
 
-    val tenant = viewmodel.tenant.collectAsState()
-    val tenant_error = viewmodel.tenant_error.collectAsState()
+    val tenant = viewmodel.tenant
     val name = tenant.value.name
     val image = tenant.value.image
     val phone = tenant.value.phone
@@ -137,6 +138,8 @@ fun TenantSheet(
     val first_month_rent = tenant.value.first_month_rent
     val deposit = tenant.value.security_deposit
     val auto_remainder = tenant.value.automatic_remainder
+
+    val errors = tenant.value
 
     Mannual(
         name = name,
@@ -156,36 +159,18 @@ fun TenantSheet(
         update_joining_date = { viewmodel.update_date(it) },
         update_auto_remainder = { viewmodel.update_automatic_remainder(it) },
 
-        name_error = ConvertResourceToString(tenant_error.value.nameError),
-        phone_error = ConvertResourceToString(tenant_error.value.phoneError),
-        room_error = ConvertResourceToString(tenant_error.value.roomError),
-        joining_date_error = ConvertResourceToString(tenant_error.value.dateError),
+        name_error = errors.nameError,
+        phone_error = errors.phoneNumberError,
+        room_error = errors.roomError,
+        joining_date_error = errors.dateError,
+
         remove_image = { viewmodel.remove_image() },
         onReset = {},
         onDial = { dial(phone, context = context) },
-        onSubmit = {
-            val tenant = Tenant(
-                name = name,
-                image = image,
-                room = room,
-                automatic_remainder = auto_remainder,
-                phone_number = phone,
-                joining_date = date,
-                rent_paid_first = first_month_rent,
-                deposit = deposit
-            )
-            viewmodel.submit()
-                   },
-        isLoading = false,
+        onSubmit = { viewmodel.submit() },
+        isLoading = tenant.value.isLoading,
         scrollState = scrollState
     )
-}
-
-@Composable
-fun ConvertResourceToString(id:Int?) : String? {
-    return id?.let { id ->
-        stringResource(id)
-    }
 }
 
 data class DropDownItem(
@@ -327,6 +312,7 @@ fun Mannual(
                         update_joining_date(it) },
                     modifier = Modifier.fillMaxWidth(),
                     date = joining_date,
+                    error = joining_date_error
                 )
             }
 
@@ -382,10 +368,38 @@ fun Mannual(
                 )
             }
         }
-        FormButton(
-            onSubmit = onSubmit,
-            onReset = onReset,
-            isLoading = isLoading
-        )
+        ROw(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(13.dp)
+        ) {
+            AppButton(
+                onClick = onReset,
+                containerColor = Color.White,
+                contentColor = Color.Black,
+                border = BorderStroke(1.dp, color = Color.Black.copy(0.1f)),
+                shape = RoundedCornerShape(24.dp),
+                modifier = Modifier.fillMaxWidth(0.5f),
+                enabled = !isLoading
+            ) {
+                Text("Reset")
+            }
+            AppButton(
+                onClick = onSubmit,
+                containerColor = Color.Black.copy(0.8f),
+                contentColor = Color.White,
+                shape = RoundedCornerShape(24.dp),
+                modifier = Modifier.fillMaxWidth(),
+                enabled = !isLoading
+            ) {
+                if(isLoading){
+                    CircularProgressIndicator(
+                        strokeWidth = 4.dp,
+                        modifier = Modifier.size(24.dp),
+                    )
+                }else {
+                    Text("Add")
+                }
+            }
+        }
     }
 }

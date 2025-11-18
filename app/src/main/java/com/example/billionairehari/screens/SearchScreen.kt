@@ -60,7 +60,7 @@ fun SearchComponentScreen(
             )
         ) {
             results.value.forEach {
-                Text(it)
+                Text(it.name)
             }
         }
 

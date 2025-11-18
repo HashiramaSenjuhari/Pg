@@ -1,6 +1,8 @@
 package com.example.billionairehari.modal
 
+import android.security.keystore.KeyNotYetValidException
 import android.view.RoundedCorner
+import android.widget.SearchView
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.background
@@ -54,6 +56,7 @@ import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -82,6 +85,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import androidx.compose.ui.zIndex
+import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import com.example.billionairehari.R.drawable
 import com.example.billionairehari.components.DateInput
@@ -97,6 +101,11 @@ import kotlin.math.exp
 import kotlin.system.exitProcess
 import com.example.billionairehari.R
 import com.example.billionairehari.components.AppButton
+import com.example.billionairehari.screens.StaticSearchBar
+import com.example.billionairehari.viewmodels.PaymentMethod
+import com.example.billionairehari.viewmodels.RecordRentViewModel
+import com.example.billionairehari.viewmodels.SearchViewModel
+import com.example.billionairehari.viewmodels.TenantSearchCard
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -111,22 +120,13 @@ fun RecordRentPriceModal(
     rent_price_error:String? = null,
     onReset:() -> Unit,
     onSubmit:() -> Unit,
-    isLoading:Boolean
+    isLoading:Boolean,
+    viewmodel: RecordRentViewModel = viewModel()
 ){
 
     val scrollState = rememberScrollState()
-
     val expanded = remember { mutableStateOf<Boolean>(false) }
-    val search = remember { mutableStateOf("") }
-    val rent = remember { mutableStateOf<String>("") }
-
-    val tenants = listOf("hari","prasath","billionaire","billionairehari","hariprasath","gerat","hari").filter { it.contains(search.value) }
-    val isTenants = if(tenants.size > 0)  true else false
-
-    val tenant = remember { mutableStateOf<String?>(null) }
-
-    val rent_paying = remember { mutableStateOf<String>("") }
-    val payment_date = remember { mutableStateOf<Long>(0L) }
+    val data = viewmodel.record.value
 
     Column(
         modifier = Modifier.fillMaxSize(),
@@ -135,13 +135,16 @@ fun RecordRentPriceModal(
         Column(
             verticalArrangement = Arrangement.spacedBy(24.dp)
         ) {
-            SearchBar(
-                expanded = expanded,
-                search = null,
-                readOnly = true
+            StaticSearchBar(
+                onClick = {
+                    expanded.value = true
+                },
+                onClickFilter = {
+                    expanded.value = true
+                }
             )
             TenantCard(
-                name = tenant.value
+                name = data.tenant.name
             )
             Input(
                 modifier = Modifier.fillMaxWidth(),
@@ -153,11 +156,12 @@ fun RecordRentPriceModal(
                 trailingIcon = {
                     Text("")
                 },
-                value = rent_paying.value,
+                value = data.paying_amount,
                 onValueChange = {
-                    rent_paying.value = it
+                    viewmodel.update_paying_amount(it)
                 },
-                type = InputType.NUMBER
+                type = InputType.NUMBER,
+                keyBoardType = KeyboardType.Number
             )
             ROw(
                 horizontalArrangement = Arrangement.spacedBy(6.dp)
@@ -166,58 +170,64 @@ fun RecordRentPriceModal(
                     label = "Payment Date",
                     modifier = Modifier.fillMaxWidth(0.5f),
                     onDate = {
-                        payment_date.value = it
+                        viewmodel.update_payment_date(it)
                     },
-                    date = payment_date.value
+                    date = data.date
                 )
-                PaymentMethod()
+                PaymentMethod(
+                    current_option = data.payment_method,
+                    onChangeOption = {
+                        viewmodel.update_payment_method(it)
+                    }
+                )
             }
         }
-        AppButton(
-            onClick = {},
-            containerColor = Color.Black.copy(0.9f),
-            contentColor = Color.White,
-            shape = CircleShape,
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Text("Add")
+        Box(
+            modifier = Modifier.padding(top = 6.dp)
+        ){
+            AppButton(
+                onClick = {},
+                containerColor = Color.Black.copy(0.9f),
+                contentColor = Color.White,
+                shape = CircleShape,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text("Add")
+            }
         }
     }
     SearchDialog(
-        search = search,
         expanded = expanded,
-        tenants = tenants,
         scrollState = scrollState,
-        isTenants = isTenants,
         onSelectTenant = {
-            tenant.value = it
+            viewmodel.update_tenant(it)
         }
     )
 }
 
 data class PaymentMethodData (
     val icon:Int,
-    val name:String
+    val name:String,
+    val type: PaymentMethod
 )
 
 val payment_method = listOf<PaymentMethodData>(
-    PaymentMethodData(icon = R.drawable.outline_payments_24, name = "Cash"),
-    PaymentMethodData(icon = R.drawable.outline_upi_pay_24, name = "Upi"),
+    PaymentMethodData(icon = R.drawable.outline_payments_24, name = PaymentMethod.CASH.toString(), type = PaymentMethod.CASH),
+    PaymentMethodData(icon = R.drawable.outline_upi_pay_24, name = PaymentMethod.UPI.toString(), type = PaymentMethod.UPI),
 )
 
 @Composable
-fun PaymentMethod(){
+fun PaymentMethod(
+    current_option: PaymentMethod,
+    onChangeOption:(PaymentMethod) -> Unit
+){
     val expanded = remember { mutableStateOf<Boolean>(false) }
-    val current_option = remember { mutableStateOf<PaymentMethodData>(payment_method[0]) }
-
     val dropboxSize = remember { mutableIntStateOf(0) }
-    Box(
-
-    ){
+    Box{
         OutlinedInput(
             readOnly = true,
             label = "Payment Method",
-            value = current_option.value.name,
+            value = current_option.name,
             onValueChange = {},
             onClick = {
                 expanded.value = true
@@ -244,10 +254,10 @@ fun PaymentMethod(){
             payment_method.forEach {
                 payment_method ->
                 DropdownMenuItem(
-                    modifier = Modifier.background(Color.White),
+                    modifier = Modifier.background(if(current_option.name == payment_method.name) Color.Black.copy(0.06f) else Color.White),
                     onClick = {
                         expanded.value = false
-                        current_option.value = payment_method
+                        onChangeOption(payment_method.type)
                     },
                     text = {
                         ROw(
@@ -382,12 +392,10 @@ fun TenantPreview(
 @Composable
 fun SearchDialog(
     expanded: MutableState<Boolean>,
-    search: MutableState<String>,
-    onSelectTenant: (String) -> Unit,
-    isTenants: Boolean,
-    tenants: List<String>,
+    onSelectTenant: (TenantSearchCard) -> Unit,
     scrollState: ScrollState,
 ){
+
     if(expanded.value){
         Dialog(
             onDismissRequest = {
@@ -403,12 +411,9 @@ fun SearchDialog(
             ){
                 SearchTenants(
                     expanded = expanded,
-                    search = search,
-                    isTenants = isTenants,
                     scrollState = scrollState,
-                    tenants = tenants,
                     onSelectTenant = {
-                        onSelectTenant(it)
+                       onSelectTenant(it)
                     }
                 )
             }
@@ -419,17 +424,13 @@ fun SearchDialog(
 @Composable
 fun SearchTenants(
     expanded: MutableState<Boolean>,
-    search: MutableState<String>,
-    isTenants:Boolean,
     scrollState: ScrollState,
-    tenants:List<String>,
-    onSelectTenant:(String) -> Unit
+    onSelectTenant:(TenantSearchCard) -> Unit,
+    viewmodel:SearchViewModel = viewModel()
 ){
-    val focusRequest = remember { FocusRequester() }
+    val search = viewmodel.query.collectAsState()
+    val result = viewmodel.result.collectAsState()
 
-    LaunchedEffect(Unit) {
-        focusRequest.requestFocus()
-    }
     Column(
         modifier = Modifier.clip(RoundedCornerShape(24.dp))
             .fillMaxWidth(0.96f)
@@ -439,75 +440,109 @@ fun SearchTenants(
     ) {
         SearchBar(
             expanded = expanded,
-            search = search,
+            query = search.value,
+            onChangeQuery = {
+                viewmodel.update_query(it)
+            },
             readOnly = false
         )
-        if(isTenants){
-            Column(
-                modifier = Modifier
-                    .zIndex(2f)
-                    .clip(RoundedCornerShape(24.dp))
-                    .fillMaxWidth()
-                    .heightIn(min = 60.dp, max = 340.dp)
-                    .background(Color.White)
-                    .border(
-                        1.dp,
-                        color = Color.Black.copy(alpha = 0.1f),
-                        shape = RoundedCornerShape(24.dp)
-                    ).focusRequester(focusRequest)
-            ) {
-                Text(
-                    "Select the tenant to update rent",
-                    fontSize = 12.sp,
-                    color = Color.Black.copy(alpha = 0.6f),
-                    modifier = Modifier.padding(horizontal = 13.dp, vertical = 6.dp)
-                )
-                Column(
-                    modifier = Modifier
-                        .verticalScroll(scrollState),
-                ) {
-                    HorizontalDivider()
-                    tenants.forEach {
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .clickable(
-                                    enabled = true,
-                                    onClick = {
-                                        onSelectTenant(it)
-                                        expanded.value = false
-                                        search.value = ""
-                                    }
-                                )
-                                .background(Color.White)
-                                .padding(11.dp),
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(13.dp)
-                        ) {
-                            AsyncImage(
-                                model = "https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fi.pinimg.com%2Foriginals%2Fed%2F7c%2Fb0%2Fed7cb0a40619f5f710325b71e6b411e3.jpg&f=1&nofb=1&ipt=06a432166eb12e9a037390617c2d300e9d154349494e45fe3e2e0e25d0d10592",
-                                contentDescription = "",
-                                contentScale = ContentScale.Crop,
-                                modifier = Modifier.clip(CircleShape).size(40.dp)
-                            )
-                            Column {
-                                Text(
-                                    it,
-                                    fontSize = 14.sp,
-                                    fontWeight = FontWeight.Medium
-                                )
-                                Text("Room 121", color = Color.Black.copy(alpha = 0.4f))
-                            }
-                        }
-                        HorizontalDivider()
+        TenantsContainer(
+            onSelectTenant = {
+                onSelectTenant(it)
+            },
+            scrollState = scrollState,
+            expanded = expanded,
+            onResetSearch = {
+                viewmodel.reset_query()
+            },
+            result = result.value
+        )
+    }
+}
+
+@Composable
+fun TenantsContainer(
+    onResetSearch:() -> Unit,
+    onSelectTenant:(TenantSearchCard) -> Unit,
+    scrollState: ScrollState,
+    result:List<TenantSearchCard>,
+    expanded: MutableState<Boolean>
+){
+    Column(
+        modifier = Modifier
+            .zIndex(2f)
+            .clip(RoundedCornerShape(24.dp))
+            .fillMaxWidth()
+            .heightIn(min = 60.dp, max = 340.dp)
+            .background(Color.White)
+            .border(
+                1.dp,
+                color = Color.Black.copy(alpha = 0.1f),
+                shape = RoundedCornerShape(24.dp)
+            )
+    ) {
+        Text(
+            "Select the tenant to update rent",
+            fontSize = 12.sp,
+            color = Color.Black.copy(alpha = 0.6f),
+            modifier = Modifier.padding(horizontal = 13.dp, vertical = 6.dp)
+        )
+        Column(
+            modifier = Modifier
+                .verticalScroll(scrollState),
+        ) {
+            HorizontalDivider()
+            result.forEach {
+                TenantCard(
+                    tenant = it,
+                    onResetSearch = onResetSearch,
+                    expanded = expanded,
+                    onSelectTenant = {
+                        onSelectTenant(it)
                     }
-                }
+                )
+                HorizontalDivider()
             }
         }
-        else {
-            Column {
-                
-            }
+    }
+}
+
+@Composable
+fun TenantCard(
+    tenant: TenantSearchCard,
+    onResetSearch:() -> Unit,
+    onSelectTenant:(TenantSearchCard) -> Unit,
+    expanded: MutableState<Boolean>
+){
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(
+                enabled = true,
+                onClick = {
+                    onSelectTenant(tenant)
+                    expanded.value = false
+                    onResetSearch()
+                }
+            )
+            .background(Color.White)
+            .padding(11.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(13.dp)
+    ) {
+        AsyncImage(
+            model = "https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fi.pinimg.com%2Foriginals%2Fed%2F7c%2Fb0%2Fed7cb0a40619f5f710325b71e6b411e3.jpg&f=1&nofb=1&ipt=06a432166eb12e9a037390617c2d300e9d154349494e45fe3e2e0e25d0d10592",
+            contentDescription = "",
+            contentScale = ContentScale.Crop,
+            modifier = Modifier.clip(CircleShape).size(40.dp)
+        )
+        Column {
+            Text(
+                tenant.name,
+                fontSize = 14.sp,
+                fontWeight = FontWeight.Medium
+            )
+            Text("Room 121", color = Color.Black.copy(alpha = 0.4f))
         }
     }
 }
@@ -515,14 +550,15 @@ fun SearchTenants(
 @Composable
 fun SearchBar(
     expanded: MutableState<Boolean>,
-    search: MutableState<String>?= null,
+    query: String,
+    onChangeQuery:(String) -> Unit,
     readOnly:Boolean = false
 ){
     TextField(
         readOnly = readOnly,
-        value = if(search == null) "" else search.value,
+        value = query,
         onValueChange = {
-            if(search != null) search.value = it
+            onChangeQuery(it)
         },
         colors = TextFieldDefaults.colors(
             unfocusedContainerColor = Color.Transparent,
@@ -557,13 +593,10 @@ fun SearchBar(
             Icon(Icons.Default.Search, contentDescription = "")
         },
         trailingIcon = {
-            val size = if(search != null) search.value.length else 0
-            if ((size > 1 || expanded.value) && !readOnly) {
+            val size = query.length
+            if (size > 1 || expanded.value) {
                 IconButton(
                     onClick = {
-                        if(search != null){
-                            search.value = ""
-                        }
                         expanded.value = false
                     }
                 ) {

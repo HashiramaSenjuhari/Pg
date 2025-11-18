@@ -186,7 +186,8 @@ fun AnnounceSheet(
             .padding(16.dp),
     ) {
         com.example.billionairehari.modal.SearchBar(
-            search = null,
+            query = "",
+            onChangeQuery = {},
             expanded = expanded,
             readOnly = true
         )

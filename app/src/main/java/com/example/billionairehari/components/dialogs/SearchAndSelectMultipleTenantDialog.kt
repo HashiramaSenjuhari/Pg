@@ -93,7 +93,8 @@ fun SearchAndSelectMultipleTenants(
                 ) {
                     SearchBar(
                         expanded = expanded,
-                        search = search,
+                        query = "",
+                        onChangeQuery = {},
                         readOnly = false
                     )
                     if(isTenants){

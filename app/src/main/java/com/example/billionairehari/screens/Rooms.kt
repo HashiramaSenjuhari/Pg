@@ -10,6 +10,7 @@ import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.Indication
 import androidx.compose.foundation.MutatePriority
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.background
@@ -50,6 +51,9 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.materialIcon
@@ -59,6 +63,8 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CardElevation
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.HorizontalDivider
@@ -103,6 +109,7 @@ import androidx.compose.ui.layout.boundsInWindow
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -142,6 +149,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
 import com.example.billionairehari.components.rooms.RoomFilterTypes
 import com.example.billionairehari.R.drawable
+import com.example.billionairehari.components.DropDown
 import com.example.billionairehari.icons.CalendarIcon
 import com.example.billionairehari.icons.Rupee
 import com.example.billionairehari.model.RoomCardDetails
@@ -422,6 +430,18 @@ fun RoomCardLabel(
     }
 }
 
+data class DropDownData(
+    val name:String,
+    val icon: ImageVector,
+    val onClick:() -> Unit
+)
+
+val dropdowns = listOf<DropDownData>(
+    DropDownData(name = "Edit Room", icon = Icons.Default.Edit, onClick = {}),
+    DropDownData(name = "Send Message", icon = Icons.Default.Edit, onClick = {}),
+    DropDownData(name = "Delete", icon = Icons.Default.Delete, onClick = {})
+)
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun RoomCardHeader(
@@ -434,6 +454,7 @@ fun RoomCardHeader(
 ){
     val tooltipState = rememberTooltipState(isPersistent = true)
     val coroutine = rememberCoroutineScope()
+    val expanded = remember { mutableStateOf<Boolean>(false) }
     ROw(
         modifier = Modifier
             .fillMaxWidth()
@@ -478,13 +499,45 @@ fun RoomCardHeader(
                 }
             }
         }
-        IconButton(
-            onClick = {}
-        ){
-            Icon(Icons.Default.MoreVert, contentDescription = "")
+        Box(){
+            IconButton(
+                onClick = {
+                    expanded.value = true
+                }
+            ){
+                Icon(Icons.Default.MoreVert, contentDescription = "")
+            }
+            DropdownMenu(
+                expanded = expanded.value,
+                onDismissRequest = {
+                    expanded.value = false
+                },
+                containerColor = Color.White,
+                shape = RoundedCornerShape(13.dp),
+                modifier = Modifier.width(160.dp)
+
+            ) {
+                dropdowns.forEach {
+                    dropDownData ->
+                    DropdownMenuItem(
+                        text = {
+                            ROw(
+                                horizontalArrangement = Arrangement.spacedBy(6.dp)
+                            ) {
+                                Icon(dropDownData.icon, contentDescription = "",modifier = Modifier.size(16.dp))
+                                Text(dropDownData.name)
+                            }
+                        },
+                        onClick = {
+                            dropDownData.onClick.invoke()
+                        }
+                    )
+                }
+            }
         }
     }
 }
+
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable

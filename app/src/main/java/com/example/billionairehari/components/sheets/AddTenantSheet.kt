@@ -110,7 +110,7 @@ import com.example.billionairehari.components.contacts.dial
 import com.example.billionairehari.icons.Phone
 import com.example.billionairehari.icons.TenantIcon
 import com.example.billionairehari.model.Tenant
-import com.example.billionairehari.screens.ROw
+import com.example.billionairehari.layout.component.ROw
 import com.example.billionairehari.viewmodels.AddTenantViewModel
 import com.google.android.material.tabs.TabLayout
 import kotlinx.coroutines.CoroutineScope

@@ -132,6 +132,7 @@ import com.example.billionairehari.icons.EditIcon
 import com.example.billionairehari.icons.ShareIcon
 import com.example.billionairehari.icons.TenantIcon
 import com.example.billionairehari.layout.MODAL_TYPE
+import com.example.billionairehari.layout.component.ROw
 import com.example.billionairehari.model.Room
 import com.example.billionairehari.model.Tenant
 import kotlinx.coroutines.CoroutineScope

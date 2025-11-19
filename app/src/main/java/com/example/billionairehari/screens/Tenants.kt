@@ -81,6 +81,7 @@ import com.example.billionairehari.icons.CalendarIcon
 import com.example.billionairehari.icons.CancelIcon
 import com.example.billionairehari.icons.FilterIcon
 import com.example.billionairehari.icons.RoomIcon
+import com.example.billionairehari.layout.component.ROw
 import com.example.billionairehari.model.Tenant
 import com.example.billionairehari.model.TenantUi
 import kotlin.math.min

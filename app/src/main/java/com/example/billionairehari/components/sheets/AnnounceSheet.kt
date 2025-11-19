@@ -111,7 +111,7 @@ import com.example.billionairehari.components.SingleImageSelector
 import com.example.billionairehari.icons.Mic
 import com.example.billionairehari.modal.CustomChip
 import com.example.billionairehari.modal.Grid
-import com.example.billionairehari.screens.ROw
+import com.example.billionairehari.layout.component.ROw
 import com.example.billionairehari.viewmodels.AnnounceMessage
 import kotlin.math.log
 import kotlin.math.roundToInt

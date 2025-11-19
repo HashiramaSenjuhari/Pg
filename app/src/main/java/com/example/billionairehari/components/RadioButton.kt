@@ -30,7 +30,7 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.billionairehari.screens.ROw
+import com.example.billionairehari.layout.component.ROw
 
 data class RentOption(
     val option:String = "Not Paid",

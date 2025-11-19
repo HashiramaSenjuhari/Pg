@@ -43,8 +43,8 @@ import androidx.compose.ui.zIndex
 import coil.compose.AsyncImage
 import com.example.billionairehari.icons.Photo
 import com.example.billionairehari.modal.Grid
-import com.example.billionairehari.screens.ROw
 import kotlinx.coroutines.CoroutineScope
+import com.example.billionairehari.layout.component.ROw
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 

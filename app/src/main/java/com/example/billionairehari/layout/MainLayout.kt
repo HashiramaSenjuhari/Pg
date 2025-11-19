@@ -63,18 +63,18 @@ import com.example.billionairehari.components.sheets.TenantSheet
 import com.example.billionairehari.modal.RecordRentPriceModal
 import com.example.billionairehari.model.Room
 import com.example.billionairehari.model.Tenant
-import com.example.billionairehari.screens.ROw
+import com.example.billionairehari.layout.component.ROw
 import com.example.billionairehari.viewmodels.GetRoomTenantCountViewModel
 import com.google.android.material.snackbar.Snackbar
 import kotlinx.coroutines.CoroutineScope
 
 sealed class MODAL_TYPE {
     object ADD_ROOM: MODAL_TYPE()
-    object ADD_TENANT: MODAL_TYPE()
     object NONE: MODAL_TYPE()
+    data class ADD_TENANT(val id:String? = null): MODAL_TYPE()
     data class ADD_TENANT_WITH_PRE_ROOM(val roomName:String): MODAL_TYPE()
     data class UPDATE_TENANT(val tenant: Tenant): MODAL_TYPE()
-    data class UPDATE_ROOM(val room: Room): MODAL_TYPE()
+    data class UPDATE_ROOM(val id: String): MODAL_TYPE()
     data class UPDATE_TENANT_RENT(val id:String? = null): MODAL_TYPE()
     data class ANNOUNCE(val reveivers:List<SelectedType>? = null): MODAL_TYPE()
 }
@@ -110,7 +110,7 @@ fun MainLayout(
 
     val title = when (current_action.value){
         MODAL_TYPE.ADD_ROOM -> "Add Room"
-        MODAL_TYPE.ADD_TENANT -> "Add Tenant"
+        is MODAL_TYPE.ADD_TENANT -> "Add Tenant"
         is MODAL_TYPE.ANNOUNCE -> "Announce"
         is MODAL_TYPE.UPDATE_TENANT_RENT -> "Record Rent"
         is MODAL_TYPE.UPDATE_ROOM -> "Update Room"
@@ -263,7 +263,7 @@ fun FloatingButton(
     if(path == "tenants"){
         FloatingActionButton(
             onClick = {
-                current_action.value = MODAL_TYPE.ADD_TENANT
+                current_action.value = MODAL_TYPE.ADD_TENANT()
                 is_open.value = true
             },
             containerColor =  Color(0xFFB2B0E8)
@@ -361,12 +361,12 @@ fun ModalUi(
                 onSubmit = {},
                 onReset = {},
             )
-            MODAL_TYPE.ADD_TENANT -> TenantSheet(
-                scrollState = scrollState,
-                context = context
-            )
             MODAL_TYPE.ADD_ROOM -> RoomSheet(
                 scrollState = scrollState
+            )
+            is MODAL_TYPE.ADD_TENANT -> TenantSheet(
+                scrollState = scrollState,
+                context = context
             )
             is MODAL_TYPE.ADD_TENANT_WITH_PRE_ROOM -> {
                 TenantSheet(
@@ -377,7 +377,7 @@ fun ModalUi(
             is MODAL_TYPE.UPDATE_ROOM -> {
                 UpdateRoomSheet(
                     scrollState = scrollState,
-                    room_data = value.room
+                    id = value.id
                 )
             }
             is MODAL_TYPE.UPDATE_TENANT -> {

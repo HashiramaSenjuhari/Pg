@@ -53,9 +53,9 @@ import coil.compose.AsyncImage
 import com.example.billionairehari.components.sheets.BottomModalLayout
 import com.example.billionairehari.icons.Photo
 import com.example.billionairehari.icons.Photo_camera_Icon
-import com.example.billionairehari.screens.ROw
 import java.io.ByteArrayOutputStream
 import com.example.billionairehari.R
+import com.example.billionairehari.layout.component.ROw
 
 
 fun BitmapToByteArray(bitmap: Bitmap): ByteArray {

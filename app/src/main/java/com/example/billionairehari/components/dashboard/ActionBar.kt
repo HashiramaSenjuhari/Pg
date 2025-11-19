@@ -85,7 +85,7 @@ fun ActionBar(
         }),
         Action(name = "Add Tenant", icon = TenantIcon, action = {
             is_open.value = true
-            current_action.value = MODAL_TYPE.ADD_TENANT
+            current_action.value = MODAL_TYPE.ADD_TENANT()
         }),
         Action(name = "Add Rent", icon = ContactIcon, action = {
             is_open.value = true
@@ -179,7 +179,7 @@ fun RoomSheet(
 
 @Composable
 fun UpdateRoomSheet(
-    room_data: Room,
+    id: String,
     scrollState: ScrollState,
 ){
     val owner = LocalViewModelStoreOwner.current
@@ -188,21 +188,21 @@ fun UpdateRoomSheet(
      *  the viewmodel lives as long as the compose is living
      * **/
 
-    Log.d("RoomViewModel",room_data.toString())
+    Log.d("RoomViewModel",id.toString())
     val viewmodel: UpdateRoomViewModel = viewModel(
         viewModelStoreOwner = owner!!,
-        factory = UpdateRoomFactory(room = room_data)
+        factory = UpdateRoomFactory(id = id)
     )
 
     val room = viewmodel.room.value
 
     AddRoomSheet(
         room_name = room.name,
-        bed_count = room.count.toString(),
-        rent = room.rent_per_tenant,
-        deposit = room.deposit_per_tenant.toString(),
+        bed_count = room.count,
+        rent = room.rent,
+        deposit = room.deposit,
         features = room.features,
-        images = room.images,
+        images = emptyList(),
         isLoading = false,
 
         onRoomNameChange = {
@@ -215,7 +215,7 @@ fun UpdateRoomSheet(
             viewmodel.update_deposit(it)
         },
         onNoOfBedChange = {
-            viewmodel.update_beds(it.toInt())
+            viewmodel.update_beds(it)
         },
         onImageAdd = {
         },

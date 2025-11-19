@@ -5,6 +5,7 @@ import android.graphics.Rect
 import android.graphics.drawable.VectorDrawable
 import android.util.Log
 import android.view.RoundedCorner
+import android.widget.ProgressBar
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState
@@ -51,6 +52,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Email
@@ -71,6 +73,7 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.ModalDrawerSheet
 import androidx.compose.material3.RichTooltip
 import androidx.compose.material3.RichTooltipColors
@@ -125,6 +128,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.PopupPositionProvider
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.billionairehari.Destinations
 import com.example.billionairehari.R
@@ -153,9 +157,12 @@ import com.example.billionairehari.R.drawable
 import com.example.billionairehari.components.DropDown
 import com.example.billionairehari.icons.CalendarIcon
 import com.example.billionairehari.icons.Rupee
+import com.example.billionairehari.layout.DIALOG_TYPE
 import com.example.billionairehari.layout.MODAL_TYPE
+import com.example.billionairehari.layout.component.ROw
 import com.example.billionairehari.model.Room
 import com.example.billionairehari.model.RoomCardDetails
+import com.example.billionairehari.model.Tenant
 import com.example.billionairehari.viewmodels.RoomsViewModel
 import com.example.billionairehari.viewmodels.current_rooms
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -164,10 +171,11 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun RoomsScreen(
-    viewmodel: RoomsViewModel,
-    modifier:Modifier,
     navController: NavController,
-    current_action: MutableState<MODAL_TYPE>
+    current_action: MutableState<MODAL_TYPE>,
+    current_dialog_action: MutableState<DIALOG_TYPE>,
+    modifier:Modifier = Modifier,
+    viewmodel: RoomsViewModel = hiltViewModel()
 ) {
     /** header Animation module - Start **/
     val scrollState = rememberScrollState()
@@ -207,7 +215,8 @@ fun RoomsScreen(
             scrollState = scrollState,
             navController = navController,
             final_rooms = final_rooms,
-            current_action = current_action
+            current_action = current_action,
+            current_dialog_action = current_dialog_action
         )
     }
 }
@@ -242,7 +251,8 @@ fun RoomCards(
     scrollState: ScrollState,
     navController: NavController,
     final_rooms: List<RoomCardDetails>,
-    current_action: MutableState<MODAL_TYPE>
+    current_action: MutableState<MODAL_TYPE>,
+    current_dialog_action: MutableState<DIALOG_TYPE>
 ){
     Column(
         modifier = Modifier
@@ -250,7 +260,7 @@ fun RoomCards(
             .background(Color.White)
             .verticalScroll(scrollState)
             .padding(start = 6.dp, end = 6.dp,bottom = 90.dp),
-        verticalArrangement = Arrangement.spacedBy(6.dp)
+        verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         final_rooms.forEach {
                 room ->
@@ -259,21 +269,7 @@ fun RoomCards(
                 onClick = {
                     navController.navigate("rooms/${room.id}")
                 },
-                onShare = {
-
-                },
-                onEdit = {
-                    current_action.value = MODAL_TYPE.UPDATE_ROOM(room = Room(
-                        name = room.name,
-                        features = room.features,
-                        images = room.images,
-                        rent_per_tenant = room.rent_per_tenant,
-                        deposit_per_tenant = room.deposit_per_tenant,
-                        count = room.count,
-                        total_beds = room.total_beds
-                    ))
-                },
-                onSendMessage = {}
+                current_action = current_action
             )
         }
     }
@@ -327,9 +323,7 @@ fun StaticSearchBar(
 fun RoomCard(
     room_detail: RoomCardDetails,
     onClick:() -> Unit,
-    onEdit:() -> Unit,
-    onSendMessage:() -> Unit,
-    onShare:() -> Unit
+    current_action: MutableState<MODAL_TYPE>
 ) {
     val is_open = rememberSaveable { mutableStateOf<Boolean>(false) }
         Card(
@@ -342,151 +336,38 @@ fun RoomCard(
             ),
             onClick = onClick
         ) {
+            Column(
+                modifier = Modifier.padding(13.dp),
+                verticalArrangement = Arrangement.spacedBy(13.dp)
+            ) {
                 RoomCardHeader(
                     name = room_detail.name,
-                    availability = room_detail.is_available,
-                    is_open = is_open,
-                    onEdit = onEdit,
-                    onSendMessage = {
-                    },
-                    onShare = {
-
-                    }
+                    available_count = 4
                 )
-                HorizontalDivider(color = Color.Black.copy(alpha = 0.1f))
+                HorizontalDivider(color = Color.Black.copy(0.1f))
                 RoomCardContent(
-                    room_detail = room_detail
+                    available = 3,
+                    beds = 6,
+                    due_date = "Nov 24",
+                    due_count = 6,
+                    current_action = current_action
                 )
-        }
-}
-
-@Composable
-fun ROw(
-    modifier:Modifier = Modifier,
-    horizontalArrangement: Arrangement.Horizontal = Arrangement.SpaceBetween,
-    content:@Composable () -> Unit
-){
-    Row(
-        modifier = Modifier.then(modifier),
-       verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = horizontalArrangement
-    ){
-        content()
-    }
-}
-@Composable
-fun RoomCardIconIntLabel(
-    name: String,
-    value: Int,
-    drawable: Int? = null,
-    icon: ImageVector? = null,
-    bg:Long,
-    border:Long,
-    text:Long,
-    width: Float = 1f
-){
-    ROw(
-        modifier = Modifier
-            .fillMaxWidth(width)
-            .clip(RoundedCornerShape(13.dp))
-            .background(Color.White)
-            .border(1.dp, color = Color(0xFFF3F4F6), shape = RoundedCornerShape(13.dp))
-            .padding(vertical = 6.dp, horizontal = 13.dp),
-        horizontalArrangement = Arrangement.SpaceBetween
-    ) {
-        ROw(
-            horizontalArrangement = Arrangement.spacedBy(13.dp)
-        ) {
-            if(icon != null){
-                Icon(icon, contentDescription = "",modifier = Modifier.size(16.dp))
             }
-            if(drawable != null){
-                Icon(painter = painterResource(id = drawable), contentDescription = "",modifier = Modifier.size(16.dp))
-            }
-            Text(name, color =  Color(0xFF606060), fontSize = 12.sp)
         }
-        Box(
-            modifier = Modifier
-                .clip(RoundedCornerShape(9.dp))
-                .border(
-                    1.dp,
-                    color = if (value > 0) Color(border) else Color(0xFFDFE0E1),
-                    shape = RoundedCornerShape(9.dp)
-                )
-                .background(if (value > 0) Color(bg) else Color(0xFFF9FAFB))
-                .padding(horizontal = 9.dp, vertical = 4.dp),
-            contentAlignment = Alignment.Center
-        ){
-            Text("$value",
-                fontSize = 13.sp,
-                fontWeight = FontWeight.Bold,
-                color = if(value > 0) Color(text) else Color(0xFF6A7282)
-            )
-        }
-    }
 }
-
-@Composable
-fun RoomCardLabel(
-    name:String,
-    icon: ImageVector,
-    value:String,
-    width:Float = 1f
-){
-    Column(
-        modifier = Modifier
-            .fillMaxWidth(width)
-            .padding(13.dp),
-        verticalArrangement = Arrangement.spacedBy(6.dp)
-    ) {
-        ROw(
-            horizontalArrangement = Arrangement.spacedBy(13.dp)
-        ) {
-            Icon(icon, contentDescription = "",modifier = Modifier
-                .clip(RoundedCornerShape(9.dp))
-                .size(24.dp)
-                .background(Color(0xFFB2B0E8).copy(0.6f))
-                .padding(6.dp))
-            Text(value,fontSize = 16.sp, fontWeight = FontWeight.Bold)
-        }
-        Text(name,fontSize = 13.sp,color =  Color(0xFF606060))
-    }
-}
-
-data class DropDownData(
-    val name:String,
-    val icon: ImageVector,
-    val onClick:() -> Unit
-)
-
-
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun RoomCardHeader(
-    is_open: MutableState<Boolean>,
     name:String,
-    availability:Boolean,
-    onEdit:() -> Unit,
-    onSendMessage:() -> Unit,
-    onShare:() -> Unit
+    available_count: Int,
 ){
-    val dropdowns = listOf<DropDownData>(
-        DropDownData(name = "Edit Room", icon = Icons.Default.Edit, onClick = onEdit),
-        DropDownData(name = "Send Message", icon = Icons.Default.Edit, onClick = onSendMessage),
-        DropDownData(name = "Delete", icon = Icons.Default.Delete, onClick = onShare)
-    )
-    val tooltipState = rememberTooltipState(isPersistent = true)
-    val coroutine = rememberCoroutineScope()
-    val expanded = remember { mutableStateOf<Boolean>(false) }
+    val isAvailable = if(available_count >= 1) true else false
+    val availability = if(isAvailable) "${available_count} Available" else "Full"
     ROw(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(start = 13.dp)
     ) {
-        ROw(
-            horizontalArrangement =  Arrangement.spacedBy(13.dp)
-        ) {
             ROw(
                 horizontalArrangement =  Arrangement.spacedBy(13.dp)
             ) {
@@ -496,67 +377,114 @@ fun RoomCardHeader(
                         .size(30.dp)
                         .clip(RoundedCornerShape(13.dp))
                         .background(Color(0xFFF3F4F6))
-                        .padding(6.dp)
+                        .padding(4.dp)
                 )
                 Text(name, fontSize = 16.sp, fontWeight = FontWeight.Bold)
             }
             ROw {
-                val border = if(availability){1.dp} else {0.dp}
-                val color = if(availability) Color(0xFFB9F8CF) else Color(0xFFE5E7EB)
-                val bg = if(availability) Color(0xFFF0FDF4) else Color(0xFFF9FAFB)
-                val content = if(availability) Color(0xFF008236) else Color(0xFF68717F)
+                val border = if(isAvailable){1.dp} else {0.dp}
+                val color = if(isAvailable) Color(0xFFB9F8CF) else Color(0xFFE5E7EB)
+                val bg = if(isAvailable) Color(0xFFF0FDF4) else Color(0xFFF9FAFB)
+                val content = if(isAvailable) Color(0xFF008236) else Color(0xFF68717F)
                 Badge(
                     modifier = Modifier
-                        .clip(RoundedCornerShape(9.dp))
                         .border(width = border, color = color, shape = RoundedCornerShape(9.dp))
                         .background(bg)
                         .padding(horizontal = 6.dp, vertical = 3.dp),
                     containerColor = bg,
                     contentColor = content
                 ){
-                    ROw(
-                        horizontalArrangement = Arrangement.spacedBy(6.dp)
-                    ) {
-                        Box(modifier = Modifier.clip(CircleShape).size(10.dp).background(if(!availability) Color.Green.copy(0.4f) else Color.Red.copy(0.8f)))
-                        Text(if(!availability)"Available" else "Full")
-                    }
+                    Text(availability)
                 }
+            }
+    }
+}
+
+@Composable
+fun RoomCardContent(
+    current_action: MutableState<MODAL_TYPE>,
+    beds:Int,
+    available:Int,
+    due_count:Int,
+    due_date:String
+){
+    val isDue = if(due_count === 0) false else true
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.Bottom
+    ) {
+        Column(
+            modifier = Modifier.fillMaxWidth(0.8f),
+            verticalArrangement = Arrangement.spacedBy(24.dp)
+        ) {
+            ROw(
+                horizontalArrangement = Arrangement.spacedBy(13.dp)
+            ){
+                RoomCardContentLabel(
+                    title = "Beds",
+                    value = {
+                        Text(beds.toString(), fontWeight = FontWeight.Medium)
+                    },
+                    icon = R.drawable.outline_bed_24,
+                    width = 0.5f
+                )
+                RoomCardContentLabel(
+                    title = "Rent Due",
+                    value = {
+                        Text(
+                            if(!isDue){
+                                "All Paid"
+                            }else {
+                                if(due_count === 1){
+                                    "${due_count.toString()} person"
+                                }else{
+                                    "${due_count.toString()} persons"
+                                }
+                            },
+                            color = if(!isDue) Color(0xFF008236) else Color.Red,
+                            fontWeight = FontWeight.Medium
+                        )
+                    },
+                    icon = R.drawable.outline_currency_rupee_24,
+                    width = 1f
+                )
+            }
+            ROw(
+                horizontalArrangement = Arrangement.spacedBy(13.dp)
+            ){
+                RoomCardContentLabel(
+                    title = "OCCUPANCY",
+                    value = {
+                        Text("4/4", fontWeight = FontWeight.Medium)
+                    },
+                    icon = R.drawable.person,
+                    width = 0.5f
+                )
+                RoomCardContentLabel(
+                    title = "Due Date",
+                    value = {
+                        Text("Nov 24", fontWeight = FontWeight.Medium)
+                    },
+                    icon = R.drawable.outline_calendar_today_24,
+                    width = 1f
+                )
             }
         }
-        Box(){
-            IconButton(
-                onClick = {
-                    expanded.value = true
-                }
-            ){
-                Icon(Icons.Default.MoreVert, contentDescription = "")
-            }
-            DropdownMenu(
-                expanded = expanded.value,
-                onDismissRequest = {
-                    expanded.value = false
-                },
-                containerColor = Color.White,
-                shape = RoundedCornerShape(13.dp),
-                modifier = Modifier.width(160.dp)
-
-            ) {
-                dropdowns.forEach {
-                    dropDownData ->
-                    val isDelete = if(dropDownData.name == "Delete") Color.Red else Color.Black
-                    DropdownMenuItem(
-                        text = {
-                            ROw(
-                                horizontalArrangement = Arrangement.spacedBy(6.dp)
-                            ) {
-                                Icon(dropDownData.icon, contentDescription = "",modifier = Modifier.size(16.dp), tint = isDelete)
-                                Text(dropDownData.name,color = isDelete)
-                            }
-                        },
-                        onClick = {
-                            dropDownData.onClick.invoke()
-                        }
-                    )
+        Column(
+            modifier = Modifier.fillMaxHeight(),
+            verticalArrangement = Arrangement.Bottom
+        ) {
+            if(available >= 1){
+                AppButton(
+                    onClick = {
+                        current_action.value = MODAL_TYPE.ADD_TENANT()
+                    },
+                    containerColor = Color.Black.copy(0.8f),
+                    contentColor = Color.White,
+                    modifier = Modifier.size(40.dp)
+                ) {
+                    Icon(Icons.Default.Add, contentDescription = "")
                 }
             }
         }
@@ -564,37 +492,38 @@ fun RoomCardHeader(
 }
 
 
-@OptIn(ExperimentalLayoutApi::class)
 @Composable
-fun RoomCardContent(room_detail: RoomCardDetails){
+fun RoomCardContentLabel(
+    title:String,
+    icon: Int,
+    width:Float = 0.5f,
+    value:@Composable () -> Unit
+){
     Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(13.dp),
-        verticalArrangement = Arrangement.spacedBy(13.dp)
+        modifier = Modifier.fillMaxWidth(width)
     ) {
         ROw(
-            modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(6.dp)
-        ){
-            RoomCardLabel(
-                name = "beds",
-                value = "${room_detail.total_beds}",
-                icon = BedIcon,
-                width = 0.30f
+        ) {
+            Icon(
+                painter =  painterResource(icon),
+                contentDescription = "",
+                modifier = Modifier.clip(RoundedCornerShape(13.dp))
+                    .size(30.dp)
+                    .background(Color(0xFFB2B0E8).copy(0.6f))
+                    .padding(4.dp)
             )
-            RoomCardLabel(
-                name = "Due Date",
-                value = "${room_detail.total_beds}",
-                icon = CalendarIcon,
-                width = 0.30f
-            )
-            RoomCardLabel(
-                name = "Rent",
-                value = "₹${room_detail.rent_per_tenant}",
-                icon = Rupee,
-                width = 0.80f
-            )
+            Column(
+                verticalArrangement = Arrangement.spacedBy(4.dp)
+            ) {
+                Text(
+                    title.uppercase(),
+                    fontWeight = FontWeight.SemiBold,
+                    fontSize = 12.sp,
+                    color = Color.Black.copy(0.4f)
+                )
+                value.invoke()
+            }
         }
     }
 }

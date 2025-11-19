@@ -59,7 +59,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import com.example.billionairehari.components.dashboard.DisableRippleEffect
-import com.example.billionairehari.screens.ROw
+import com.example.billionairehari.layout.component.ROw
 import kotlinx.coroutines.selects.select
 import java.text.SimpleDateFormat
 import java.time.LocalDate

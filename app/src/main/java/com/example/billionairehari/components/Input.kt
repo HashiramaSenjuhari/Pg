@@ -49,7 +49,7 @@ import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.billionairehari.icons.TenantIcon
-import com.example.billionairehari.screens.ROw
+import com.example.billionairehari.layout.component.ROw
 
 
 enum class InputType {

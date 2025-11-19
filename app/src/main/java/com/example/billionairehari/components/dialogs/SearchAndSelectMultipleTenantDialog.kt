@@ -55,7 +55,7 @@ import coil.compose.AsyncImage
 import com.example.billionairehari.components.AppButton
 import com.example.billionairehari.modal.Grid
 import com.example.billionairehari.modal.SearchBar
-import com.example.billionairehari.screens.ROw
+import com.example.billionairehari.layout.component.ROw
 
 
 @Composable

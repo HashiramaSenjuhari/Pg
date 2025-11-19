@@ -95,7 +95,7 @@ import com.example.billionairehari.components.InputType
 import com.example.billionairehari.components.OutlinedInput
 import com.example.billionairehari.icons.CashIcon
 import com.example.billionairehari.icons.RupeeCircleIcon
-import com.example.billionairehari.screens.ROw
+import com.example.billionairehari.layout.component.ROw
 import com.example.billionairehari.screens.formatIndianRupee
 import kotlin.math.exp
 import kotlin.system.exitProcess

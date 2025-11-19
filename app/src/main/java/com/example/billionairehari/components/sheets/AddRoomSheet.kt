@@ -64,7 +64,7 @@ import com.example.billionairehari.icons.RoomIcon
 import com.example.billionairehari.icons.Rupee
 import com.example.billionairehari.modal.CustomChip
 import com.example.billionairehari.modal.Grid
-import com.example.billionairehari.screens.ROw
+import com.example.billionairehari.layout.component.ROw
 import kotlinx.coroutines.selects.select
 
 @Composable

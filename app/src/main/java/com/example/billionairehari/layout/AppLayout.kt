@@ -111,7 +111,8 @@ fun AppLayout(
                 viewmodel = hiltViewModel<RoomsViewModel>(),
                 modifier = Modifier.padding(padding),
                 navController = navController,
-                current_action = current_action
+                current_action = current_action,
+                current_dialog_action = current_dialog_action
             )
         }
         composable(
@@ -185,7 +186,7 @@ fun AppLayout(
                 onTenantNavigate = {},
                 onRoomEdit = {
                     is_open.value = true
-                    current_action.value = MODAL_TYPE.UPDATE_ROOM(room = it)
+                    current_action.value = MODAL_TYPE.UPDATE_ROOM(id = "")
                 },
                 onRoomMessage = {
                     is_open.value = true

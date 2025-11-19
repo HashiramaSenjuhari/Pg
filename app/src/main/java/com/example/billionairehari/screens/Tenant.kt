@@ -79,6 +79,7 @@ import com.example.billionairehari.components.AppButton
 import com.example.billionairehari.components.contacts.dial
 import com.example.billionairehari.icons.CalendarIcon
 import com.example.billionairehari.icons.TenantIcon
+import com.example.billionairehari.layout.component.ROw
 import com.example.billionairehari.viewmodels.TenantViewModel
 import com.google.android.material.chip.Chip
 

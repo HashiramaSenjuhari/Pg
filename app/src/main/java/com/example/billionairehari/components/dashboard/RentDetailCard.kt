@@ -29,7 +29,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.billionairehari.components.AppButton
 import com.example.billionairehari.icons.RemaindIcon
-import com.example.billionairehari.screens.ROw
+import com.example.billionairehari.layout.component.ROw
 import com.example.billionairehari.ui.theme.robotoFontFamily
 
 @Composable

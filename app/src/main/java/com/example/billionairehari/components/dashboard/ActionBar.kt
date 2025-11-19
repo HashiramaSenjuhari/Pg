@@ -1,5 +1,6 @@
 package com.example.billionairehari.components.dashboard
 
+import android.util.Log
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -39,6 +40,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.viewmodel.compose.LocalViewModelStoreOwner
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.billionairehari.Destinations
@@ -54,6 +57,8 @@ import com.example.billionairehari.layout.MODAL_TYPE
 import com.example.billionairehari.model.Room
 import com.example.billionairehari.viewmodels.AddRoomViewModel
 import com.example.billionairehari.viewmodels.RoomsViewModel
+import com.example.billionairehari.viewmodels.UpdateRoomFactory
+import com.example.billionairehari.viewmodels.UpdateRoomViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 
 data class Action(
@@ -167,6 +172,78 @@ fun RoomSheet(
         },
         onReset = {
             viewmodel.reset()
+        }
+    )
+}
+
+
+@Composable
+fun UpdateRoomSheet(
+    room_data: Room,
+    scrollState: ScrollState,
+){
+    val owner = LocalViewModelStoreOwner.current
+
+    /** viewmodelStoreOwner refers the activity
+     *  the viewmodel lives as long as the compose is living
+     * **/
+
+    Log.d("RoomViewModel",room_data.toString())
+    val viewmodel: UpdateRoomViewModel = viewModel(
+        viewModelStoreOwner = owner!!,
+        factory = UpdateRoomFactory(room = room_data)
+    )
+
+    val room = viewmodel.room.value
+
+    AddRoomSheet(
+        room_name = room.name,
+        bed_count = room.count.toString(),
+        rent = room.rent_per_tenant,
+        deposit = room.deposit_per_tenant.toString(),
+        features = room.features,
+        images = room.images,
+        isLoading = false,
+
+        onRoomNameChange = {
+            viewmodel.update_name(it)
+        },
+        onRentChange = {
+            viewmodel.update_rent(it)
+        },
+        onDepositChange = {
+            viewmodel.update_deposit(it)
+        },
+        onNoOfBedChange = {
+            viewmodel.update_beds(it.toInt())
+        },
+        onImageAdd = {
+        },
+        onImageRemove = {
+        },
+        onImageError = {
+
+        },
+        onFeatureAdd = {
+            viewmodel.update_features(it)
+        },
+        onFeatureRemove = {
+            viewmodel.remove_features(it)
+        },
+
+        images_error = null,
+        room_name_error = null,
+        beds_error = null,
+        rent_error = null,
+        deposit_error = null,
+        features_error = null,
+
+        scrollState = scrollState,
+        onSubmit = {
+//            viewmodel.submit()
+        },
+        onReset = {
+//            viewmodel.reset()
         }
     )
 }

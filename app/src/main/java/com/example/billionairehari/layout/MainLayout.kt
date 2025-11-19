@@ -53,6 +53,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.example.billionairehari.components.dashboard.RoomSheet
 import com.example.billionairehari.components.dashboard.TopBar
+import com.example.billionairehari.components.dashboard.UpdateRoomSheet
 import com.example.billionairehari.components.dialogs.RemoveDialog
 import com.example.billionairehari.components.sheets.AnnounceSheet
 import com.example.billionairehari.components.sheets.BottomModalLayout
@@ -374,8 +375,9 @@ fun ModalUi(
                 )
             }
             is MODAL_TYPE.UPDATE_ROOM -> {
-                RoomSheet(
-                    scrollState = scrollState
+                UpdateRoomSheet(
+                    scrollState = scrollState,
+                    room_data = value.room
                 )
             }
             is MODAL_TYPE.UPDATE_TENANT -> {

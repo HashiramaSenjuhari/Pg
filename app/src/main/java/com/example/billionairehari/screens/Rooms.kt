@@ -82,6 +82,7 @@ import androidx.compose.material3.TextFieldColors
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TooltipBox
 import androidx.compose.material3.TooltipDefaults
+import androidx.compose.material3.VerticalDivider
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.material3.rememberTooltipState
 import androidx.compose.runtime.Composable
@@ -152,6 +153,8 @@ import com.example.billionairehari.R.drawable
 import com.example.billionairehari.components.DropDown
 import com.example.billionairehari.icons.CalendarIcon
 import com.example.billionairehari.icons.Rupee
+import com.example.billionairehari.layout.MODAL_TYPE
+import com.example.billionairehari.model.Room
 import com.example.billionairehari.model.RoomCardDetails
 import com.example.billionairehari.viewmodels.RoomsViewModel
 import com.example.billionairehari.viewmodels.current_rooms
@@ -163,7 +166,8 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 fun RoomsScreen(
     viewmodel: RoomsViewModel,
     modifier:Modifier,
-    navController: NavController
+    navController: NavController,
+    current_action: MutableState<MODAL_TYPE>
 ) {
     /** header Animation module - Start **/
     val scrollState = rememberScrollState()
@@ -202,7 +206,8 @@ fun RoomsScreen(
         RoomCards(
             scrollState = scrollState,
             navController = navController,
-            final_rooms = final_rooms
+            final_rooms = final_rooms,
+            current_action = current_action
         )
     }
 }
@@ -237,6 +242,7 @@ fun RoomCards(
     scrollState: ScrollState,
     navController: NavController,
     final_rooms: List<RoomCardDetails>,
+    current_action: MutableState<MODAL_TYPE>
 ){
     Column(
         modifier = Modifier
@@ -252,7 +258,22 @@ fun RoomCards(
                 room_detail = room,
                 onClick = {
                     navController.navigate("rooms/${room.id}")
-                }
+                },
+                onShare = {
+
+                },
+                onEdit = {
+                    current_action.value = MODAL_TYPE.UPDATE_ROOM(room = Room(
+                        name = room.name,
+                        features = room.features,
+                        images = room.images,
+                        rent_per_tenant = room.rent_per_tenant,
+                        deposit_per_tenant = room.deposit_per_tenant,
+                        count = room.count,
+                        total_beds = room.total_beds
+                    ))
+                },
+                onSendMessage = {}
             )
         }
     }
@@ -303,14 +324,19 @@ fun StaticSearchBar(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun RoomCard(room_detail: RoomCardDetails,onClick:() -> Unit) {
+fun RoomCard(
+    room_detail: RoomCardDetails,
+    onClick:() -> Unit,
+    onEdit:() -> Unit,
+    onSendMessage:() -> Unit,
+    onShare:() -> Unit
+) {
     val is_open = rememberSaveable { mutableStateOf<Boolean>(false) }
         Card(
             modifier = Modifier
                 .fillMaxWidth()
                 .border(1.dp, color = Color.Black.copy(0.1f), shape = RoundedCornerShape(13.dp))
-                .background(Color(0xFFFFFFF))
-                .padding(vertical = 3.dp),
+                .background(Color(0xFFFFFFF)),
             colors = CardDefaults.cardColors(
                 containerColor = Color.White
             ),
@@ -320,8 +346,7 @@ fun RoomCard(room_detail: RoomCardDetails,onClick:() -> Unit) {
                     name = room_detail.name,
                     availability = room_detail.is_available,
                     is_open = is_open,
-                    onEdit = {
-                    },
+                    onEdit = onEdit,
                     onSendMessage = {
                     },
                     onShare = {
@@ -411,8 +436,6 @@ fun RoomCardLabel(
     Column(
         modifier = Modifier
             .fillMaxWidth(width)
-            .clip(RoundedCornerShape(13.dp))
-            .background(Color(0xFFF9FAFB))
             .padding(13.dp),
         verticalArrangement = Arrangement.spacedBy(6.dp)
     ) {
@@ -436,11 +459,7 @@ data class DropDownData(
     val onClick:() -> Unit
 )
 
-val dropdowns = listOf<DropDownData>(
-    DropDownData(name = "Edit Room", icon = Icons.Default.Edit, onClick = {}),
-    DropDownData(name = "Send Message", icon = Icons.Default.Edit, onClick = {}),
-    DropDownData(name = "Delete", icon = Icons.Default.Delete, onClick = {})
-)
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -452,6 +471,11 @@ fun RoomCardHeader(
     onSendMessage:() -> Unit,
     onShare:() -> Unit
 ){
+    val dropdowns = listOf<DropDownData>(
+        DropDownData(name = "Edit Room", icon = Icons.Default.Edit, onClick = onEdit),
+        DropDownData(name = "Send Message", icon = Icons.Default.Edit, onClick = onSendMessage),
+        DropDownData(name = "Delete", icon = Icons.Default.Delete, onClick = onShare)
+    )
     val tooltipState = rememberTooltipState(isPersistent = true)
     val coroutine = rememberCoroutineScope()
     val expanded = remember { mutableStateOf<Boolean>(false) }
@@ -519,13 +543,14 @@ fun RoomCardHeader(
             ) {
                 dropdowns.forEach {
                     dropDownData ->
+                    val isDelete = if(dropDownData.name == "Delete") Color.Red else Color.Black
                     DropdownMenuItem(
                         text = {
                             ROw(
                                 horizontalArrangement = Arrangement.spacedBy(6.dp)
                             ) {
-                                Icon(dropDownData.icon, contentDescription = "",modifier = Modifier.size(16.dp))
-                                Text(dropDownData.name)
+                                Icon(dropDownData.icon, contentDescription = "",modifier = Modifier.size(16.dp), tint = isDelete)
+                                Text(dropDownData.name,color = isDelete)
                             }
                         },
                         onClick = {
@@ -562,24 +587,14 @@ fun RoomCardContent(room_detail: RoomCardDetails){
                 name = "Due Date",
                 value = "${room_detail.total_beds}",
                 icon = CalendarIcon,
-                width = 0.50f
+                width = 0.30f
             )
             RoomCardLabel(
                 name = "Rent",
                 value = "₹${room_detail.rent_per_tenant}",
                 icon = Rupee,
-                width = 1f
+                width = 0.80f
             )
-        }
-        AppButton(
-            modifier = Modifier.fillMaxWidth(),
-            onClick = {},
-            containerColor = Color.Black.copy(0.8f),
-            contentColor = Color.White,
-            shape = CircleShape,
-            border = BorderStroke(1.dp, color = Color.Black.copy(0.1f))
-        ) {
-            Text("Add Room")
         }
     }
 }

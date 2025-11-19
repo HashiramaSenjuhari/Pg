@@ -110,7 +110,8 @@ fun AppLayout(
             RoomsScreen(
                 viewmodel = hiltViewModel<RoomsViewModel>(),
                 modifier = Modifier.padding(padding),
-                navController = navController
+                navController = navController,
+                current_action = current_action
             )
         }
         composable(

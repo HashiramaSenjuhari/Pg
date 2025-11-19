@@ -71,7 +71,7 @@ import kotlinx.coroutines.CoroutineScope
 sealed class MODAL_TYPE {
     object ADD_ROOM: MODAL_TYPE()
     object NONE: MODAL_TYPE()
-    data class ADD_TENANT(val id:String? = null): MODAL_TYPE()
+    data class ADD_TENANT(val room:String? = null): MODAL_TYPE()
     data class ADD_TENANT_WITH_PRE_ROOM(val roomName:String): MODAL_TYPE()
     data class UPDATE_TENANT(val tenant: Tenant): MODAL_TYPE()
     data class UPDATE_ROOM(val id: String): MODAL_TYPE()
@@ -365,6 +365,7 @@ fun ModalUi(
                 scrollState = scrollState
             )
             is MODAL_TYPE.ADD_TENANT -> TenantSheet(
+                room = value.room,
                 scrollState = scrollState,
                 context = context
             )

@@ -2,6 +2,7 @@ package com.example.billionairehari.viewmodels
 
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -26,8 +27,10 @@ data class TenantData (
     val isLoading:Boolean = false
 )
 
-class AddTenantViewModel: ViewModel(){
-    var tenant = mutableStateOf(TenantData())
+class AddTenantViewModel(
+    private val room:String? = null
+): ViewModel(){
+    var tenant = mutableStateOf(TenantData(room = room ?: ""))
         private set
 
     /** update value **/
@@ -114,4 +117,16 @@ fun validateDate(date:Long):String? {
         return "please choose date"
     }
     return null
+}
+
+class AddTenantFactory(
+    private val room:String? = null
+): ViewModelProvider.Factory {
+    override fun <T : ViewModel> create(modelClass: Class<T>): T {
+        if(modelClass.isAssignableFrom(AddTenantViewModel::class.java)){
+            return AddTenantViewModel(room = room) as T
+        }else {
+            throw IllegalArgumentException("Please Provide Correct Class")
+        }
+    }
 }

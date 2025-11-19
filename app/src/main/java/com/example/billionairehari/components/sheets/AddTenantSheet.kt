@@ -93,6 +93,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.text.isDigitsOnly
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.viewmodel.compose.LocalViewModelStoreOwner
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.billionairehari.components.Activate
 import com.example.billionairehari.components.AppButton
@@ -111,6 +112,7 @@ import com.example.billionairehari.icons.Phone
 import com.example.billionairehari.icons.TenantIcon
 import com.example.billionairehari.model.Tenant
 import com.example.billionairehari.layout.component.ROw
+import com.example.billionairehari.viewmodels.AddTenantFactory
 import com.example.billionairehari.viewmodels.AddTenantViewModel
 import com.google.android.material.tabs.TabLayout
 import kotlinx.coroutines.CoroutineScope
@@ -119,37 +121,36 @@ import kotlinx.coroutines.launch
 
 @Composable
 fun TenantSheet(
+    room:String? = null,
     scrollState: ScrollState,
-    context: Context,
-    viewmodel: AddTenantViewModel = viewModel()
+    context: Context
 ) {
 
+    Log.d("ROOM_GREAT",room.toString())
+    val owner = LocalViewModelStoreOwner.current
+
+    val viewmodel: AddTenantViewModel = viewModel(
+        factory = AddTenantFactory(room = room),
+        viewModelStoreOwner = owner!!
+    )
     val nameError = rememberSaveable { mutableStateOf<String?>(null) }
     val roomError = rememberSaveable { mutableStateOf<String?>(null) }
     val dateError = rememberSaveable { mutableStateOf<String?>(null) }
     val phoneError = rememberSaveable { mutableStateOf<String?>(null) }
 
-    val tenant = viewmodel.tenant
-    val name = tenant.value.name
-    val image = tenant.value.image
-    val phone = tenant.value.phone
-    val room = tenant.value.room
-    val date = tenant.value.date
-    val first_month_rent = tenant.value.first_month_rent
-    val deposit = tenant.value.security_deposit
-    val auto_remainder = tenant.value.automatic_remainder
+    val tenant = viewmodel.tenant.value
 
-    val errors = tenant.value
+    val errors = tenant
 
     Mannual(
-        name = name,
-        room = room,
-        phone = phone,
-        image = image,
-        joining_date = date,
-        rent_paid = first_month_rent,
-        deposit_paid = deposit,
-        auto_remainder = auto_remainder,
+        name = tenant.name,
+        room =  tenant.room,
+        phone = tenant.phone,
+        image = tenant.image,
+        joining_date = tenant.date,
+        rent_paid = tenant.first_month_rent,
+        deposit_paid = tenant.security_deposit,
+        auto_remainder = tenant.automatic_remainder,
         update_name = { viewmodel.update_name(it) },
         update_room = { viewmodel.update_room(it) },
         update_phone = { viewmodel.update_phone(it) },
@@ -166,9 +167,9 @@ fun TenantSheet(
 
         remove_image = { viewmodel.remove_image() },
         onReset = {},
-        onDial = { dial(phone, context = context) },
+        onDial = { dial(tenant.phone, context = context) },
         onSubmit = { viewmodel.submit() },
-        isLoading = tenant.value.isLoading,
+        isLoading = tenant.isLoading,
         scrollState = scrollState
     )
 }

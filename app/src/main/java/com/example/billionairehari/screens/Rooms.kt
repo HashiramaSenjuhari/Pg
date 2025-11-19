@@ -402,11 +402,11 @@ fun RoomCardHeader(
 
 @Composable
 fun RoomCardContent(
-    current_action: MutableState<MODAL_TYPE>,
     beds:Int,
     available:Int,
     due_count:Int,
-    due_date:String
+    due_date:String,
+    current_action: MutableState<MODAL_TYPE>
 ){
     val isDue = if(due_count === 0) false else true
     Row(
@@ -464,7 +464,7 @@ fun RoomCardContent(
                 RoomCardContentLabel(
                     title = "Due Date",
                     value = {
-                        Text("Nov 24", fontWeight = FontWeight.Medium)
+                        Text("Nov 24", fontWeight = FontWeight.Normal)
                     },
                     icon = R.drawable.outline_calendar_today_24,
                     width = 1f
@@ -478,7 +478,7 @@ fun RoomCardContent(
             if(available >= 1){
                 AppButton(
                     onClick = {
-                        current_action.value = MODAL_TYPE.ADD_TENANT()
+                        current_action.value = MODAL_TYPE.ADD_TENANT(room = "BillionaireHari")
                     },
                     containerColor = Color.Black.copy(0.8f),
                     contentColor = Color.White,

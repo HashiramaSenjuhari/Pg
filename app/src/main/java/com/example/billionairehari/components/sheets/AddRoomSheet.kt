@@ -127,8 +127,9 @@ fun AddRoomSheet(
                 leadingIcon = RoomIcon,
                 modifier = Modifier.fillMaxWidth()
             )
-            ROw(
-                horizontalArrangement = Arrangement.spacedBy(13.dp)
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(13.dp),
+                verticalAlignment = Alignment.Top
             ) {
                 Input(
                     value = bed_count,

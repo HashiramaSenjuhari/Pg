@@ -15,6 +15,7 @@ import androidx.compose.foundation.gestures.scrollable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
@@ -40,6 +41,7 @@ import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Badge
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -85,6 +87,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import androidx.compose.ui.zIndex
+import androidx.lifecycle.viewmodel.compose.LocalViewModelStoreOwner
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import com.example.billionairehari.R.drawable
@@ -101,8 +104,10 @@ import kotlin.math.exp
 import kotlin.system.exitProcess
 import com.example.billionairehari.R
 import com.example.billionairehari.components.AppButton
+import com.example.billionairehari.model.TenantRentRecord
 import com.example.billionairehari.screens.StaticSearchBar
 import com.example.billionairehari.viewmodels.PaymentMethod
+import com.example.billionairehari.viewmodels.RecordRentFactory
 import com.example.billionairehari.viewmodels.RecordRentViewModel
 import com.example.billionairehari.viewmodels.SearchViewModel
 import com.example.billionairehari.viewmodels.TenantSearchCard
@@ -111,18 +116,14 @@ import com.example.billionairehari.viewmodels.TenantSearchCard
 @Composable
 fun RecordRentPriceModal(
     is_open: MutableState<Boolean>,
-    tenant_name:String,
-    actual_rent_price:String,
-    rent_price:String,
-    date:Long,
-    onRentPriceChange:(String) -> Unit,
-    onDateChange:(Long) -> Unit,
-    rent_price_error:String? = null,
-    onReset:() -> Unit,
-    onSubmit:() -> Unit,
-    isLoading:Boolean,
-    viewmodel: RecordRentViewModel = viewModel()
+    tenant: TenantRentRecord = TenantRentRecord()
 ){
+    val owner = LocalViewModelStoreOwner.current
+
+    val viewmodel: RecordRentViewModel = viewModel(
+        factory = RecordRentFactory(tenant = tenant),
+        viewModelStoreOwner = owner!!
+    )
 
     val scrollState = rememberScrollState()
     val expanded = remember { mutableStateOf<Boolean>(false) }
@@ -161,23 +162,37 @@ fun RecordRentPriceModal(
                     viewmodel.update_paying_amount(it)
                 },
                 type = InputType.NUMBER,
-                keyBoardType = KeyboardType.Number
+                keyBoardType = KeyboardType.Number,
+                error = data.payError,
+                readOnly = data.isLoading
             )
-            ROw(
-                horizontalArrangement = Arrangement.spacedBy(6.dp)
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(6.dp),
+                verticalAlignment = Alignment.Top
             ) {
-                DateInput(
-                    label = "Payment Date",
-                    modifier = Modifier.fillMaxWidth(0.5f),
-                    onDate = {
-                        viewmodel.update_payment_date(it)
-                    },
-                    date = data.date
-                )
+                Column(
+                    verticalArrangement = Arrangement.spacedBy(6.dp)
+                ){
+                    DateInput(
+                        label = "Payment Date",
+                        modifier = Modifier.fillMaxWidth(0.5f),
+                        onDate = {
+                            if(!data.isLoading){
+                                viewmodel.update_payment_date(it)
+                            }
+                        },
+                        date = data.date
+                    )
+                    if(data.dateError != null){
+                        Text(data.dateError, fontSize = 12.sp, color = Color.Red)
+                    }
+                }
                 PaymentMethod(
                     current_option = data.payment_method,
                     onChangeOption = {
-                        viewmodel.update_payment_method(it)
+                        if(!data.isLoading){
+                            viewmodel.update_payment_method(it)
+                        }
                     }
                 )
             }
@@ -186,13 +201,20 @@ fun RecordRentPriceModal(
             modifier = Modifier.padding(top = 6.dp)
         ){
             AppButton(
-                onClick = {},
+                onClick = {
+                    viewmodel.submit()
+                },
                 containerColor = Color.Black.copy(0.9f),
                 contentColor = Color.White,
                 shape = CircleShape,
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
+                padding = PaddingValues(vertical = 13.dp)
             ) {
-                Text("Add")
+                if(data.isLoading){
+                    CircularProgressIndicator(modifier = Modifier.size(20.4.dp), strokeWidth = 2.dp)
+                }else {
+                    Text("Add")
+                }
             }
         }
     }

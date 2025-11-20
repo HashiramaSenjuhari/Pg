@@ -64,6 +64,7 @@ import com.example.billionairehari.modal.RecordRentPriceModal
 import com.example.billionairehari.model.Room
 import com.example.billionairehari.model.Tenant
 import com.example.billionairehari.layout.component.ROw
+import com.example.billionairehari.model.TenantRentRecord
 import com.example.billionairehari.viewmodels.GetRoomTenantCountViewModel
 import com.example.billionairehari.viewmodels.room
 import com.google.android.material.snackbar.Snackbar
@@ -76,7 +77,7 @@ sealed class MODAL_TYPE {
     data class ADD_TENANT_WITH_PRE_ROOM(val roomName:String): MODAL_TYPE()
     data class UPDATE_TENANT(val tenant: Tenant): MODAL_TYPE()
     data class UPDATE_ROOM(val room: Room): MODAL_TYPE()
-    data class UPDATE_TENANT_RENT(val id:String? = null): MODAL_TYPE()
+    data class UPDATE_TENANT_RENT(val tenant: TenantRentRecord): MODAL_TYPE()
     data class ANNOUNCE(val reveivers:List<SelectedType>? = null): MODAL_TYPE()
 }
 
@@ -389,18 +390,9 @@ fun ModalUi(
                 )
             }
             is MODAL_TYPE.UPDATE_TENANT_RENT -> {
-                val id = value?.id ?: null
+                val tenant = value.tenant
                 RecordRentPriceModal(
-                    tenant_name = "Record Rent",
-                    actual_rent_price = "2000",
-                    rent_price = "20000",
-                    date = 0L,
-                    onRentPriceChange = {},
-                    onDateChange = {},
-                    rent_price_error = "",
-                    onReset = {},
-                    onSubmit = {},
-                    isLoading = false,
+                    tenant = tenant!!,
                     is_open = is_open
                 )
             }

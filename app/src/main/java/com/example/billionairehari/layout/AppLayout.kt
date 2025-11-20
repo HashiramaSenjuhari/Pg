@@ -220,7 +220,7 @@ fun AppLayout(
                 },
                 onTenantRentUpdate = {
                     is_open.value = true
-                    current_action.value = MODAL_TYPE.UPDATE_TENANT_RENT(id = it)
+                    current_action.value = MODAL_TYPE.UPDATE_TENANT_RENT(tenant = it)
                 },
                 onTenantShare = {},
                 current_action = current_action

@@ -11,6 +11,15 @@ data class Tenant(
     val automatic_remainder:Boolean = false
 )
 
+data class TenantRentRecord(
+    val name:String = "",
+    val image:String = "",
+    val room:String = "",
+    val due_date:Long = 0L,
+    val rent:String = "",
+    val isPaid:Boolean = false
+)
+
 data class TenantUi(
     val id:String = "",
     val name:String = "",

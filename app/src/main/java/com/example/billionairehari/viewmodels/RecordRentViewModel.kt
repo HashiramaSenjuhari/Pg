@@ -3,7 +3,10 @@ package com.example.billionairehari.viewmodels
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
+import com.example.billionairehari.model.Tenant
+import com.example.billionairehari.model.TenantRentRecord
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
@@ -14,11 +17,22 @@ data class RecordData(
     val paying_amount:String = "",
     val date:Long = 0L,
     val payment_method: PaymentMethod = PaymentMethod.UPI,
-    val isLoading:Boolean = false
+    val isLoading:Boolean = false,
+    val payError:String? = null,
+    val dateError:String? = null
 )
 
-class RecordRentViewModel : ViewModel() {
-    private val _record = mutableStateOf(RecordData())
+class RecordRentViewModel(
+    private val tenant: TenantRentRecord = TenantRentRecord()
+) : ViewModel() {
+    private val _record = mutableStateOf(RecordData(
+        tenant = TenantSearchCard(
+            name = tenant.name,
+            room = tenant.room,
+            rent_amount = tenant.rent,
+            due = tenant.due_date
+        )
+    ))
     val record: State<RecordData> get() = _record
 
     /** updating value **/
@@ -31,13 +45,15 @@ class RecordRentViewModel : ViewModel() {
 
     fun update_paying_amount(price:String){
         _record.value = _record.value.copy(
-            paying_amount = price
+            paying_amount = price,
+            payError = null
         )
     }
 
     fun update_payment_date(date:Long) {
         _record.value = _record.value.copy(
-            date = date
+            date = date,
+            dateError = null
         )
     }
 
@@ -48,6 +64,13 @@ class RecordRentViewModel : ViewModel() {
     }
 
     fun submit(){
+        _record.value = _record.value.copy(
+            payError = validateRent(_record.value.paying_amount),
+            dateError = validateDate(_record.value.date)
+        )
+        if(_record.value.dateError !== null || _record.value.payError !== null){
+            return
+        }
         viewModelScope.launch {
             try {
                 _record.value = _record.value.copy(
@@ -57,8 +80,20 @@ class RecordRentViewModel : ViewModel() {
             }catch(error: Exception){
 
             }finally {
-                _record.value = RecordData()
+                _record.value = _record.value.copy(
+                    isLoading = false
+                )
+//                _record.value = RecordData()
             }
         }
+    }
+}
+
+class RecordRentFactory(private val tenant: TenantRentRecord): ViewModelProvider.Factory {
+    override fun <T : ViewModel> create(modelClass: Class<T>): T {
+        if(modelClass.isAssignableFrom(RecordRentViewModel::class.java)){
+            return RecordRentViewModel(tenant = tenant) as T
+        }
+        throw IllegalArgumentException("Provide RecordRentViewModel Class")
     }
 }

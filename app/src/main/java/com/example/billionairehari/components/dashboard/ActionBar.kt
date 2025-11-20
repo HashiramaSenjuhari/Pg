@@ -55,6 +55,7 @@ import com.example.billionairehari.icons.RoomIcon
 import com.example.billionairehari.icons.TenantIcon
 import com.example.billionairehari.layout.MODAL_TYPE
 import com.example.billionairehari.model.Room
+import com.example.billionairehari.model.TenantRentRecord
 import com.example.billionairehari.viewmodels.AddRoomViewModel
 import com.example.billionairehari.viewmodels.RoomsViewModel
 import com.example.billionairehari.viewmodels.UpdateRoomFactory
@@ -89,7 +90,7 @@ fun ActionBar(
         }),
         Action(name = "Add Rent", icon = ContactIcon, action = {
             is_open.value = true
-            current_action.value = MODAL_TYPE.UPDATE_TENANT_RENT()
+            current_action.value = MODAL_TYPE.UPDATE_TENANT_RENT(tenant = TenantRentRecord())
         })
     )
     Column(

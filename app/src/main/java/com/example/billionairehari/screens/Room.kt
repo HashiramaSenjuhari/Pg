@@ -135,6 +135,7 @@ import com.example.billionairehari.layout.MODAL_TYPE
 import com.example.billionairehari.layout.component.ROw
 import com.example.billionairehari.model.Room
 import com.example.billionairehari.model.Tenant
+import com.example.billionairehari.model.TenantRentRecord
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -151,7 +152,7 @@ fun RoomScreen(
     onRoomDelete:(String) -> Unit,
 
     onTenant:(String) -> Unit,
-    onTenantRentUpdate:(String) -> Unit,
+    onTenantRentUpdate:(TenantRentRecord) -> Unit,
     onTenantDelete:(String) -> Unit,
     onTenantMessage:(String) -> Unit,
     onTenantShare:(String) -> Unit,
@@ -213,56 +214,47 @@ fun RoomScreen(
             deposit = 4000,
 
             tenants = listOf(
-                Tenant(
+                TenantRentRecord(
                     name = "Billionaire",
                     room = "Billionairehari",
-                    deposit = true,
-                    rent_paid_first = true,
-                    image = null,
-                    joining_date = 0L,
-                    phone_number = "343492834",
-                    automatic_remainder = true
+                    image = "",
+                    rent = "",
+                    due_date = 0L,
+                    isPaid = true
                 ),
-                Tenant(
+                TenantRentRecord(
                     name = "Billionaire",
                     room = "Billionairehari",
-                    deposit = true,
-                    rent_paid_first = true,
-                    image = null,
-                    joining_date = 0L,
-                    phone_number = "343492834",
-                    automatic_remainder = true
+                    image = "",
+                    rent = "",
+                    due_date = 0L,
+                    isPaid = true
                 ),
-                Tenant(
+
+                TenantRentRecord(
                     name = "Billionaire",
                     room = "Billionairehari",
-                    deposit = true,
-                    rent_paid_first = true,
-                    image = null,
-                    joining_date = 0L,
-                    phone_number = "343492834",
-                    automatic_remainder = true
+                    image = "",
+                    rent = "",
+                    due_date = 0L,
+                    isPaid = true
                 ),
-                Tenant(
+                TenantRentRecord(
                     name = "Billionaire",
                     room = "Billionairehari",
-                    deposit = true,
-                    rent_paid_first = true,
-                    image = null,
-                    joining_date = 0L,
-                    phone_number = "343492834",
-                    automatic_remainder = true
+                    image = "",
+                    rent = "",
+                    due_date = 0L,
+                    isPaid = true
                 ),
-                Tenant(
+                TenantRentRecord(
                     name = "Billionaire",
                     room = "Billionairehari",
-                    deposit = true,
-                    rent_paid_first = true,
-                    image = null,
-                    joining_date = 0L,
-                    phone_number = "343492834",
-                    automatic_remainder = true
-                )
+                    image = "",
+                    rent = "",
+                    due_date = 0L,
+                    isPaid = true
+                ),
             ),
             features = listOf("Billionaire"),
             onTenant = {
@@ -424,13 +416,13 @@ fun RoomDetails(
     filled: Int,
     due_date: String,
     rent_due: Int,
-    tenants:List<Tenant>,
+    tenants:List<TenantRentRecord>,
     rent:Int,
     deposit:Int,
     features:List<String>,
 
     onTenant:(String) -> Unit,
-    onTenantRentUpdate: (String) -> Unit,
+    onTenantRentUpdate: (TenantRentRecord) -> Unit,
     onTenantDelete:(String) -> Unit,
     onTenantNotice:(String) -> Unit,
     onTenantMessage:(String) -> Unit
@@ -723,9 +715,9 @@ fun FeatureLabel(
 
 @Composable
 fun Tenants(
-    tenants: List<Tenant>,
+    tenants: List<TenantRentRecord>,
     onTenant:(String) -> Unit,
-    onTenantRentUpdate: (String) -> Unit,
+    onTenantRentUpdate: (TenantRentRecord) -> Unit,
     onTenantMessage: (String) -> Unit,
     onTenantNotice: (String) -> Unit,
     onTenantDelete: (String) -> Unit
@@ -747,13 +739,13 @@ fun Tenants(
                             onTenant(tenant.name)
                         },
                         onTenantRentUpdate = {
-                            onTenantRentUpdate(tenant.name)
+                            onTenantRentUpdate(tenant)
                         },
                         onTenantMessage = {
                             onTenantMessage(tenant.name)
                         },
                         onTenantNotice = {
-                            onTenantNotice(tenant.phone_number)
+                            onTenantNotice(tenant.name)
                         },
                         onTenantDelete = {
                             onTenantDelete(tenant.name)
@@ -772,20 +764,17 @@ data class OptionModal(
 
 @Composable
 fun Tenant(
-    tenant: Tenant,
+    tenant: TenantRentRecord,
     onTenant:() -> Unit,
     onTenantRentUpdate: () -> Unit,
     onTenantMessage: () -> Unit,
     onTenantNotice: () -> Unit,
     onTenantDelete: () -> Unit
 ){
-    val is_rent_paid = true
     val is_notice_applied = false
     val expanded = remember { mutableStateOf<Boolean>(false) }
     val is_delete_dialog = remember { mutableStateOf<Boolean>(false) }
     val is_rent_dialog_open = remember { mutableStateOf<Boolean>(false) }
-    val rent = remember { mutableStateOf<String>("") }
-    val date = remember { mutableStateOf<Long>(0L) }
     Card(
         colors = CardDefaults.cardColors(
             containerColor = Color.Transparent
@@ -810,22 +799,22 @@ fun Tenant(
                 Column(
                     verticalArrangement = Arrangement.spacedBy(6.dp)
                 ) {
-                    Text("Billionaire", fontWeight = FontWeight.Medium)
+                    Text(tenant.name, fontWeight = FontWeight.Medium)
                     ROw(
                         horizontalArrangement = Arrangement.spacedBy(6.dp)
                     ) {
                         Badge(
-                            modifier = Modifier.border(1.dp, color = if(is_rent_paid) Color.Unspecified else Color(0xFFF75270), shape = CircleShape),
-                            containerColor = if(is_rent_paid) Color(0xFF59AC77) else Color(0xFFF7CAC9),
+                            modifier = Modifier.border(1.dp, color = if(tenant.isPaid) Color.Unspecified else Color(0xFFF75270), shape = CircleShape),
+                            containerColor = if(tenant.isPaid) Color(0xFF59AC77) else Color(0xFFF7CAC9),
                             contentColor = Color.White
                         ) {
                             Box(
                                 modifier = Modifier.padding(horizontal = 6.dp, vertical = 3.dp)
                             ){
                                 Text(
-                                    if(is_rent_paid) "Paid" else "Not Paid",
+                                    if(tenant.isPaid) "Paid" else "Not Paid",
                                     fontSize = 12.sp,
-                                    color =  if(is_rent_paid) Color.White else Color(0xFFDC143C)
+                                    color =  if(tenant.isPaid) Color.White else Color(0xFFDC143C)
                                 )
                             }
                         }

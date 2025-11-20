@@ -292,8 +292,9 @@ fun Mannual(
                 error = phone_error
             )
             /* room and date */
-            ROw(
-                horizontalArrangement = Arrangement.spacedBy(13.dp)
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(13.dp),
+                verticalAlignment = Alignment.Top
             ) {
                 DropDown(
                     label = "Choose Room",

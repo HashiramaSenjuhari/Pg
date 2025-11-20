@@ -143,6 +143,7 @@ import kotlinx.coroutines.launch
 @Composable
 fun RoomScreen(
     modifier: Modifier,
+    current_action:MutableState<MODAL_TYPE>,
 
     onRoomEdit:(Room) -> Unit,
     onRoomMessage:(String) -> Unit,
@@ -159,7 +160,7 @@ fun RoomScreen(
     onBackNavigation:() -> Unit,
     onTenantNavigate:(String) -> Unit
 ) {
-//    val room = hiltViewModel<RoomViewModel>()
+    val room = hiltViewModel<RoomViewModel>()
     val scrollState = rememberScrollState()
     val is_more = remember { mutableStateOf<Boolean>(false) }
     Column(
@@ -182,7 +183,7 @@ fun RoomScreen(
         ){
             StaticBar(
                 onRoomEdit = {
-//                    onRoomEdit(room.room.value)
+                    current_action.value = MODAL_TYPE.UPDATE_ROOM(room = room.room.value)
                 },
                 onRoomShare = {
 //                    onRoomShare(room.room.value.id)

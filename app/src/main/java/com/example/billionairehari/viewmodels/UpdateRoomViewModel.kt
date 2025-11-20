@@ -11,6 +11,7 @@ import kotlinx.coroutines.launch
 
 data class RoomUpdateData(
     val name:String,
+    val images:List<String>,
     val count:String,
     val rent:String,
     val deposit:String,
@@ -23,31 +24,29 @@ data class RoomUpdateData(
 )
 
 class UpdateRoomViewModel(
-    private val id: String
+    private val data: Room
 ) : ViewModel() {
     /**
      *  architecture
      *
-     *  pass id to repository and collect data from room
+     *  collect data from room
      *  and pass it to data class
      *
      * **/
     private val _room = mutableStateOf<RoomUpdateData>(
         RoomUpdateData(
-            name = "",
-            count = "",
-            rent = "",
-            deposit = "",
-            features = emptyList()
+            name = data.name,
+            count = data.total_beds,
+            features = data.features,
+            images = data.images,
+            deposit = data.deposit_per_tenant,
+            rent = data.rent_per_tenant
         )
     )
 
-    init {
-        /** pass id to respository and get data **/
-        /** pass data to data class **/
-    }
+    val room: State<RoomUpdateData> = _room
 
-    val room: State<RoomUpdateData> get() = _room
+    /** update **/
 
     fun update_name(name:String) {
         _room.value = _room.value.copy(
@@ -93,6 +92,19 @@ class UpdateRoomViewModel(
     }
 
     fun submit(){
+        val current_roon = _room.value
+        _room.value = _room.value.copy(
+            nameError = validateRoomName(name = current_roon.name),
+            countError = validateBeds(beds = current_roon.count),
+            depositError = validateDeposit(price = current_roon.deposit),
+            rentError = validateRent(price = current_roon.rent)
+        )
+        if(_room.value.nameError != null || room.value.countError != null
+            || room.value.depositError != null
+            || room.value.rentError != null
+        ){
+            return
+        }
         viewModelScope.launch {
             try {
                 _room.value = _room.value.copy(
@@ -111,11 +123,11 @@ class UpdateRoomViewModel(
 }
 
 class UpdateRoomFactory(
-    private val id: String
+    private val room: Room
 ): ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         if(modelClass.isAssignableFrom(UpdateRoomViewModel::class.java)){
-            return UpdateRoomViewModel(id = id) as T
+            return UpdateRoomViewModel(data = room) as T
         }
         throw IllegalArgumentException("Unknown ViewModel class")
     }

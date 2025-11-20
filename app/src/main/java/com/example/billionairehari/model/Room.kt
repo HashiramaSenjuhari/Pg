@@ -2,7 +2,7 @@ package com.example.billionairehari.model
 
 data class Room(
     val name:String = "",
-    val images: List<ByteArray> = emptyList(),
+    val images: List<String> = emptyList(),
     val total_beds:String = "",
     val count:Int = 0,
     val rent_per_tenant:String = "",

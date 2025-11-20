@@ -1,5 +1,6 @@
 package com.example.billionairehari.viewmodels
 
+import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import com.example.billionairehari.components.ChipType
@@ -14,15 +15,15 @@ class RoomViewModel @Inject constructor(
     private val savedStateHandle: SavedStateHandle
 ): ViewModel() {
     private val _room_id:String? = savedStateHandle["roomId"]
-    val room_id = _room_id
-    val room = MutableStateFlow(RoomCardDetails(
-        name = "Room 101",
-        id = "101",
-        deposit_per_tenant = "2000",
-        rent_per_tenant = "2000",
-        is_available = false,
-        total_beds = "3",
-        features = listOf("ac"),
-        images = emptyList()
-    ))
+    val room = mutableStateOf<Room>(
+        Room(
+            name = "Billionaire Hari",
+            total_beds = "6",
+            count = 0,
+            rent_per_tenant = "3000",
+            deposit_per_tenant = "3000",
+            images = emptyList(),
+            features = emptyList()
+        )
+    )
 }

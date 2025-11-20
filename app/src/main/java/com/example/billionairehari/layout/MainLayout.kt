@@ -65,6 +65,7 @@ import com.example.billionairehari.model.Room
 import com.example.billionairehari.model.Tenant
 import com.example.billionairehari.layout.component.ROw
 import com.example.billionairehari.viewmodels.GetRoomTenantCountViewModel
+import com.example.billionairehari.viewmodels.room
 import com.google.android.material.snackbar.Snackbar
 import kotlinx.coroutines.CoroutineScope
 
@@ -74,7 +75,7 @@ sealed class MODAL_TYPE {
     data class ADD_TENANT(val room:String? = null): MODAL_TYPE()
     data class ADD_TENANT_WITH_PRE_ROOM(val roomName:String): MODAL_TYPE()
     data class UPDATE_TENANT(val tenant: Tenant): MODAL_TYPE()
-    data class UPDATE_ROOM(val id: String): MODAL_TYPE()
+    data class UPDATE_ROOM(val room: Room): MODAL_TYPE()
     data class UPDATE_TENANT_RENT(val id:String? = null): MODAL_TYPE()
     data class ANNOUNCE(val reveivers:List<SelectedType>? = null): MODAL_TYPE()
 }
@@ -378,7 +379,7 @@ fun ModalUi(
             is MODAL_TYPE.UPDATE_ROOM -> {
                 UpdateRoomSheet(
                     scrollState = scrollState,
-                    id = value.id
+                    room = value.room
                 )
             }
             is MODAL_TYPE.UPDATE_TENANT -> {

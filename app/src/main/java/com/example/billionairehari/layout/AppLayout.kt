@@ -186,7 +186,6 @@ fun AppLayout(
                 onTenantNavigate = {},
                 onRoomEdit = {
                     is_open.value = true
-                    current_action.value = MODAL_TYPE.UPDATE_ROOM(id = "")
                 },
                 onRoomMessage = {
                     is_open.value = true
@@ -223,7 +222,8 @@ fun AppLayout(
                     is_open.value = true
                     current_action.value = MODAL_TYPE.UPDATE_TENANT_RENT(id = it)
                 },
-                onTenantShare = {}
+                onTenantShare = {},
+                current_action = current_action
             )
         }
         composable(

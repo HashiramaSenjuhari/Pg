@@ -179,7 +179,7 @@ fun RoomSheet(
 
 @Composable
 fun UpdateRoomSheet(
-    id: String,
+    room: Room,
     scrollState: ScrollState,
 ){
     val owner = LocalViewModelStoreOwner.current
@@ -188,17 +188,17 @@ fun UpdateRoomSheet(
      *  the viewmodel lives as long as the compose is living
      * **/
 
-    Log.d("RoomViewModel",id.toString())
+    Log.d("RoomViewModel",room.toString())
     val viewmodel: UpdateRoomViewModel = viewModel(
         viewModelStoreOwner = owner!!,
-        factory = UpdateRoomFactory(id = id)
+        factory = UpdateRoomFactory(room = room)
     )
 
     val room = viewmodel.room.value
 
     AddRoomSheet(
         room_name = room.name,
-        bed_count = room.count,
+        bed_count = room.count.toString(),
         rent = room.rent,
         deposit = room.deposit,
         features = room.features,
@@ -232,15 +232,15 @@ fun UpdateRoomSheet(
         },
 
         images_error = null,
-        room_name_error = null,
-        beds_error = null,
-        rent_error = null,
-        deposit_error = null,
+        room_name_error = room.nameError,
+        beds_error = room.countError,
+        rent_error = room.rentError,
+        deposit_error = room.depositError,
         features_error = null,
 
         scrollState = scrollState,
         onSubmit = {
-//            viewmodel.submit()
+            viewmodel.submit()
         },
         onReset = {
 //            viewmodel.reset()

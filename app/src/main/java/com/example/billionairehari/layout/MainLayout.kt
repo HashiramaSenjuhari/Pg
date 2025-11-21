@@ -51,6 +51,7 @@ import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.example.billionairehari.NavigationAction
 import com.example.billionairehari.components.dashboard.RoomSheet
 import com.example.billionairehari.components.dashboard.TopBar
 import com.example.billionairehari.components.dashboard.UpdateRoomSheet
@@ -100,9 +101,10 @@ fun MainLayout(
     val snackbarHost = remember { SnackbarHostState() }
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded =  true)
 
+    val navigation = NavigationAction(navController = navController)
+
     // navigation
     val navBackStack = navController.currentBackStackEntryAsState()
-    val destination = navBackStack.value?.destination
 
     // mutableState
     val is_open = rememberSaveable { mutableStateOf<Boolean>(true) }
@@ -121,10 +123,12 @@ fun MainLayout(
         else -> ""
     }
 
+
+    val destination = navBackStack.value?.destination
     // destination
     val route = destination?.route?.split("/")
     val route_size = route?.size ?: 0
-    val path = route?.get(0) ?: ""
+    val path = destination?.route ?: ""
 
     val activity = LocalView.current.context as Activity
     SideEffect {
@@ -150,7 +154,7 @@ fun MainLayout(
         },
         bottomBar = {
             if(route_size === 1){
-                BottomBar(navController = navController)
+                BottomBar(navigation = navigation)
             }
         },
         floatingActionButton = {

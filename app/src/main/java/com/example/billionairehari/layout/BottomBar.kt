@@ -33,12 +33,29 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.composables.TicketsIcon
+import com.example.billionairehari.NavigationAction
 import com.example.billionairehari.icons.Dashboard
 import com.example.billionairehari.icons.Rooms
 import com.example.billionairehari.icons.TenantsIcon
 
 @Composable
-fun BottomBar(navController: NavController){
+fun BottomBar(navigation: NavigationAction){
+
+    val bars = listOf<MainBar>(
+        MainBar(id = 0,name = "Dashboard",route = "dashboard", icon = Dashboard, navigation = {
+            navigation.navigateToDashboard()
+        }),
+        MainBar(id = 1,name = "Rooms",route = "rooms",icon = Rooms, navigation = {
+            navigation.navigateToRooms()
+        }),
+        MainBar(id = 2,name = "Tenants",route = "tenants",icon = TenantsIcon, navigation = {
+            navigation.navigateToTenants()
+        }),
+        MainBar(id = 3,name = "Tickets",route = "tickets",icon = TicketsIcon,navigation = {
+            navigation.navigateToContacts()
+        })
+    )
+
     val selectedDestination = rememberSaveable { mutableStateOf(bars[0].name) }
     NavigationBar(
         modifier = Modifier.clip(RoundedCornerShape(13.dp)),
@@ -50,7 +67,7 @@ fun BottomBar(navController: NavController){
             bars.forEach { bar ->
                 NavigationBarItem(
                     onClick = {
-                        navController.navigate(bar.route)
+                        bar.navigation()
                         selectedDestination.value = bar.name
                     },
                     label = {
@@ -70,25 +87,6 @@ data class MainBar(
     val id:Int,
     val name:String,
     val route:String,
-    val icon: ImageVector
+    val icon: ImageVector,
+    val navigation:() -> Unit
 )
-
-val bars = listOf<MainBar>(
-    MainBar(id = 0,name = "Dashboard",route = "dashboard", icon = Dashboard),
-    MainBar(id = 1,name = "Rooms",route = "rooms",icon = Rooms),
-    MainBar(id = 2,name = "Tenants",route = "tenants",icon = TenantsIcon),
-    MainBar(id = 3,name = "Tickets",route = "tickets",icon = TicketsIcon)
-)
-
-@Preview
-@Composable
-fun Testbar() {
-    val navController = rememberNavController()
-    Scaffold(
-        bottomBar =  {
-                BottomBar(navController = navController)
-        },
-        modifier =  Modifier.fillMaxSize()
-
-    ) {  }
-}

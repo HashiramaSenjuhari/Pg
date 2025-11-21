@@ -11,8 +11,10 @@ import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOut
 import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -43,8 +45,8 @@ import com.example.billionairehari.components.sheets.SelectedType
 import com.example.billionairehari.icons.Rooms
 import com.example.billionairehari.screens.DashboardScreen
 import com.example.billionairehari.screens.RoomScreen
+import com.example.billionairehari.screens.RoomSearchComponentScreen
 import com.example.billionairehari.screens.RoomsScreen
-import com.example.billionairehari.screens.SearchComponentScreen
 import com.example.billionairehari.screens.TenantScreen
 import com.example.billionairehari.screens.TenantsScreen
 import com.example.billionairehari.viewmodels.RoomViewModel
@@ -246,11 +248,26 @@ fun AppLayout(
                 navArgument(name = Arguments.SEARCH_ID_ARGS){
                     type = NavType.StringType
                 }
-            )
+            ),
+            enterTransition = {
+                slideInVertically(
+                    initialOffsetY = { fullHeight -> fullHeight }
+                ) + fadeIn()
+            },
+            exitTransition = {
+                slideOutVertically(
+                    targetOffsetY = { fullHeight -> -fullHeight }
+                )
+            }
         ) {
             id ->
             val search_type = id?.arguments?.getString(Arguments.SEARCH_ID_ARGS)
-            SearchComponentScreen(id = search_type!!,modifier = Modifier.padding(padding))
+            RoomSearchComponentScreen(
+                id = search_type!!,
+                modifier = Modifier.padding(padding),
+                navController = navController,
+                current_action = current_action
+            )
         }
     }
 }

@@ -67,7 +67,6 @@ import com.example.billionairehari.model.Tenant
 import com.example.billionairehari.layout.component.ROw
 import com.example.billionairehari.model.TenantRentRecord
 import com.example.billionairehari.viewmodels.GetRoomTenantCountViewModel
-import com.example.billionairehari.viewmodels.room
 import com.google.android.material.snackbar.Snackbar
 import kotlinx.coroutines.CoroutineScope
 
@@ -316,14 +315,14 @@ fun Header(
     path: String,
     navController: NavHostController
 ){
-    if(route_size >= 2 && path != "search"){
-        HeaderBar(
-            name = path.replaceFirstChar { it.uppercaseChar() },
-            onNavigate = {
-                navController.navigate(path)
-            }
-        )
-    }
+//    if(route_size >= 2 && path != "search"){
+//        HeaderBar(
+//            name = path.replaceFirstChar { it.uppercaseChar() },
+//            onNavigate = {
+//                navController.navigate(path)
+//            }
+//        )
+//    }
 }
 
 

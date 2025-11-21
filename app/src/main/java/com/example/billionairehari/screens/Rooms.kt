@@ -164,7 +164,6 @@ import com.example.billionairehari.model.Room
 import com.example.billionairehari.model.RoomCardDetails
 import com.example.billionairehari.model.Tenant
 import com.example.billionairehari.viewmodels.RoomsViewModel
-import com.example.billionairehari.viewmodels.current_rooms
 import dagger.hilt.android.lifecycle.HiltViewModel
 
 
@@ -207,7 +206,9 @@ fun RoomsScreen(
     ) {
         DynamicTopHeader(
             onClickFilter = {},
-            onClickSearch = {},
+            onClickSearch = {
+                navController.navigate("search/rooms")
+            },
             fontSize = fontSize.value.sp,
             spacing = spacing.value
         )
@@ -215,8 +216,7 @@ fun RoomsScreen(
             scrollState = scrollState,
             navController = navController,
             final_rooms = final_rooms,
-            current_action = current_action,
-            current_dialog_action = current_dialog_action
+            current_action = current_action
         )
     }
 }
@@ -240,8 +240,8 @@ fun DynamicTopHeader(
             Text("Rooms", fontSize = fontSize, fontWeight = FontWeight.Bold)
         }
         StaticSearchBar(
-            onClick = {},
-            onClickFilter = {}
+            onClick = onClickSearch,
+            onClickFilter = onClickFilter
         )
     }
 }
@@ -251,8 +251,7 @@ fun RoomCards(
     scrollState: ScrollState,
     navController: NavController,
     final_rooms: List<RoomCardDetails>,
-    current_action: MutableState<MODAL_TYPE>,
-    current_dialog_action: MutableState<DIALOG_TYPE>
+    current_action: MutableState<MODAL_TYPE>
 ){
     Column(
         modifier = Modifier
@@ -287,7 +286,7 @@ fun StaticSearchBar(
             .padding(vertical = 3.dp, horizontal = 13.dp)
             .clickable(
                 enabled = true,
-                onClick = onClickFilter,
+                onClick = onClick,
                 indication = null,
                 interactionSource = MutableInteractionSource()
             ),

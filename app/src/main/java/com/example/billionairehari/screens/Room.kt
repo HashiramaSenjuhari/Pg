@@ -736,19 +736,19 @@ fun Tenants(
                     Tenant(
                         tenant = tenant,
                         onTenant = {
-                            onTenant(tenant.name)
+                            onTenant(tenant.id)
                         },
                         onTenantRentUpdate = {
                             onTenantRentUpdate(tenant)
                         },
                         onTenantMessage = {
-                            onTenantMessage(tenant.name)
+                            onTenantMessage(tenant.id)
                         },
                         onTenantNotice = {
                             onTenantNotice(tenant.name)
                         },
                         onTenantDelete = {
-                            onTenantDelete(tenant.name)
+                            onTenantDelete(tenant.id)
                         }
                     )
                 }

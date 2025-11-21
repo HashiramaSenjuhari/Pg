@@ -1,7 +1,9 @@
 package com.example.billionairehari.viewmodels
 
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.billionairehari.model.RoomCardDetails
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -21,43 +23,81 @@ data class TenantSearchCard(
     val rent_amount:String = ""
 )
 
-val greats = listOf<TenantSearchCard>(
-    TenantSearchCard(
-        name = "BillionaireHari",
-        room = "Room 101",
-        due = 0L,
-        rent_amount = "2000"
+val greats = listOf<RoomCardDetails>(
+    RoomCardDetails(
+        id = "6",
+        name = "Room 101",
+        total_beds = "4",
+        is_available = false,
+        count = 3,
+        images = emptyList(),
+        deposit_per_tenant = "3000",
+        rent_per_tenant = "2000",
+        features = emptyList(),
+        rent_dues = 3,
+        under_notice = 0
     ),
-    TenantSearchCard(
-        name = "Hari",
-        room = "Room 101",
-        due = 0L,
-        rent_amount = "2000"
+    RoomCardDetails(
+        id = "6",
+        name = "Room 102",
+        total_beds = "4",
+        is_available = false,
+        count = 3,
+        images = emptyList(),
+        deposit_per_tenant = "3000",
+        rent_per_tenant = "2000",
+        features = emptyList(),
+        rent_dues = 3,
+        under_notice = 0
     ),
-    TenantSearchCard(
-        name = "Billionaire",
-        room = "Room 101",
-        due = 0L,
-        rent_amount = "2000"
+    RoomCardDetails(
+        id = "6",
+        name = "Room 103",
+        total_beds = "4",
+        is_available = false,
+        count = 3,
+        images = emptyList(),
+        deposit_per_tenant = "3000",
+        rent_per_tenant = "2000",
+        features = emptyList(),
+        rent_dues = 3,
+        under_notice = 0
     ),
-    TenantSearchCard(
-        name = "Great",
-        room = "Room 101",
-        due = 0L,
-        rent_amount = "2000"
+    RoomCardDetails(
+        id = "6",
+        name = "Room 104",
+        total_beds = "4",
+        is_available = false,
+        count = 3,
+        images = emptyList(),
+        deposit_per_tenant = "3000",
+        rent_per_tenant = "2000",
+        features = emptyList(),
+        rent_dues = 3,
+        under_notice = 0
     ),
-    TenantSearchCard(
-        name = "Mark",
-        room = "Room 101",
-        due = 0L,
-        rent_amount = "2000"
+    RoomCardDetails(
+        id = "6",
+        name = "Room 105",
+        total_beds = "4",
+        is_available = false,
+        count = 3,
+        images = emptyList(),
+        deposit_per_tenant = "3000",
+        rent_per_tenant = "2000",
+        features = emptyList(),
+        rent_dues = 3,
+        under_notice = 0
     )
 )
 
-class SearchViewModel: ViewModel() {
+class SearchViewModel(
+    private val savedState: SavedStateHandle
+): ViewModel() {
+    val id = savedState.get<String>("searchId")
     private val _query = MutableStateFlow<String>("")
     val query = _query.asStateFlow()
-    val result: StateFlow<List<TenantSearchCard>> = query
+    val result: StateFlow<List<RoomCardDetails>> = query
         .debounce(300L)
         .distinctUntilChanged()
         .map { query ->

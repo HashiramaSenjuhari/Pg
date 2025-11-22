@@ -1,5 +1,6 @@
 package com.example.billionairehari.screens
 
+import android.app.Activity
 import android.graphics.LinearGradient
 import android.graphics.Rect
 import android.graphics.drawable.VectorDrawable
@@ -91,6 +92,7 @@ import androidx.compose.material3.rememberTooltipState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.SnapshotMutationPolicy
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
@@ -107,10 +109,12 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.TileMode
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.boundsInWindow
 import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.semantics.Role
@@ -127,6 +131,7 @@ import androidx.compose.ui.unit.min
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.PopupPositionProvider
+import androidx.core.view.WindowInsetsControllerCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
@@ -165,6 +170,7 @@ import com.example.billionairehari.model.RoomCardDetails
 import com.example.billionairehari.model.Tenant
 import com.example.billionairehari.viewmodels.RoomsViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlin.text.toFloat
 
 
 @OptIn(ExperimentalFoundationApi::class)
@@ -176,18 +182,8 @@ fun RoomsScreen(
     modifier:Modifier = Modifier,
     viewmodel: RoomsViewModel = hiltViewModel()
 ) {
-    /** header Animation module - Start **/
+
     val scrollState = rememberScrollState()
-
-//    Log.d("OffsetBillionaire",scrollState.value.toFloat().toString())
-    val maxOffset = 100f
-    val progress = (scrollState.value.toFloat() / maxOffset).coerceIn(0f,1f)
-//    Log.d("OffsetBillionaire",progress.toString())
-
-    val padding = animateDpAsState(targetValue = lerp(50.dp, 9.dp,progress))
-    val spacing = animateDpAsState(targetValue = lerp(13.dp,3.dp,progress))
-    val fontSize = animateFloatAsState(targetValue = lerp(24.sp, 21.sp,progress).value)
-    /** header Animation module - End **/
 
     /** viewmodel - start **/
     val filtered_rooms = viewmodel.rooms.collectAsState()
@@ -197,21 +193,13 @@ fun RoomsScreen(
 
     val is_open = rememberSaveable { mutableStateOf<Boolean>(false) }
 
-    Column(
-        modifier = Modifier
-            .animateContentSize()
-            .fillMaxSize()
-            .background(Color.White)
-            .padding(top = padding.value)
+    DynamicShowcaseScreen(
+        title = "Rooms",
+        placeholder = "Search Room",
+        scrollState = scrollState,
+        navController = navController,
+        search_route = Destinations.ROOM_SEARCH_ROUTE
     ) {
-        DynamicTopHeader(
-            onClickFilter = {},
-            onClickSearch = {
-                navController.navigate("search/rooms")
-            },
-            fontSize = fontSize.value.sp,
-            spacing = spacing.value
-        )
         RoomCards(
             scrollState = scrollState,
             navController = navController,
@@ -219,10 +207,62 @@ fun RoomsScreen(
             current_action = current_action
         )
     }
+
+}
+
+@Composable
+fun DynamicShowcaseScreen(
+    scrollState: ScrollState,
+    navController: NavController,
+    title: String,
+    placeholder: String,
+    search_route:String,
+    content:@Composable () -> Unit
+){
+
+    /** header Animation module - Start **/
+    /** header Animation module - End **/
+
+
+    val maxOffset = 100f
+    val progress = (scrollState.value.toFloat() / maxOffset).coerceIn(0f,1f)
+
+    val padding = animateDpAsState(targetValue = lerp(50.dp, 9.dp,progress))
+    val spacing = animateDpAsState(targetValue = lerp(13.dp,3.dp,progress))
+    val fontSize = animateFloatAsState(targetValue = lerp(24.sp, 21.sp,progress).value)
+    val activity = LocalView.current.context as Activity
+
+    SideEffect {
+        activity.window.statusBarColor = Color.Blue.copy(0.01f).toArgb()
+        val wc = WindowInsetsControllerCompat(activity.window,activity.window.decorView)
+        wc.isAppearanceLightStatusBars = true
+    }
+
+    Column(
+        modifier = Modifier
+            .animateContentSize()
+            .fillMaxSize()
+            .background(Brush.verticalGradient(colors = listOf(Color.Blue.copy(0.2f),Color.White,Color.White,Color.White,Color.White,Color.White)))
+            .padding(top = padding.value)
+    ) {
+        DynamicTopHeader(
+            title = title,
+            placeholder = placeholder,
+            onClickFilter = {},
+            onClickSearch = {
+                navController.navigate(search_route)
+            },
+            fontSize = fontSize.value.sp,
+            spacing = spacing.value
+        )
+        content.invoke()
+    }
 }
 
 @Composable
 fun DynamicTopHeader(
+    title:String,
+    placeholder:String,
     spacing: Dp,
     fontSize: TextUnit,
     onClickSearch: () -> Unit,
@@ -237,9 +277,10 @@ fun DynamicTopHeader(
         ROw(
             modifier = Modifier.padding(6.dp)
         ) {
-            Text("Rooms", fontSize = fontSize, fontWeight = FontWeight.Bold)
+            Text(title, fontSize = fontSize, fontWeight = FontWeight.Bold)
         }
         StaticSearchBar(
+            placeholder = placeholder,
             onClick = onClickSearch,
             onClickFilter = onClickFilter
         )
@@ -255,10 +296,11 @@ fun RoomCards(
 ){
     Column(
         modifier = Modifier
-            .fillMaxHeight()
+            .clip(RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp))
+            .fillMaxSize()
             .background(Color.White)
             .verticalScroll(scrollState)
-            .padding(start = 6.dp, end = 6.dp,bottom = 90.dp),
+            .padding(start = 6.dp, end = 6.dp,bottom = 90.dp, top = 13.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         final_rooms.forEach {
@@ -276,6 +318,7 @@ fun RoomCards(
 
 @Composable
 fun StaticSearchBar(
+    placeholder:String,
     onClick: () -> Unit,
     onClickFilter:() -> Unit
 ){
@@ -303,7 +346,7 @@ fun StaticSearchBar(
                     contentDescription = "",
                     modifier = Modifier.size(30.dp)
                 )
-                Text("Search Room", fontSize = 16.sp, color = Color.Black.copy(0.6f))
+                Text(placeholder, fontSize = 16.sp, color = Color.Black.copy(0.6f))
             }
             IconButton(
                 onClick = onClickFilter
@@ -326,6 +369,7 @@ fun RoomCard(
 ) {
     val is_open = rememberSaveable { mutableStateOf<Boolean>(false) }
         Card(
+            shape = RoundedCornerShape(24.dp),
             modifier = Modifier
                 .fillMaxWidth()
                 .border(1.dp, color = Color.Black.copy(0.1f), shape = RoundedCornerShape(13.dp))
@@ -337,13 +381,14 @@ fun RoomCard(
         ) {
             Column(
                 modifier = Modifier.padding(13.dp),
-                verticalArrangement = Arrangement.spacedBy(13.dp)
             ) {
                 RoomCardHeader(
                     name = room_detail.name,
                     available_count = 4
                 )
+                Spacer(modifier = Modifier.padding(vertical = 3.dp))
                 HorizontalDivider(color = Color.Black.copy(0.1f))
+                Spacer(modifier = Modifier.padding(vertical = 6.dp))
                 RoomCardContent(
                     available = 3,
                     beds = 6,

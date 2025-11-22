@@ -109,7 +109,6 @@ import com.example.billionairehari.screens.StaticSearchBar
 import com.example.billionairehari.viewmodels.PaymentMethod
 import com.example.billionairehari.viewmodels.RecordRentFactory
 import com.example.billionairehari.viewmodels.RecordRentViewModel
-import com.example.billionairehari.viewmodels.SearchViewModel
 import com.example.billionairehari.viewmodels.TenantSearchCard
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -137,6 +136,7 @@ fun RecordRentPriceModal(
             verticalArrangement = Arrangement.spacedBy(24.dp)
         ) {
             StaticSearchBar(
+                placeholder = "Search Tenant",
                 onClick = {
                     expanded.value = true
                 },
@@ -448,10 +448,9 @@ fun SearchTenants(
     expanded: MutableState<Boolean>,
     scrollState: ScrollState,
     onSelectTenant:(TenantSearchCard) -> Unit,
-    viewmodel:SearchViewModel = viewModel()
 ){
-    val search = viewmodel.query.collectAsState()
-    val result = viewmodel.result.collectAsState()
+//    val search = viewmodel.query.collectAsState()
+//    val result = viewmodel.result.collectAsState()
 
     Column(
         modifier = Modifier.clip(RoundedCornerShape(24.dp))
@@ -462,23 +461,24 @@ fun SearchTenants(
     ) {
         SearchBar(
             expanded = expanded,
-            query = search.value,
+            query = "",
+//            query = search.value,
             onChangeQuery = {
-                viewmodel.update_query(it)
+//                viewmodel.update_query(it)
             },
             readOnly = false
         )
-        TenantsContainer(
-            onSelectTenant = {
-                onSelectTenant(it)
-            },
-            scrollState = scrollState,
-            expanded = expanded,
-            onResetSearch = {
-                viewmodel.reset_query()
-            },
-            result = result.value
-        )
+//        TenantsContainer(
+//            onSelectTenant = {
+//                onSelectTenant(it)
+//            },
+//            scrollState = scrollState,
+//            expanded = expanded,
+//            onResetSearch = {
+//                viewmodel.reset_query()
+//            },
+//            result = result.value
+//        )
     }
 }
 

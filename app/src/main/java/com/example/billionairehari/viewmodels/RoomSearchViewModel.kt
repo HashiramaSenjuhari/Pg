@@ -4,24 +4,15 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.billionairehari.model.RoomCardDetails
-import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.stateIn
 
-data class TenantSearchCard(
-    val name:String = "",
-    val room:String = "",
-    val due:Long = 0L,
-    val rent_amount:String = ""
-)
 
 val greats = listOf<RoomCardDetails>(
     RoomCardDetails(
@@ -91,10 +82,9 @@ val greats = listOf<RoomCardDetails>(
     )
 )
 
-class SearchViewModel(
+class RoomSearchViewModel(
     private val savedState: SavedStateHandle
 ): ViewModel() {
-    val id = savedState.get<String>("searchId")
     private val _query = MutableStateFlow<String>("")
     val query = _query.asStateFlow()
     val result: StateFlow<List<RoomCardDetails>> = query

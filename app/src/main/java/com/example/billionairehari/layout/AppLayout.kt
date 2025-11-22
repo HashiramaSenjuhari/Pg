@@ -1,18 +1,13 @@
 package com.example.billionairehari.layout
 
 import android.content.Intent
-import android.net.Uri
 import android.util.Log
-import androidx.compose.animation.AnimatedContentTransitionScope
 import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
-import androidx.compose.animation.core.Easing
-import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideInVertically
-import androidx.compose.animation.slideOut
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
@@ -29,8 +24,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.navigation.NavArgs
-import androidx.navigation.NavArgument
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -42,14 +35,13 @@ import com.example.billionairehari.NavigationAction
 import com.example.billionairehari.Screens
 import com.example.billionairehari.components.contacts.ContactScreen
 import com.example.billionairehari.components.sheets.SelectedType
-import com.example.billionairehari.icons.Rooms
 import com.example.billionairehari.screens.DashboardScreen
 import com.example.billionairehari.screens.RoomScreen
-import com.example.billionairehari.screens.RoomSearchComponentScreen
+import com.example.billionairehari.screens.search.RoomSearchComponentScreen
 import com.example.billionairehari.screens.RoomsScreen
 import com.example.billionairehari.screens.TenantScreen
+import com.example.billionairehari.screens.search.TenantSearchComponentScreen
 import com.example.billionairehari.screens.TenantsScreen
-import com.example.billionairehari.viewmodels.RoomViewModel
 import com.example.billionairehari.viewmodels.RoomsViewModel
 
 @Composable
@@ -111,7 +103,6 @@ fun AppLayout(
         ) {
             RoomsScreen(
                 viewmodel = hiltViewModel<RoomsViewModel>(),
-                modifier = Modifier.padding(padding),
                 navController = navController,
                 current_action = current_action,
                 current_dialog_action = current_dialog_action
@@ -243,12 +234,7 @@ fun AppLayout(
             }
         }
         composable(
-            route = Destinations.SEARCH_ROUTE,
-            arguments = listOf(
-                navArgument(name = Arguments.SEARCH_ID_ARGS){
-                    type = NavType.StringType
-                }
-            ),
+            route = Destinations.ROOM_SEARCH_ROUTE,
             enterTransition = {
                 slideInVertically(
                     initialOffsetY = { fullHeight -> fullHeight }
@@ -260,13 +246,28 @@ fun AppLayout(
                 )
             }
         ) {
-            id ->
-            val search_type = id?.arguments?.getString(Arguments.SEARCH_ID_ARGS)
             RoomSearchComponentScreen(
-                id = search_type!!,
                 modifier = Modifier.padding(padding),
                 navController = navController,
                 current_action = current_action
+            )
+        }
+        composable(
+            route = Destinations.TENANT_SEARCH_ROUTE,
+            enterTransition = {
+                slideInVertically(
+                    initialOffsetY = { fullHeight -> fullHeight }
+                ) + fadeIn()
+            },
+            exitTransition = {
+                slideOutVertically(
+                    targetOffsetY = { fullHeight -> -fullHeight }
+                )
+            }
+        ){
+            TenantSearchComponentScreen(
+                modifier = Modifier.padding(padding),
+                navController = navController,
             )
         }
     }

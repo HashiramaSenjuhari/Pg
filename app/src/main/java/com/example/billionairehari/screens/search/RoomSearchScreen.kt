@@ -1,11 +1,9 @@
-package com.example.billionairehari.screens
+package com.example.billionairehari.screens.search
 
-import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -14,7 +12,6 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
@@ -34,20 +31,22 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import com.example.billionairehari.Screens
 import com.example.billionairehari.layout.MODAL_TYPE
-import com.example.billionairehari.viewmodels.SearchViewModel
+import com.example.billionairehari.screens.RoomCard
+import com.example.billionairehari.screens.TenantCard
+import com.example.billionairehari.viewmodels.RoomSearchViewModel
+import com.example.billionairehari.viewmodels.TenantSearchViewModel
 
 @Composable
 fun RoomSearchComponentScreen(
-    id:String,
     modifier: Modifier = Modifier,
     current_action: MutableState<MODAL_TYPE>,
-    viewmodel: SearchViewModel = viewModel(),
-    navController: NavController
+    navController: NavController,
+    viewmodel: RoomSearchViewModel = viewModel(),
 ){
     val text = remember { mutableStateOf<String>("") }
     val query = viewmodel.query.collectAsState()
@@ -109,6 +108,7 @@ fun RoomSearchComponentScreen(
 
     }
 }
+
 
 @Composable
 fun SearchInput(

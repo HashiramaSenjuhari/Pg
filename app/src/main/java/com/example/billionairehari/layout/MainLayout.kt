@@ -51,6 +51,7 @@ import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.example.billionairehari.Destinations
 import com.example.billionairehari.NavigationAction
 import com.example.billionairehari.components.dashboard.RoomSheet
 import com.example.billionairehari.components.dashboard.TopBar
@@ -136,6 +137,8 @@ fun MainLayout(
         wc.isAppearanceLightStatusBars = true
     }
 
+    Log.d("Path",path);
+
     Scaffold(
         modifier = Modifier.fillMaxSize().padding(0.dp),
         containerColor = Color.White,
@@ -152,7 +155,7 @@ fun MainLayout(
             )
         },
         bottomBar = {
-            if(route_size === 1){
+            if(route_size === 1 && !path.contains("_search")){
                 BottomBar(navigation = navigation)
             }
         },

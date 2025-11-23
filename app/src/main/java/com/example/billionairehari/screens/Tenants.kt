@@ -25,6 +25,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.LazyRow
@@ -293,7 +294,8 @@ fun TenantCard(
                 verticalArrangement = Arrangement.spacedBy(6.dp)
             ) {
                 Row(
-                    horizontalArrangement = Arrangement.spacedBy(6.dp)
+                    modifier = Modifier.width(190.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween
                 ) {
                     Text(
                         name,
@@ -301,6 +303,7 @@ fun TenantCard(
                     )
                     Badge(
                         modifier = Modifier
+                            .width(80.dp)
                             .background(Brush.horizontalGradient(colors = listOf(Color.White,color,color,Color.White)))
                             .padding(horizontal = 13.dp),
                         containerColor = Color.Transparent

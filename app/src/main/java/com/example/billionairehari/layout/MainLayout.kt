@@ -155,7 +155,10 @@ fun MainLayout(
         },
         bottomBar = {
             if(route_size === 1 && !path.contains("_search")){
-                BottomBar(navigation = navigation)
+                BottomBar(
+                    route = destination?.route ?: "dashboard",
+                    navigation = navigation
+                )
             }
         },
         floatingActionButton = {

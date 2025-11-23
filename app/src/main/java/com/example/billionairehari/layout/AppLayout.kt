@@ -113,7 +113,7 @@ fun AppLayout(
             exitTransition = {
                 slideOutHorizontally(
                     targetOffsetX = { fullWidth -> -fullWidth }
-                ) + fadeOut()
+                )
             }
         ){
             entry ->

@@ -128,7 +128,7 @@ fun MainLayout(
     // destination
     val route = destination?.route?.split("/")
     val route_size = route?.size ?: 0
-    val path = destination?.route ?: ""
+    val path = route?.get(0) ?: ""
 
     val activity = LocalView.current.context as Activity
     SideEffect {
@@ -137,7 +137,6 @@ fun MainLayout(
         wc.isAppearanceLightStatusBars = true
     }
 
-    Log.d("Path",path);
 
     Scaffold(
         modifier = Modifier.fillMaxSize().padding(0.dp),
@@ -224,7 +223,7 @@ fun HeaderBar(name:String,onNavigate:() -> Unit){
         },
         title = {
             ROw {
-                Text("Tenant", fontSize = 16.sp)
+                Text(name, fontSize = 16.sp)
             }
         },
         colors = TopAppBarDefaults.topAppBarColors(
@@ -242,6 +241,7 @@ fun FloatingButton(
     is_open: MutableState<Boolean>,
     current_action: MutableState<MODAL_TYPE>
 ){
+    Log.d("Floating","${route_size}${path}")
     if(route_size == 1 && path == "rooms"){
         FloatingActionButton(
             onClick = {
@@ -268,7 +268,7 @@ fun FloatingButton(
             Icon(Icons.Default.Add, contentDescription = "")
         }
     }
-    if(path == "tenants"){
+    if(route?.size == 1 && path == "tenants"){
         FloatingActionButton(
             onClick = {
                 current_action.value = MODAL_TYPE.ADD_TENANT()
@@ -318,14 +318,15 @@ fun Header(
     path: String,
     navController: NavHostController
 ){
-//    if(route_size >= 2 && path != "search"){
-//        HeaderBar(
-//            name = path.replaceFirstChar { it.uppercaseChar() },
-//            onNavigate = {
-//                navController.navigate(path)
-//            }
-//        )
-//    }
+    Log.d("Header","${path}${route_size}")
+    if(route_size >= 2 && path != "search"){
+        HeaderBar(
+            name = path.replaceFirstChar { it.uppercaseChar() },
+            onNavigate = {
+                navController.navigate(path)
+            }
+        )
+    }
 }
 
 

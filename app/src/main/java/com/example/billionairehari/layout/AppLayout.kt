@@ -81,24 +81,6 @@ fun AppLayout(
             )
         }
         composable(
-            route = Destinations.CONTACTS_ROUTE,
-            enterTransition = {
-                slideInHorizontally(
-                    initialOffsetX = { fullWidth -> fullWidth }
-                ) + fadeIn()
-            },
-            exitTransition = {
-                slideOutHorizontally(
-                    targetOffsetX = { fullWidth -> -fullWidth }
-                ) + fadeOut()
-            }
-        ){
-            ContactScreen(
-                navCotroller = navController,
-                modifier = Modifier.padding(padding)
-            )
-        }
-        composable(
             route = Destinations.ROOMS_ROUTE
         ) {
             RoomsScreen(

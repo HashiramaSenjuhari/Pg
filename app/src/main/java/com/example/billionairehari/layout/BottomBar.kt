@@ -51,9 +51,9 @@ fun BottomBar(navigation: NavigationAction){
         MainBar(id = 2,name = "Tenants",route = "tenants",icon = TenantsIcon, navigation = {
             navigation.navigateToTenants()
         }),
-        MainBar(id = 3,name = "Tickets",route = "tickets",icon = TicketsIcon,navigation = {
-            navigation.navigateToContacts()
-        })
+//        MainBar(id = 3,name = "Tickets",route = "tickets",icon = TicketsIcon,navigation = {
+//            navigation.navigateToContacts()
+//        })
     )
 
     val selectedDestination = rememberSaveable { mutableStateOf(bars[0].name) }

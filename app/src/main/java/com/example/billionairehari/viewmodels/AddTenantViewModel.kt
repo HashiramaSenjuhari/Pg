@@ -11,8 +11,6 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 data class TenantData (
-    val name:String = "",
-    val nameError:String? = null,
     val image: ByteArray? = null,
     val imageError:String? = null,
     val phone:String = "",
@@ -21,10 +19,23 @@ data class TenantData (
     val roomError:String? = null,
     val date:Long = 0L,
     val dateError:String? = null,
+
     val first_month_rent:Boolean = false,
     val security_deposit: Boolean = false,
     val automatic_remainder:Boolean = false,
-    val isLoading:Boolean = false
+
+    val isLoading:Boolean = false,
+
+    /** KYC **/
+    val aadhar:String = "",
+    val aadharError:String? = null,
+
+    val isSendingOtp:Boolean = false,
+    val sendingOtpError:String? = null,
+    val isOptSent:Boolean = false,
+
+    val isVerfyingOtp:Boolean = false,
+    val otpError:String? = null,
 )
 
 class AddTenantViewModel(
@@ -34,9 +45,6 @@ class AddTenantViewModel(
         private set
 
     /** update value **/
-    fun update_name(name:String){
-        tenant.value = tenant.value.copy(name = name, nameError = null)
-    }
     fun update_image(image: ByteArray?) {
         tenant.value = tenant.value.copy(image = image, imageError = null)
     }
@@ -59,19 +67,40 @@ class AddTenantViewModel(
         tenant.value = tenant.value.copy(automatic_remainder = remainder)
     }
 
+    fun verify_aadhar(aadhar:String){
+        if(aadhar.trim().length < 12){
+            tenant.value = tenant.value.copy(aadharError = "Please enter valid aadhar number")
+            return
+        }
+        tenant.value = tenant.value.copy(isSendingOtp = true, aadharError = null)
+        viewModelScope.launch {
+            try {
+                delay(4000)
+                /** CALL SEND OTP FUNCTION **/
+                tenant.value = tenant.value.copy(sendingOtpError = null, isOptSent = true)
+            }catch (error: Exception){
+                tenant.value = tenant.value.copy(sendingOtpError = error.toString())
+            }finally{
+                tenant.value = tenant.value.copy(isSendingOtp = false)
+            }
+        }
+    }
+
+    fun verify_opt(otp:String): Boolean {
+        return true
+    }
+
     fun remove_image(){
         tenant.value = tenant.value.copy(image = null)
     }
     /** upload to repository **/
     fun submit(){
         tenant.value = tenant.value.copy(
-            nameError = validateName(tenant.value.name),
             phoneNumberError = validatePhoneNumber(tenant.value.phone),
             roomError = validateRoom(tenant.value.room),
             dateError = validateDate(tenant.value.date)
         )
-        if(tenant.value.nameError != null
-            || tenant.value.phoneNumberError != null
+        if(tenant.value.phoneNumberError != null
             || tenant.value.roomError != null
             || tenant.value.dateError != null){
             return

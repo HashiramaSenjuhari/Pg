@@ -173,6 +173,42 @@ val PhoneNumberTransformation = VisualTransformation { text ->
     )
 }
 
+val AadharNumberTransformation = VisualTransformation { text ->
+    val trimmed = text.text.take(12)
+    val aadhar = buildString {
+        for(i in trimmed.indices){
+            append(trimmed[i])
+            if((i + 1) % 4 === 0 && i !== trimmed.lastIndex){
+                append(" ")
+            }
+        }
+    }
+
+    val aadharOffset = object : OffsetMapping {
+        override fun originalToTransformed(offset: Int): Int {
+            return when(offset){
+                in 0..4 -> offset
+                in 5..8 -> offset + 1
+                in 9..12 -> offset + 2
+                else -> offset + 3
+            }
+        }
+
+        override fun transformedToOriginal(offset: Int): Int {
+            return when(offset){
+                in 0..5 -> offset
+                in 6..10 -> offset - 1
+                in 11..15 -> offset - 2
+                else -> offset - 3
+            }
+        }
+    }
+    TransformedText(
+        text = AnnotatedString(aadhar),
+        offsetMapping = aadharOffset
+    )
+}
+
 @Composable
 fun OutlinedInput(
     label:String,

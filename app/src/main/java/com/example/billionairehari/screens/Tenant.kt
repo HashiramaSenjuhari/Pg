@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -94,7 +95,6 @@ import com.google.android.material.chip.Chip
 
 val tenantDropDowns = listOf<DropDownParams>(
     DropDownParams(name = "Update Tenant", icon = IconType.Vector(Icons.Outlined.Edit), onClick = {}),
-    DropDownParams(name = "Add Addtional Info", icon = IconType.Vector(Icons.Outlined.Add), onClick = {}),
     DropDownParams(name = "Delete", icon = IconType.Vector(Icons.Outlined.Delete), onClick = {})
 )
 
@@ -112,7 +112,7 @@ fun TenantScreen(
         label = "Tenants",
         modifier = Modifier.then(modifier),
         contentModifier = Modifier.padding(horizontal = 13.dp),
-        verticalArrangement = 24.dp,
+        verticalArrangement = 13.dp,
         trailingContent = {
             DropDownButton(
                 icon = Icons.Outlined.MoreVert,
@@ -127,6 +127,7 @@ fun TenantScreen(
             TenantProfileBar()
         }
         TenantRentDetail()
+        CompleteTenantInfo()
         TenantDetailShowcase(
             title = "Personal",
             details = listOf(
@@ -182,6 +183,33 @@ fun TenantScreen(
                 .background(Color.Blue)
                 .padding(vertical = 24.dp)
         )
+    }
+}
+
+@Composable
+fun CompleteTenantInfo(){
+    ROw(
+        modifier = Modifier
+            .clip(CircleShape)
+            .border(1.dp, color = Color.Black.copy(0.1f), shape = CircleShape)
+            .fillMaxWidth()
+            .padding(start = 13.dp, end = 6.dp),
+        horizontalArrangement = Arrangement.SpaceBetween
+    ) {
+        Text(
+            "Complete the Tenant Profile Information",
+            fontSize = 13.sp,
+            color = Color.Black.copy(0.6f)
+        )
+        AppButton(
+            onClick = {},
+            shape = CircleShape,
+            containerColor = Color.Black.copy(0.8f),
+            contentColor = Color.White,
+            padding = PaddingValues(horizontal = 13.dp)
+        ) {
+            Text("Complete", fontSize = 13.sp)
+        }
     }
 }
 
@@ -290,9 +318,9 @@ fun TenantDetailsLayout(
     ) {
         Column(
             modifier = Modifier.padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(13.dp)
+            verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            Text(title, fontWeight = FontWeight.SemiBold)
+            Text(title, fontWeight = FontWeight.SemiBold, fontSize = 16.sp)
             Column(
                 verticalArrangement = Arrangement.spacedBy(13.dp),
                 modifier = Modifier.padding(vertical = 6.dp)

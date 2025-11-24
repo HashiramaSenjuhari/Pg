@@ -37,10 +37,7 @@ fun AddTenantWithRoomName(
     val deposit = remember { mutableStateOf<Boolean>(false) }
     val auto_remainder = remember { mutableStateOf<Boolean>(false) }
     Mannual(
-        name = name.value,
-        update_name = {
-            name.value = it
-        },
+
         phone = phone.value,
         update_phone = {
             phone.value = it
@@ -54,6 +51,7 @@ fun AddTenantWithRoomName(
             deposit.value = it
         },
         image = image.value,
+        aadhar = "",
         update_image = {
             image.value = it
         },
@@ -69,7 +67,7 @@ fun AddTenantWithRoomName(
         update_auto_remainder = {
             auto_remainder.value = it
         },
-        name_error = "",
+        update_aadhar = {},
         phone_error = "",
         room_error = "",
         remove_image = {
@@ -84,6 +82,14 @@ fun AddTenantWithRoomName(
 
         },
         scrollState = scrollState,
-        onDial = {}
+        onDial = {},
+        otp = "",
+        VerifyOtp = {},
+        SendOtp = {},
+        update_otp = {},
+        loadingOtp = false,
+        verifyingOtp = false,
+        isOtpSent = false,
+        aadhar_error = null
     )
 }

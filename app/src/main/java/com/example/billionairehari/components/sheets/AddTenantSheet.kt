@@ -5,6 +5,7 @@ import android.content.Intent
 import android.graphics.Bitmap
 import android.net.Uri
 import android.util.Log
+import android.widget.Toast
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.updateTransition
 import androidx.compose.foundation.BorderStroke
@@ -16,6 +17,7 @@ import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -65,6 +67,7 @@ import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.VerticalDivider
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableStateOf
@@ -80,13 +83,17 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.modifier.modifierLocalConsumer
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.VisualTransformation
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
@@ -95,6 +102,7 @@ import androidx.core.text.isDigitsOnly
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.viewmodel.compose.LocalViewModelStoreOwner
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.billionairehari.components.AadharNumberTransformation
 import com.example.billionairehari.components.Activate
 import com.example.billionairehari.components.AppButton
 import com.example.billionairehari.components.DateInput
@@ -116,6 +124,7 @@ import com.example.billionairehari.viewmodels.AddTenantFactory
 import com.example.billionairehari.viewmodels.AddTenantViewModel
 import com.google.android.material.tabs.TabLayout
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 
@@ -133,25 +142,23 @@ fun TenantSheet(
         factory = AddTenantFactory(room = room),
         viewModelStoreOwner = owner!!
     )
-    val nameError = rememberSaveable { mutableStateOf<String?>(null) }
-    val roomError = rememberSaveable { mutableStateOf<String?>(null) }
-    val dateError = rememberSaveable { mutableStateOf<String?>(null) }
-    val phoneError = rememberSaveable { mutableStateOf<String?>(null) }
+    val aadhar = remember { mutableStateOf("") }
+    val otp = remember { mutableStateOf("") }
 
     val tenant = viewmodel.tenant.value
 
     val errors = tenant
 
     Mannual(
-        name = tenant.name,
         room =  tenant.room,
         phone = tenant.phone,
         image = tenant.image,
+        aadhar = aadhar.value,
+        otp = otp.value,
         joining_date = tenant.date,
         rent_paid = tenant.first_month_rent,
         deposit_paid = tenant.security_deposit,
         auto_remainder = tenant.automatic_remainder,
-        update_name = { viewmodel.update_name(it) },
         update_room = { viewmodel.update_room(it) },
         update_phone = { viewmodel.update_phone(it) },
         update_image = { viewmodel.update_image(it) },
@@ -159,8 +166,10 @@ fun TenantSheet(
         update_deposit_paid = { viewmodel.update_security_deposit(it) },
         update_joining_date = { viewmodel.update_date(it) },
         update_auto_remainder = { viewmodel.update_automatic_remainder(it) },
+        update_aadhar = { aadhar.value = it },
+        update_otp = { otp.value = it },
 
-        name_error = errors.nameError,
+        aadhar_error = errors.aadharError,
         phone_error = errors.phoneNumberError,
         room_error = errors.roomError,
         joining_date_error = errors.dateError,
@@ -169,8 +178,22 @@ fun TenantSheet(
         onReset = {},
         onDial = { dial(tenant.phone, context = context) },
         onSubmit = { viewmodel.submit() },
+        scrollState = scrollState,
+
+        SendOtp = {
+            viewmodel.verify_aadhar(aadhar = aadhar.value)
+        },
+        VerifyOtp = {
+            viewmodel.verify_opt(otp = otp.value)
+        },
+
+        /** loading **/
         isLoading = tenant.isLoading,
-        scrollState = scrollState
+        loadingOtp = tenant.isSendingOtp,
+        verifyingOtp = tenant.isVerfyingOtp,
+
+        /** open **/
+        isOtpSent = tenant.isOptSent
     )
 }
 
@@ -186,10 +209,6 @@ val fakeItems = listOf(
 
 @Composable
 fun Mannual(
-    name:String,
-    update_name:(String) -> Unit,
-    name_error:String? = null,
-
     phone:String,
     update_phone:(String) -> Unit,
     phone_error:String? = null,
@@ -212,162 +231,258 @@ fun Mannual(
     update_image:(ByteArray) -> Unit,
     remove_image:() -> Unit,
 
+    aadhar:String,
+    update_aadhar:(String) -> Unit,
+    aadhar_error:String?,
+
+    otp:String,
+    update_otp:(String) -> Unit,
+
+    /** loading **/
+    loadingOtp:Boolean,
+    verifyingOtp:Boolean,
+    isOtpSent:Boolean,
+
     auto_remainder:Boolean,
     update_auto_remainder:(Boolean) -> Unit,
+
+    SendOtp:() -> Unit,
+    VerifyOtp:() -> Unit,
 
     onReset:() -> Unit,
     onSubmit:() -> Unit,
     isLoading:Boolean,
-    scrollState: ScrollState,
-    onDial:() -> Unit
-){
-    Column (
-        modifier = Modifier.fillMaxHeight()
-            .verticalScroll(scrollState)
-            .animateContentSize()
-            .padding(vertical = 6.dp),
-        verticalArrangement = Arrangement.SpaceBetween
-    ){
-        Column(
-            modifier = Modifier.fillMaxHeight(),
-            verticalArrangement = Arrangement.spacedBy(24.dp),
-        ) {
-            Column(
-                verticalArrangement = Arrangement.spacedBy(16.dp)
-            ) {
-                PhotoPick(
-                    onImageChange = {
-                            value ->
-                        update_image(value)
-                    },
-                    image = image,
-                    onRemoveImage = {
-                        remove_image()
-                    }
-                )
-            }
-            /* name */
-            OutlinedInput(
-                label = "Name",
-                onValueChange = {
-                    update_name(it) },
-                leadingIcon = Icons.Outlined.Person,
-                value = name,
-                modifier = Modifier.fillMaxWidth(),
-                error = name_error
-            )
-            /* phone number */
-            OutlinedInput(
-                label = "Phone Number",
-                keyBoardType = KeyboardType.Phone,
-                onValueChange = {
-                    update_phone(it)
-                } ,
-                value =  phone,
-                leadingIcon = Icons.Outlined.Call,
-                leadingIconInput = {
-                    ROw(
-                        modifier = Modifier.padding(start = 13.dp, end = 6.dp),
-                        horizontalArrangement = Arrangement.spacedBy(13.dp)
-                    ) {
-                        Text("+91")
-                        VerticalDivider(modifier = Modifier.height(24.dp))
-                    }
-                },
-                trailingIcon = {
-                    Box(
-                        modifier = Modifier.padding(horizontal = 6.dp)
-                    ) {
-                        AppButton(
-                            onClick = onDial
-                        ) {
-                            Text("Verify", fontSize = 12.sp)
-                        }
-                    }
-                },
-                modifier = Modifier.fillMaxWidth(),
-                maxLength = 10,
-                tranformation = PhoneNumberTransformation,
-                type = InputType.NUMBER,
-                error = phone_error
-            )
-            /* room and date */
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(13.dp),
-                verticalAlignment = Alignment.Top
-            ) {
-                DropDown(
-                    label = "Choose Room",
-                    is_important = true,
-                    error = room_error,
-                    items =  fakeItems,
-                    onChangeValue = {
-                        update_room(it)
-                    },
-                    value = if(room.isEmpty()) "Select Room"
-                    else room,
-                    size = 0.5f
-                )
-                DateInput(
-                    label = "Joining Date",
-                    onDate = {
-                        update_joining_date(it) },
-                    modifier = Modifier.fillMaxWidth(),
-                    date = joining_date,
-                    error = joining_date_error
-                )
-            }
+    onDial:() -> Unit,
 
-            /* first month and deposit */
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(24.dp)
+    scrollState: ScrollState,
+){
+    val sendOtp = remember { mutableStateOf(false) }
+    val context = LocalContext.current
+
+    Column(
+        modifier = Modifier.fillMaxHeight(),
+        verticalArrangement = Arrangement.SpaceBetween
+    ) {
+        Column (
+            modifier = Modifier
+                .verticalScroll(scrollState)
+                .animateContentSize()
+                .padding(vertical = 6.dp),
+        ){
+            Column(
+                modifier = Modifier.fillMaxHeight(),
+                verticalArrangement = Arrangement.spacedBy(24.dp),
             ) {
                 Column(
-                    modifier = Modifier.weight(0.5f)
+                    verticalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
-                    Label(
-                        name = "Rent  (First Month)",
-                        fontSize =13.sp
-                    )
-                    Spacer(
-                        modifier = Modifier.height(13.dp)
-                    )
-                    SelectOption(
-                        selectedOption = rent_paid,
-                        onValueChange = {
-                            update_rent_paid(it)
+                    PhotoPick(
+                        onImageChange = {
+                                value ->
+                            update_image(value)
+                        },
+                        image = image,
+                        onRemoveImage = {
+                            remove_image()
                         }
                     )
                 }
                 Column(
-                    modifier = Modifier.weight(0.5f)
+                    verticalArrangement = Arrangement.spacedBy(13.dp)
                 ) {
-                    Label(
-                        name = "Security Deposit",
-                        fontSize =13.sp
-                    )
-                    Spacer(
-                        modifier = Modifier.height(13.dp)
-                    )
-                    SelectOption(
-                        selectedOption = deposit_paid,
+                    OutlinedInput(
+                        leadingIcon = Icons.Outlined.Person,
+                        label = "Aadhar Number",
+                        value = aadhar,
                         onValueChange = {
-                            update_deposit_paid(it)
-                        }
+                            update_aadhar(it)
+                        },
+                        maxLength = 12,
+                        type = InputType.NUMBER,
+                        keyBoardType = KeyboardType.Number,
+                        tranformation = AadharNumberTransformation,
+                        modifier = Modifier.fillMaxWidth(),
+                        trailingIcon = {
+                            AppButton(
+                                padding = PaddingValues(horizontal = 13.dp),
+                                onClick = SendOtp,
+                            ) {
+                                if(loadingOtp){
+                                    CircularProgressIndicator(modifier = Modifier.size(24.dp), strokeWidth = 1.dp)
+                                }else {
+                                    Text("Send OTP", fontSize = 12.sp)
+                                }
+                            }
+                        },
+                        readOnly = loadingOtp,
+                        error = aadhar_error
                     )
-                }
-            }
-            ROw(
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Text("Automatic Rent Remaninder", fontSize =16.sp, fontWeight = FontWeight.Medium)
-                Activate(
-                    checked = auto_remainder,
-                    onCheckChange = {
-                        update_auto_remainder(it)
+                    if(isOtpSent){
+                        val time = remember { mutableStateOf(10) }
+                        LaunchedEffect(
+                            time.value
+                        ) {
+                            if(time.value > 0){
+                                delay(1000)
+                                time.value -= 1
+                            }
+                        }
+                        Column(
+                            horizontalAlignment = Alignment.End,
+                            verticalArrangement = Arrangement.spacedBy(6.dp)
+                        ) {
+                            OutlinedInput(
+                                leadingIcon = Icons.Default.Person,
+                                label = "OTP",
+                                value = otp,
+                                onValueChange = {
+                                    update_otp(it)
+                                },
+                                maxLength = 12,
+                                type = InputType.NUMBER,
+                                keyBoardType = KeyboardType.Number,
+                                tranformation = AadharNumberTransformation,
+                                modifier = Modifier.fillMaxWidth(),
+                                trailingIcon = {
+                                    AppButton(
+                                        padding = PaddingValues(horizontal = 13.dp),
+                                        onClick = VerifyOtp,
+                                    ) {
+                                        Text("Verify OTP", fontSize = 12.sp)
+                                    }
+                                }
+                            )
+                            if(time.value > 0){
+                                Text("Reset password in 0:${time.value.toString().padStart(2,'0')}", fontSize = 13.sp,color = Color.Red)
+                            }else {
+                                Text(
+                                    "Resend OTP",
+                                    textDecoration = TextDecoration.Underline,
+                                    modifier =  Modifier.clickable(
+                                        onClick = {
+                                            Toast.makeText(context,"Resent OTP to phone number",Toast.LENGTH_SHORT).show()
+                                            time.value = 10
+                                        }
+                                    )
+                                )
+                            }
+                        }
                     }
-                )
+                    /* phone number */
+                    OutlinedInput(
+                        label = "Phone Number",
+                        keyBoardType = KeyboardType.Phone,
+                        onValueChange = {
+                            update_phone(it)
+                        } ,
+                        value =  phone,
+                        leadingIcon = Icons.Outlined.Call,
+                        leadingIconInput = {
+                            ROw(
+                                modifier = Modifier.padding(start = 13.dp, end = 6.dp),
+                                horizontalArrangement = Arrangement.spacedBy(13.dp)
+                            ) {
+                                Text("+91")
+                                VerticalDivider(modifier = Modifier.height(24.dp))
+                            }
+                        },
+                        trailingIcon = {
+                            Box(
+                                modifier = Modifier.padding(horizontal = 6.dp)
+                            ) {
+                                AppButton(
+                                    onClick = onDial
+                                ) {
+                                    Text("Verify", fontSize = 12.sp)
+                                }
+                            }
+                        },
+                        modifier = Modifier.fillMaxWidth(),
+                        maxLength = 10,
+                        tranformation = PhoneNumberTransformation,
+                        type = InputType.NUMBER,
+                        error = phone_error
+                    )
+
+                }
+                /* room and date */
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(13.dp),
+                    verticalAlignment = Alignment.Top
+                ) {
+                    DropDown(
+                        label = "Choose Room",
+                        is_important = true,
+                        error = room_error,
+                        items =  fakeItems,
+                        onChangeValue = {
+                            update_room(it)
+                        },
+                        value = if(room.isEmpty()) "Select Room"
+                        else room,
+                        size = 0.5f
+                    )
+                    DateInput(
+                        label = "Joining Date",
+                        onDate = {
+                            update_joining_date(it) },
+                        modifier = Modifier.fillMaxWidth(),
+                        date = joining_date,
+                        error = joining_date_error
+                    )
+                }
+
+                /* first month and deposit */
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(24.dp)
+                ) {
+                    Column(
+                        modifier = Modifier.weight(0.5f)
+                    ) {
+                        Label(
+                            name = "Rent  (First Month)",
+                            fontSize =13.sp
+                        )
+                        Spacer(
+                            modifier = Modifier.height(13.dp)
+                        )
+                        SelectOption(
+                            selectedOption = rent_paid,
+                            onValueChange = {
+                                update_rent_paid(it)
+                            }
+                        )
+                    }
+                    Column(
+                        modifier = Modifier.weight(0.5f)
+                    ) {
+                        Label(
+                            name = "Security Deposit",
+                            fontSize =13.sp
+                        )
+                        Spacer(
+                            modifier = Modifier.height(13.dp)
+                        )
+                        SelectOption(
+                            selectedOption = deposit_paid,
+                            onValueChange = {
+                                update_deposit_paid(it)
+                            }
+                        )
+                    }
+                }
+                ROw(
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text("Automatic Rent Remaninder", fontSize =16.sp, fontWeight = FontWeight.Medium)
+                    Activate(
+                        checked = auto_remainder,
+                        onCheckChange = {
+                            update_auto_remainder(it)
+                        }
+                    )
+                }
             }
         }
         FormButton(

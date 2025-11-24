@@ -24,6 +24,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.billionairehari.Screens
+import com.example.billionairehari.layout.ChildLayout
 import com.example.billionairehari.screens.TenantCard
 import com.example.billionairehari.viewmodels.TenantSearchViewModel
 
@@ -46,6 +47,7 @@ fun TenantSearchComponentScreen(
     val results = viewmodel.result.collectAsStateWithLifecycle()
     val tenants = results.value
     val scrollState = rememberScrollState()
+
 
     Column(
         modifier = Modifier

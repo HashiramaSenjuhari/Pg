@@ -121,7 +121,7 @@ fun AppLayout(
             Log.d("Billionaire",tenantId)
             TenantScreen(
                 id = tenantId,
-                modifier = Modifier.padding(padding).fillMaxSize().background(Color(0xFFF6F6F6)),
+                modifier = Modifier.padding(padding).fillMaxSize(),
                 context = context,
                 onNavigateToHistory = {
                     navController.navigate("${Screens.TENANT_RENT_SCREEN}/1")

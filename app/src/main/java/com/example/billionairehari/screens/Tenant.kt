@@ -79,6 +79,7 @@ import com.example.billionairehari.components.AppButton
 import com.example.billionairehari.components.contacts.dial
 import com.example.billionairehari.icons.CalendarIcon
 import com.example.billionairehari.icons.TenantIcon
+import com.example.billionairehari.layout.ChildLayout
 import com.example.billionairehari.layout.component.ROw
 import com.example.billionairehari.viewmodels.TenantViewModel
 import com.google.android.material.chip.Chip
@@ -92,10 +93,12 @@ fun TenantScreen(
 ) {
     val state_id = hiltViewModel<TenantViewModel>()
     val scrollState = rememberScrollState()
-    Column(
-        modifier = Modifier.then(modifier).padding(horizontal = 13.dp)
-            .verticalScroll(state = scrollState),
-        verticalArrangement = Arrangement.spacedBy(24.dp)
+
+    ChildLayout(
+        label = "Tenants",
+        modifier = Modifier.then(modifier),
+        contentModifier = Modifier.padding(horizontal = 13.dp),
+        verticalArrangement = 13.dp
     ) {
         Column(
             modifier = Modifier.padding(top = 13.dp)

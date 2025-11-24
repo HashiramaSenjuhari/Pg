@@ -4,6 +4,7 @@ import android.graphics.drawable.VectorDrawable
 import android.util.Log
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -12,6 +13,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
@@ -37,6 +39,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AccountBox
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Call
@@ -131,6 +134,7 @@ import com.example.billionairehari.icons.DeleteIcon
 import com.example.billionairehari.icons.EditIcon
 import com.example.billionairehari.icons.ShareIcon
 import com.example.billionairehari.icons.TenantIcon
+import com.example.billionairehari.layout.ChildLayout
 import com.example.billionairehari.layout.MODAL_TYPE
 import com.example.billionairehari.layout.component.ROw
 import com.example.billionairehari.model.Room
@@ -162,23 +166,22 @@ fun RoomScreen(
     onTenantNavigate:(String) -> Unit
 ) {
     val room = hiltViewModel<RoomViewModel>()
-    val scrollState = rememberScrollState()
     val is_more = remember { mutableStateOf<Boolean>(false) }
-    Column(
+
+
+    val photos = listOf(
+        "https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fi.pinimg.com%2Foriginals%2F6d%2F80%2F73%2F6d80739dc844d81325c81a73d3fa5cc6.jpg&f=1&nofb=1&ipt=e7fb2752441029b26dce1e075c76003253d17a36339ef2aa990c536d77173484\"",
+        "https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fi.pinimg.com%2Foriginals%2F6d%2F80%2F73%2F6d80739dc844d81325c81a73d3fa5cc6.jpg&f=1&nofb=1&ipt=e7fb2752441029b26dce1e075c76003253d17a36339ef2aa990c536d77173484\"",
+        "https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fi.pinimg.com%2Foriginals%2F6d%2F80%2F73%2F6d80739dc844d81325c81a73d3fa5cc6.jpg&f=1&nofb=1&ipt=e7fb2752441029b26dce1e075c76003253d17a36339ef2aa990c536d77173484\"",
+        "https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fi.pinimg.com%2Foriginals%2F6d%2F80%2F73%2F6d80739dc844d81325c81a73d3fa5cc6.jpg&f=1&nofb=1&ipt=e7fb2752441029b26dce1e075c76003253d17a36339ef2aa990c536d77173484\""
+    )
+    val pagerState = rememberPagerState(initialPage = 0, pageCount = {
+        photos.size
+    })
+    ChildLayout(
+        label = "Rooms",
         modifier = Modifier.then(modifier)
-            .wrapContentHeight()
-            .background(Color.White)
-            .verticalScroll(state = scrollState)
-    ) {
-        val photos = listOf(
-            "https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fi.pinimg.com%2Foriginals%2F6d%2F80%2F73%2F6d80739dc844d81325c81a73d3fa5cc6.jpg&f=1&nofb=1&ipt=e7fb2752441029b26dce1e075c76003253d17a36339ef2aa990c536d77173484\"",
-            "https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fi.pinimg.com%2Foriginals%2F6d%2F80%2F73%2F6d80739dc844d81325c81a73d3fa5cc6.jpg&f=1&nofb=1&ipt=e7fb2752441029b26dce1e075c76003253d17a36339ef2aa990c536d77173484\"",
-            "https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fi.pinimg.com%2Foriginals%2F6d%2F80%2F73%2F6d80739dc844d81325c81a73d3fa5cc6.jpg&f=1&nofb=1&ipt=e7fb2752441029b26dce1e075c76003253d17a36339ef2aa990c536d77173484\"",
-            "https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fi.pinimg.com%2Foriginals%2F6d%2F80%2F73%2F6d80739dc844d81325c81a73d3fa5cc6.jpg&f=1&nofb=1&ipt=e7fb2752441029b26dce1e075c76003253d17a36339ef2aa990c536d77173484\""
-        )
-        val pagerState = rememberPagerState(initialPage = 0, pageCount = {
-            photos.size
-        })
+    ){
         Box(
             modifier = Modifier.fillMaxWidth().height(240.dp).zIndex(0f)
         ){
@@ -275,6 +278,7 @@ fun RoomScreen(
         )
     }
 }
+
 
 data class DropDownParams(
     val name:String,

@@ -146,13 +146,13 @@ fun MainLayout(
                 snackbarHostState = snackbarHost
             )
         },
-        topBar = {
-            Header(
-                route_size = route_size,
-                path = path,
-                navController = navController
-            )
-        },
+//        topBar = {
+//            Header(
+//                route_size = route_size,
+//                path = path,
+//                navController = navController
+//            )
+//        },
         bottomBar = {
             if(route_size === 1 && !path.contains("_search")){
                 BottomBar(

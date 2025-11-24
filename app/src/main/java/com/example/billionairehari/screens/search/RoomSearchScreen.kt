@@ -18,6 +18,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableStateOf
@@ -25,6 +26,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.ui.focus.onFocusEvent
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
@@ -48,6 +53,13 @@ fun RoomSearchComponentScreen(
     navController: NavController,
     viewmodel: RoomSearchViewModel = viewModel(),
 ){
+    /** Focus Requester **/
+    val focusRequester = remember { FocusRequester() }
+
+    LaunchedEffect(Unit) {
+        focusRequester.requestFocus()
+    }
+
     val text = remember { mutableStateOf<String>("") }
     val query = viewmodel.query.collectAsState()
     val results = viewmodel.result.collectAsStateWithLifecycle()
@@ -65,7 +77,8 @@ fun RoomSearchComponentScreen(
             query = query.value,
             onChangeValue = {
                 viewmodel.update_query(it)
-            }
+            },
+            focus = focusRequester
         )
         Column(
             modifier = Modifier
@@ -99,13 +112,14 @@ fun RoomSearchComponentScreen(
                         RoomCard(
                             current_action = current_action,
                             room_detail = room,
-                            onClick = {}
+                            onClick = {
+                                navController.navigate("rooms/${room.id}")
+                            }
                         )
                     }
                 }
             }
         }
-
     }
 }
 
@@ -113,7 +127,8 @@ fun RoomSearchComponentScreen(
 @Composable
 fun SearchInput(
     query:String,
-    onChangeValue:(String) -> Unit
+    onChangeValue:(String) -> Unit,
+    focus: FocusRequester
 ){
     TextField(
         value = query,
@@ -133,7 +148,8 @@ fun SearchInput(
                     color = Color.Black,
                     strokeWidth = 1f
                 )
-            }.padding(horizontal = 6.dp),
+            }.padding(horizontal = 6.dp)
+            .focusRequester(focusRequester = focus),
         colors = TextFieldDefaults.colors(
             focusedContainerColor = Color.White,
             unfocusedContainerColor = Color.White,

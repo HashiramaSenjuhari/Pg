@@ -48,6 +48,7 @@ import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Warning
+import androidx.compose.material.icons.outlined.MoreVert
 import androidx.compose.material3.Badge
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -280,9 +281,14 @@ fun RoomScreen(
 }
 
 
+sealed class IconType {
+    data class IntType(val int: Int) : IconType()
+    data class Vector(val imageVector: ImageVector) : IconType()
+}
+
 data class DropDownParams(
     val name:String,
-    val icon: ImageVector? = null,
+    val icon: IconType? = null,
     val onClick:() -> Unit
 )
 
@@ -297,13 +303,12 @@ fun StaticBar(
     onRoomDelete:() -> Unit
 ){
     val dropdowns = listOf<DropDownParams>(
-        DropDownParams(name = "Edit Room", icon = EditIcon, onClick = onRoomEdit),
-        DropDownParams(name = "Message", icon = ChatIcon, onClick = onRoomMessage),
-        DropDownParams(name = "Share", icon = ShareIcon, onClick = onRoomDelete),
-        DropDownParams(name = "Delete", icon = DeleteIcon, onClick = onRoomDelete),
+        DropDownParams(name = "Edit Room", icon = IconType.Vector(EditIcon), onClick = onRoomEdit),
+        DropDownParams(name = "Message", icon = IconType.Vector(ChatIcon), onClick = onRoomMessage),
+        DropDownParams(name = "Share", icon = IconType.Vector(ShareIcon), onClick = onRoomDelete),
+        DropDownParams(name = "Delete", icon = IconType.Vector(DeleteIcon), onClick = onRoomDelete),
     )
     val coroutine = rememberCoroutineScope()
-    val expanded = rememberSaveable { mutableStateOf<Boolean>(false) }
     ROw(
         modifier = Modifier.fillMaxWidth()
             .offset(y = 24.dp)
@@ -311,38 +316,51 @@ fun StaticBar(
             .zIndex(3f),
         horizontalArrangement = Arrangement.End
     ) {
-        Box{
-            IconButton(
-                onClick = {
-                    expanded.value = true
-                },
-                modifier = Modifier
-                    .shadow(6.dp, shape = CircleShape),
-                colors = IconButtonDefaults.iconButtonColors(
-                    containerColor = Color.White
-                )
-            ) {
-                Icon(Icons.Default.MoreVert, contentDescription = "")
-            }
-            DropdownMenu(
-                expanded = expanded.value,
-                onDismissRequest = {
-                    expanded.value = false
-                },
-                modifier = Modifier.fillMaxWidth(0.4f),
-                shape = RoundedCornerShape(13.dp),
+        DropDownButton(
+            icon = Icons.Outlined.MoreVert,
+            dropDowns = dropdowns
+        )
+    }
+}
+
+@Composable
+fun DropDownButton(
+    icon: ImageVector,
+    dropDowns:List<DropDownParams>,
+    modifier:Modifier = Modifier,
+    width: Float = 0.4f
+){
+    val expanded = rememberSaveable { mutableStateOf<Boolean>(false) }
+    Box{
+        IconButton(
+            onClick = {
+                expanded.value = true
+            },
+            modifier = Modifier.then(modifier),
+            colors = IconButtonDefaults.iconButtonColors(
                 containerColor = Color.White
-            ) {
-                dropdowns.forEach {
-                    DropDownButton(
-                        name = it.name,
-                        contentColor = if(it.name === "Delete") Color.Red else Color.Black,
-                        icon = it.icon,
-                        onClick = {
-                            it.onClick.invoke()
-                        }
-                    )
-                }
+            )
+        ) {
+            Icon(Icons.Default.MoreVert, contentDescription = "")
+        }
+        DropdownMenu(
+            expanded = expanded.value,
+            onDismissRequest = {
+                expanded.value = false
+            },
+            modifier = Modifier.fillMaxWidth(width),
+            shape = RoundedCornerShape(13.dp),
+            containerColor = Color.White
+        ) {
+            dropDowns.forEach {
+                DropDownButton(
+                    name = it.name,
+                    contentColor = if(it.name === "Delete") Color.Red else Color.Black,
+                    icon = it.icon,
+                    onClick = {
+                        it.onClick.invoke()
+                    }
+                )
             }
         }
     }
@@ -351,7 +369,7 @@ fun StaticBar(
 @Composable
 fun DropDownButton(
     name:String,
-    icon: ImageVector? = null,
+    icon: IconType? = null,
     contentColor:Color = Color.Black,
     onClick:() -> Unit,
 ){
@@ -361,9 +379,14 @@ fun DropDownButton(
                 horizontalArrangement = Arrangement.spacedBy(6.dp)
             ) {
                 if(icon != null){
-                    Icon(icon, contentDescription = name,modifier = Modifier.size(16.dp), tint = contentColor)
+                    when(icon){
+                        is IconType.IntType ->
+                            Icon(painter = painterResource(icon.int), contentDescription = name, tint = contentColor)
+                        is IconType.Vector ->
+                            Icon(icon.imageVector, contentDescription = name, tint = contentColor)
+                    }
                 }
-                Text(name, color = contentColor)
+                Text(name, color = contentColor, fontWeight = FontWeight.Normal)
             }
         },
         onClick = onClick

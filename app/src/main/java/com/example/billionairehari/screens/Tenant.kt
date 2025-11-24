@@ -34,6 +34,14 @@ import androidx.compose.material.icons.filled.Call
 import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.materialIcon
+import androidx.compose.material.icons.outlined.Add
+import androidx.compose.material.icons.outlined.Call
+import androidx.compose.material.icons.outlined.DateRange
+import androidx.compose.material.icons.outlined.Delete
+import androidx.compose.material.icons.outlined.Edit
+import androidx.compose.material.icons.outlined.LocationOn
+import androidx.compose.material.icons.outlined.MoreVert
+import androidx.compose.material.icons.outlined.Person
 import androidx.compose.material3.Badge
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -84,6 +92,12 @@ import com.example.billionairehari.layout.component.ROw
 import com.example.billionairehari.viewmodels.TenantViewModel
 import com.google.android.material.chip.Chip
 
+val tenantDropDowns = listOf<DropDownParams>(
+    DropDownParams(name = "Update Tenant", icon = IconType.Vector(Icons.Outlined.Edit), onClick = {}),
+    DropDownParams(name = "Add Addtional Info", icon = IconType.Vector(Icons.Outlined.Add), onClick = {}),
+    DropDownParams(name = "Delete", icon = IconType.Vector(Icons.Outlined.Delete), onClick = {})
+)
+
 @Composable
 fun TenantScreen(
     id:String,
@@ -98,7 +112,14 @@ fun TenantScreen(
         label = "Tenants",
         modifier = Modifier.then(modifier),
         contentModifier = Modifier.padding(horizontal = 13.dp),
-        verticalArrangement = 13.dp
+        verticalArrangement = 24.dp,
+        trailingContent = {
+            DropDownButton(
+                icon = Icons.Outlined.MoreVert,
+                dropDowns = tenantDropDowns,
+                width = 0.5f
+            )
+        }
     ) {
         Column(
             modifier = Modifier.padding(top = 13.dp)
@@ -110,17 +131,17 @@ fun TenantScreen(
             title = "Personal",
             details = listOf(
                 DetailModal(
-                    icon = TenantIcon,
+                    icon = Icons.Outlined.Person,
                     title = "Age",
                     value = "18 year",
                 ),
                 DetailModal(
-                    icon = TenantIcon,
+                    icon = Icons.Outlined.LocationOn,
                     title = "State",
                     value = "Puducherry",
                 ),
                 DetailModal(
-                    icon = TenantIcon,
+                    icon = Icons.Outlined.DateRange,
                     title = "Joined At",
                     value = "Jul 24,2024",
                 )
@@ -130,7 +151,7 @@ fun TenantScreen(
             title = "Contact Detail",
             details = listOf(
                 DetailModal(
-                    icon = TenantIcon,
+                    icon = Icons.Outlined.Call,
                     title = "Phone Number",
                     value = PhoneNumberUtils.formatNumber("8668072364","IN"),
                     button = CardAction(
@@ -141,19 +162,8 @@ fun TenantScreen(
                     )
                 ),
                 DetailModal(
-                    icon = TenantIcon,
+                    icon = Icons.Outlined.Call,
                     title = "alternate number",
-                    value = PhoneNumberUtils.formatNumber("8668072364","IN"),
-                    button = CardAction(
-                        onClick = {
-                            dial(context = context, number = "8668072363")
-                        },
-                        icon = Icons.Default.Call
-                    )
-                ),
-                DetailModal(
-                    icon = TenantIcon,
-                    title = "Phone Number",
                     value = PhoneNumberUtils.formatNumber("8668072364","IN"),
                     button = CardAction(
                         onClick = {
@@ -251,22 +261,6 @@ fun TenantRentDetail(){
                 width = 1f
             )
         }
-        ROw(
-            horizontalArrangement = Arrangement.spacedBy(13.dp)
-        ){
-            DetailCard(
-                title = "Due",
-                icon = CalendarIcon,
-                rent_due_price = 0,
-                paid_text = "No Due"
-            )
-            DetailCard(
-                title = "Rent Due Date",
-                icon = CalendarIcon,
-                total = "23 Oct",
-                width = 1f
-            )
-        }
     }
 }
 
@@ -300,7 +294,7 @@ fun TenantDetailsLayout(
         ) {
             Text(title, fontWeight = FontWeight.SemiBold)
             Column(
-                verticalArrangement = Arrangement.spacedBy(16.dp),
+                verticalArrangement = Arrangement.spacedBy(13.dp),
                 modifier = Modifier.padding(vertical = 6.dp)
             ) {
                 content()
@@ -345,7 +339,7 @@ private fun TenantDetailCard(
             horizontalArrangement = Arrangement.spacedBy(13.dp)
         ) {
             Icon(
-                TenantIcon,
+                icon,
                 contentDescription = "",
                 modifier = Modifier.clip(CircleShape)
                     .size(30.dp)
@@ -366,7 +360,7 @@ private fun TenantDetailCard(
             IconButton(
                 onClick = button.onClick
             ) {
-                Icon(button.icon, contentDescription = "",modifier = Modifier.size(16.dp))
+                Icon(button.icon, contentDescription = "")
             }
         }
     }

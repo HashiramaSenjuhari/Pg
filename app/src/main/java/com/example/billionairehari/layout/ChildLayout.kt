@@ -30,6 +30,7 @@ fun ChildLayout(
     scrollState: ScrollState = rememberScrollState(),
     contentModifier:Modifier = Modifier,
     verticalArrangement: Dp = 0.dp,
+    trailingContent:(@Composable () -> Unit)? = null,
     content:@Composable () -> Unit
 ){
     Column(
@@ -38,15 +39,20 @@ fun ChildLayout(
             .background(Color.White)
     ) {
         ROw(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(13.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            modifier = Modifier.fillMaxWidth()
         ) {
-            IconButton(
-                onClick = {}
+            ROw(
+                horizontalArrangement = Arrangement.spacedBy(13.dp)
             ) {
-                Icon(Icons.Default.ArrowBack, contentDescription = "")
+                IconButton(
+                    onClick = {}
+                ) {
+                    Icon(Icons.Default.ArrowBack, contentDescription = "")
+                }
+                Text(label, fontSize = 16.sp)
             }
-            Text(label, fontSize = 16.sp)
+            trailingContent?.invoke()
         }
         Column(
             modifier = Modifier

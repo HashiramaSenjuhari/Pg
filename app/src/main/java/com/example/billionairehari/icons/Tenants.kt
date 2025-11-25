@@ -6,12 +6,12 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.graphics.vector.path
 import androidx.compose.ui.unit.dp
 
-val AddTenantIcon: ImageVector
+val TenantsIcon: ImageVector
     get() {
-        if (_Person_add != null) return _Person_add!!
+        if (_Group != null) return _Group!!
 
-        _Person_add = ImageVector.Builder(
-            name = "Person_add",
+        _Group = ImageVector.Builder(
+            name = "Group",
             defaultWidth = 24.dp,
             defaultHeight = 24.dp,
             viewportWidth = 960f,
@@ -20,28 +20,6 @@ val AddTenantIcon: ImageVector
             path(
                 fill = SolidColor(Color(0xFF000000))
             ) {
-                moveTo(720f, 560f)
-                verticalLineToRelative(-120f)
-                horizontalLineTo(600f)
-                verticalLineToRelative(-80f)
-                horizontalLineToRelative(120f)
-                verticalLineToRelative(-120f)
-                horizontalLineToRelative(80f)
-                verticalLineToRelative(120f)
-                horizontalLineToRelative(120f)
-                verticalLineToRelative(80f)
-                horizontalLineTo(800f)
-                verticalLineToRelative(120f)
-                close()
-                moveToRelative(-360f, -80f)
-                quadToRelative(-66f, 0f, -113f, -47f)
-                reflectiveQuadToRelative(-47f, -113f)
-                reflectiveQuadToRelative(47f, -113f)
-                reflectiveQuadToRelative(113f, -47f)
-                reflectiveQuadToRelative(113f, 47f)
-                reflectiveQuadToRelative(47f, 113f)
-                reflectiveQuadToRelative(-47f, 113f)
-                reflectiveQuadToRelative(-113f, 47f)
                 moveTo(40f, 800f)
                 verticalLineToRelative(-112f)
                 quadToRelative(0f, -34f, 17.5f, -62.5f)
@@ -54,7 +32,39 @@ val AddTenantIcon: ImageVector
                 reflectiveQuadTo(680f, 688f)
                 verticalLineToRelative(112f)
                 close()
-                moveToRelative(80f, -80f)
+                moveToRelative(720f, 0f)
+                verticalLineToRelative(-120f)
+                quadToRelative(0f, -44f, -24.5f, -84.5f)
+                reflectiveQuadTo(666f, 526f)
+                quadToRelative(51f, 6f, 96f, 20.5f)
+                reflectiveQuadToRelative(84f, 35.5f)
+                quadToRelative(36f, 20f, 55f, 44.5f)
+                reflectiveQuadToRelative(19f, 53.5f)
+                verticalLineToRelative(120f)
+                close()
+                moveTo(360f, 480f)
+                quadToRelative(-66f, 0f, -113f, -47f)
+                reflectiveQuadToRelative(-47f, -113f)
+                reflectiveQuadToRelative(47f, -113f)
+                reflectiveQuadToRelative(113f, -47f)
+                reflectiveQuadToRelative(113f, 47f)
+                reflectiveQuadToRelative(47f, 113f)
+                reflectiveQuadToRelative(-47f, 113f)
+                reflectiveQuadToRelative(-113f, 47f)
+                moveToRelative(400f, -160f)
+                quadToRelative(0f, 66f, -47f, 113f)
+                reflectiveQuadToRelative(-113f, 47f)
+                quadToRelative(-11f, 0f, -28f, -2.5f)
+                reflectiveQuadToRelative(-28f, -5.5f)
+                quadToRelative(27f, -32f, 41.5f, -71f)
+                reflectiveQuadToRelative(14.5f, -81f)
+                reflectiveQuadToRelative(-14.5f, -81f)
+                reflectiveQuadToRelative(-41.5f, -71f)
+                quadToRelative(14f, -5f, 28f, -6.5f)
+                reflectiveQuadToRelative(28f, -1.5f)
+                quadToRelative(66f, 0f, 113f, 47f)
+                reflectiveQuadToRelative(47f, 113f)
+                moveTo(120f, 720f)
                 horizontalLineToRelative(480f)
                 verticalLineToRelative(-32f)
                 quadToRelative(0f, -11f, -5.5f, -20f)
@@ -75,12 +85,12 @@ val AddTenantIcon: ImageVector
                 reflectiveQuadTo(280f, 320f)
                 reflectiveQuadToRelative(23.5f, 56.5f)
                 reflectiveQuadTo(360f, 400f)
-                moveToRelative(0f, 320f)
+                moveToRelative(0f, -80f)
             }
         }.build()
 
-        return _Person_add!!
+        return _Group!!
     }
 
-private var _Person_add: ImageVector? = null
+private var _Group: ImageVector? = null
 

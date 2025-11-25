@@ -298,7 +298,6 @@ fun RoomCards(
         modifier = Modifier
             .clip(RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp))
             .fillMaxSize()
-            .background(Color.White)
             .verticalScroll(scrollState)
             .padding(start = 6.dp, end = 6.dp,bottom = 90.dp, top = 13.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)

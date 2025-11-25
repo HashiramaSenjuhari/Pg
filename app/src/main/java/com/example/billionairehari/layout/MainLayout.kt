@@ -18,6 +18,8 @@ import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.FloatingActionButtonDefaults
+import androidx.compose.material3.FloatingActionButtonElevation
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
@@ -42,6 +44,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.view.WindowInsetsControllerCompat
@@ -70,6 +73,9 @@ import com.example.billionairehari.model.TenantRentRecord
 import com.example.billionairehari.viewmodels.GetRoomTenantCountViewModel
 import com.google.android.material.snackbar.Snackbar
 import kotlinx.coroutines.CoroutineScope
+import com.example.billionairehari.R
+import com.example.billionairehari.icons.AddRoom
+import com.example.billionairehari.icons.AddTenantIcon
 
 sealed class MODAL_TYPE {
     object ADD_ROOM: MODAL_TYPE()
@@ -253,7 +259,7 @@ fun FloatingButton(
             },
             containerColor =  Color(0xFFB2B0E8)
         ) {
-            Icon(Icons.Default.Add, contentDescription = "")
+            Icon(AddRoom, contentDescription = "")
         }
     }
     if(route?.size == 2 && path == "rooms"){
@@ -268,18 +274,21 @@ fun FloatingButton(
             },
             containerColor =  Color(0xFFB2B0E8)
         ) {
-            Icon(Icons.Default.Add, contentDescription = "")
+            Icon(AddTenantIcon, contentDescription = "")
         }
     }
     if(route?.size == 1 && path == "tenants"){
         FloatingActionButton(
+            elevation = FloatingActionButtonDefaults.bottomAppBarFabElevation(
+                defaultElevation = 2.dp
+            ),
             onClick = {
                 current_action.value = MODAL_TYPE.ADD_TENANT()
                 is_open.value = true
             },
             containerColor =  Color(0xFFB2B0E8)
         ) {
-            Icon(Icons.Default.Add, contentDescription = "")
+            Icon(AddTenantIcon, contentDescription = "")
         }
     }
 }

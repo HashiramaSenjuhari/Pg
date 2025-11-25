@@ -2,88 +2,53 @@ package com.example.billionairehari.icons
 
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.StrokeJoin
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.graphics.vector.path
 import androidx.compose.ui.unit.dp
 
-val TenantsIcon: ImageVector
+val TenantIcon: ImageVector
     get() {
-        if (_Supervisor_account != null) return _Supervisor_account!!
+        if (_User != null) return _User!!
 
-        _Supervisor_account = ImageVector.Builder(
-            name = "Supervisor_account",
+        _User = ImageVector.Builder(
+            name = "User",
             defaultWidth = 24.dp,
             defaultHeight = 24.dp,
-            viewportWidth = 960f,
-            viewportHeight = 960f
+            viewportWidth = 24f,
+            viewportHeight = 24f
         ).apply {
             path(
-                fill = SolidColor(Color(0xFF000000))
+                stroke = SolidColor(Color(0xFF0F172A)),
+                strokeLineWidth = 1.5f,
+                strokeLineCap = StrokeCap.Round,
+                strokeLineJoin = StrokeJoin.Round
             ) {
-                moveTo(680f, 600f)
-                quadToRelative(-42f, 0f, -71f, -29f)
-                reflectiveQuadToRelative(-29f, -71f)
-                reflectiveQuadToRelative(29f, -71f)
-                reflectiveQuadToRelative(71f, -29f)
-                reflectiveQuadToRelative(71f, 29f)
-                reflectiveQuadToRelative(29f, 71f)
-                reflectiveQuadToRelative(-29f, 71f)
-                reflectiveQuadToRelative(-71f, 29f)
-                moveTo(480f, 800f)
-                verticalLineToRelative(-56f)
-                quadToRelative(0f, -24f, 12.5f, -44.5f)
-                reflectiveQuadTo(528f, 670f)
-                quadToRelative(36f, -15f, 74.5f, -22.5f)
-                reflectiveQuadTo(680f, 640f)
-                reflectiveQuadToRelative(77.5f, 7.5f)
-                reflectiveQuadTo(832f, 670f)
-                quadToRelative(23f, 9f, 35.5f, 29.5f)
-                reflectiveQuadTo(880f, 744f)
-                verticalLineToRelative(56f)
+                moveTo(15.75f, 6f)
+                curveTo(15.75f, 8.07107f, 14.071f, 9.75f, 12f, 9.75f)
+                curveTo(9.9289f, 9.75f, 8.24996f, 8.07107f, 8.24996f, 6f)
+                curveTo(8.24996f, 3.92893f, 9.9289f, 2.25f, 12f, 2.25f)
+                curveTo(14.071f, 2.25f, 15.75f, 3.92893f, 15.75f, 6f)
                 close()
-                moveToRelative(-80f, -320f)
-                quadToRelative(-66f, 0f, -113f, -47f)
-                reflectiveQuadToRelative(-47f, -113f)
-                reflectiveQuadToRelative(47f, -113f)
-                reflectiveQuadToRelative(113f, -47f)
-                reflectiveQuadToRelative(113f, 47f)
-                reflectiveQuadToRelative(47f, 113f)
-                reflectiveQuadToRelative(-47f, 113f)
-                reflectiveQuadToRelative(-113f, 47f)
-                moveTo(80f, 800f)
-                verticalLineToRelative(-112f)
-                quadToRelative(0f, -34f, 17f, -62.5f)
-                reflectiveQuadToRelative(47f, -43.5f)
-                quadToRelative(60f, -30f, 124.5f, -46f)
-                reflectiveQuadTo(400f, 520f)
-                quadToRelative(35f, 0f, 70f, 6f)
-                reflectiveQuadToRelative(70f, 14f)
-                lineToRelative(-34f, 34f)
-                lineToRelative(-34f, 34f)
-                quadToRelative(-18f, -5f, -36f, -6.5f)
-                reflectiveQuadToRelative(-36f, -1.5f)
-                quadToRelative(-58f, 0f, -113.5f, 14f)
-                reflectiveQuadTo(180f, 654f)
-                quadToRelative(-10f, 5f, -15f, 14f)
-                reflectiveQuadToRelative(-5f, 20f)
-                verticalLineToRelative(32f)
-                horizontalLineToRelative(240f)
-                verticalLineToRelative(80f)
+            }
+            path(
+                stroke = SolidColor(Color(0xFF0F172A)),
+                strokeLineWidth = 1.5f,
+                strokeLineCap = StrokeCap.Round,
+                strokeLineJoin = StrokeJoin.Round
+            ) {
+                moveTo(4.5011f, 20.1182f)
+                curveTo(4.5714f, 16.0369f, 7.90184f, 12.75f, 12f, 12.75f)
+                curveTo(16.0982f, 12.75f, 19.4287f, 16.0371f, 19.4988f, 20.1185f)
+                curveTo(17.216f, 21.166f, 14.6764f, 21.75f, 12.0003f, 21.75f)
+                curveTo(9.32396f, 21.75f, 6.78406f, 21.1659f, 4.5011f, 20.1182f)
                 close()
-                moveToRelative(320f, -400f)
-                quadToRelative(33f, 0f, 56.5f, -23.5f)
-                reflectiveQuadTo(480f, 320f)
-                reflectiveQuadToRelative(-23.5f, -56.5f)
-                reflectiveQuadTo(400f, 240f)
-                reflectiveQuadToRelative(-56.5f, 23.5f)
-                reflectiveQuadTo(320f, 320f)
-                reflectiveQuadToRelative(23.5f, 56.5f)
-                reflectiveQuadTo(400f, 400f)
             }
         }.build()
 
-        return _Supervisor_account!!
+        return _User!!
     }
 
-private var _Supervisor_account: ImageVector? = null
+private var _User: ImageVector? = null
 

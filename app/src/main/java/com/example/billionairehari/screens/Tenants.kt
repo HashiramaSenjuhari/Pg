@@ -216,7 +216,10 @@ fun TenantCards(
     viewmodel: ViewModel = TenantsViewModel()
 ){
     Column(
-        modifier = Modifier.verticalScroll(state = scrollState)
+        modifier = Modifier
+            .clip(RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp))
+            .background(Color.White)
+            .verticalScroll(state = scrollState)
             .padding(bottom = 240.dp)
     ) {
         tenants.sortedBy { it -> it.name.first().uppercase() }.forEach {

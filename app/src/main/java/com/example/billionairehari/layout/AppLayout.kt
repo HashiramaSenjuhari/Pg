@@ -35,6 +35,7 @@ import com.example.billionairehari.NavigationAction
 import com.example.billionairehari.Screens
 import com.example.billionairehari.components.contacts.ContactScreen
 import com.example.billionairehari.components.sheets.SelectedType
+import com.example.billionairehari.screens.AuthScreen
 import com.example.billionairehari.screens.DashboardScreen
 import com.example.billionairehari.screens.RoomScreen
 import com.example.billionairehari.screens.search.RoomSearchComponentScreen
@@ -42,7 +43,11 @@ import com.example.billionairehari.screens.RoomsScreen
 import com.example.billionairehari.screens.TenantScreen
 import com.example.billionairehari.screens.search.TenantSearchComponentScreen
 import com.example.billionairehari.screens.TenantsScreen
+import com.example.billionairehari.screens.auth.OtpVerificationScreen
+import com.example.billionairehari.screens.auth.SignInScreen
+import com.example.billionairehari.screens.auth.SignUpScreen
 import com.example.billionairehari.viewmodels.RoomsViewModel
+import okhttp3.internal.wait
 
 @Composable
 fun AppLayout(
@@ -250,6 +255,35 @@ fun AppLayout(
             TenantSearchComponentScreen(
                 modifier = Modifier.padding(padding),
                 navController = navController,
+            )
+        }
+        composable(
+            route = Destinations.AUTH_ROUTE
+        ){
+            AuthScreen(
+                modifier = Modifier.padding(padding),
+                navController = navController
+            )
+        }
+        composable(
+            route = Destinations.SIGNUP_ROUTE
+        ){
+            SignUpScreen(
+                navController = navController
+            )
+        }
+        composable(
+            route = Destinations.SIGNIN_ROUTE
+        ){
+            SignInScreen(
+                navController = navController
+            )
+        }
+        composable(
+            route = Destinations.VERIFY_OTP_ROUTE
+        ){
+            OtpVerificationScreen(
+                modifier = Modifier.padding(padding)
             )
         }
     }

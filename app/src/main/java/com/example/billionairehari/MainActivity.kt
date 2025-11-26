@@ -22,6 +22,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.core.view.WindowInsetsControllerCompat
 import com.example.billionairehari.layout.MainLayout
 import com.example.billionairehari.ui.theme.BillionaireHariTheme
 import dagger.hilt.android.AndroidEntryPoint
@@ -37,6 +38,13 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
+
+            val activity = LocalView.current.context as Activity
+            SideEffect {
+                activity.window.statusBarColor = Color.White.toArgb()
+                val wc = WindowInsetsControllerCompat(activity.window,activity.window.decorView)
+                wc.isAppearanceLightStatusBars = true
+            }
             MainLayout()
         }
     }

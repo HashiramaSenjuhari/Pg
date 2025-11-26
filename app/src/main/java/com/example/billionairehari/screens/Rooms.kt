@@ -371,7 +371,7 @@ fun RoomCard(
             shape = RoundedCornerShape(24.dp),
             modifier = Modifier
                 .fillMaxWidth()
-                .border(1.dp, color = Color.Black.copy(0.1f), shape = RoundedCornerShape(13.dp))
+                .border(1.dp, color = Color.Black.copy(0.1f), shape = RoundedCornerShape(24.dp))
                 .background(Color(0xFFFFFFF)),
             colors = CardDefaults.cardColors(
                 containerColor = Color.White

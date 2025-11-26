@@ -18,15 +18,12 @@ object Screens {
     const val ROOM_SEARCH_SEARCH = "room_search"
     const val TENANT_SEARCH_SEARCH = "tenant_search"
     const val AUTH_SCREEN = "auth"
-    const val SIGN_UP_SCREEN = "signup"
-    const val SIGN_IN_SCREEN = "signin"
-    const val VERIFY_OTP_SCREEN = "opt_verification"
 }
 
 object Arguments {
-    const val ROOM_ID_ARGS = "roomId"
-    const val TENANT_ID_ARGS = "tenantId"
-    const val SEARCH_ID_ARGS = "searchId"
+    const val ROOM_ID_ARGS = "room_id"
+    const val TENANT_ID_ARGS = "tenant_id"
+    const val SEARCH_ID_ARGS = "search_id"
 }
 
 object Destinations {
@@ -44,9 +41,6 @@ object Destinations {
     const val ROOM_SEARCH_ROUTE = "${Screens.ROOM_SEARCH_SEARCH}"
     const val TENANT_SEARCH_ROUTE = "${Screens.TENANT_SEARCH_SEARCH}"
     const val AUTH_ROUTE = "${Screens.AUTH_SCREEN}"
-    const val SIGNUP_ROUTE = "${Screens.AUTH_SCREEN}/${Screens.SIGN_UP_SCREEN}"
-    const val SIGNIN_ROUTE = "${Screens.AUTH_SCREEN}/${Screens.SIGN_IN_SCREEN}"
-    const val VERIFY_OTP_ROUTE = "${Screens.AUTH_SCREEN}/${Screens.VERIFY_OTP_SCREEN}"
 }
 
 class NavigationAction (private val navController: NavHostController) {

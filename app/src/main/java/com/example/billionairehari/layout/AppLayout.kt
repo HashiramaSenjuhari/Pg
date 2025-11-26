@@ -24,6 +24,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavArgument
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -43,9 +44,6 @@ import com.example.billionairehari.screens.RoomsScreen
 import com.example.billionairehari.screens.TenantScreen
 import com.example.billionairehari.screens.search.TenantSearchComponentScreen
 import com.example.billionairehari.screens.TenantsScreen
-import com.example.billionairehari.screens.auth.OtpVerificationScreen
-import com.example.billionairehari.screens.auth.SignInScreen
-import com.example.billionairehari.screens.auth.SignUpScreen
 import com.example.billionairehari.viewmodels.RoomsViewModel
 import okhttp3.internal.wait
 
@@ -186,7 +184,7 @@ fun AppLayout(
                 },
 
                 onTenant = {
-                    navController.navigate("tenants/${it}")
+                    navController.navigate("${Screens.TENANTS_SCREEN}/${it}")
                 },
                 onTenantDelete = {
                     is_dialog_open.value = true
@@ -263,27 +261,6 @@ fun AppLayout(
             AuthScreen(
                 modifier = Modifier.padding(padding),
                 navController = navController
-            )
-        }
-        composable(
-            route = Destinations.SIGNUP_ROUTE
-        ){
-            SignUpScreen(
-                navController = navController
-            )
-        }
-        composable(
-            route = Destinations.SIGNIN_ROUTE
-        ){
-            SignInScreen(
-                navController = navController
-            )
-        }
-        composable(
-            route = Destinations.VERIFY_OTP_ROUTE
-        ){
-            OtpVerificationScreen(
-                modifier = Modifier.padding(padding)
             )
         }
     }

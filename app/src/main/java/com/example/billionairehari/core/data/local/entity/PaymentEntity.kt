@@ -13,12 +13,18 @@ import com.example.billionairehari.core.data.local.entity.Tenant
             entity = Tenant::class,
             parentColumns = ["id"],
             childColumns = ["tenant_id"]
+        ),
+        ForeignKey(
+            entity = Room::class,
+            parentColumns = ["id"],
+            childColumns = ["room_id"]
         )
     ]
 )
 data class Payment(
     @PrimaryKey val id:String,
     @ColumnInfo(name = "tenant_id") val tenantId:String,
+    @ColumnInfo(name = "room_id") val roomId:String,
     @ColumnInfo(name = "amount") val amount:Int,
     @ColumnInfo(name = "payment_date") val paymentDate:Long,
     @ColumnInfo(name = "payment_type") val paymentType:String

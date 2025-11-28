@@ -10,9 +10,9 @@ import com.example.billionairehari.core.data.local.entity.Property
     tableName = "rooms",
     foreignKeys = [
         ForeignKey(
-            entity = Property::class,
+            entity = Owner::class,
             parentColumns = ["id"],
-            childColumns = ["property_id"]
+            childColumns = ["owner_id"]
         )
     ]
 )
@@ -23,5 +23,6 @@ data class Room(
     @ColumnInfo(name = "rent_price") var rentPrice: Int,
     var deposit:Int,
     var features: List<String>,
-    val property_id:String
+    val property_id:String,
+    @ColumnInfo(name = "owner_id") val ownerId:String
 )

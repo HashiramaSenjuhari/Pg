@@ -10,6 +10,7 @@ import java.util.Properties
 data class Owner(
     @PrimaryKey val id:String,
     val name:String,
-    val phont:String,
+    val phone:String,
+    @ColumnInfo(name = "pg_name") val pgName:String,
     @ColumnInfo(name = "is_verified") val isVerified:Boolean
 )

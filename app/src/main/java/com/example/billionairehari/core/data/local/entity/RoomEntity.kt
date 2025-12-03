@@ -5,8 +5,7 @@ import androidx.room.Entity
 import androidx.room.ForeignKey
 import androidx.room.PrimaryKey
 import androidx.room.TypeConverters
-import com.example.billionairehari.core.data.local.entity.Property
-
+import com.example.billionairehari.core.data.local.typeconverter.ListConverter
 
 @TypeConverters(ListConverter::class)
 @Entity(
@@ -27,5 +26,6 @@ data class Room(
     var deposit:Int,
     var features: List<String>,
     val property_id:String,
+    @ColumnInfo(name = "due_date") val dueDate:Long,
     @ColumnInfo(name = "owner_id") val ownerId:String
 )

@@ -100,7 +100,7 @@ fun MainLayout(
     navController: NavHostController = rememberNavController(),
     context: Context = LocalContext.current,
     scope: CoroutineScope = rememberCoroutineScope(),
-    startDestination:String = Destinations.AUTH_ROUTE,
+    startDestination:String = Destinations.DASHBOARD_ROUTE,
 ){
     // states
     val scrollState = rememberScrollState()

@@ -4,27 +4,12 @@ import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.ForeignKey
 import androidx.room.PrimaryKey
-import androidx.room.TypeConverter
 import androidx.room.TypeConverters
-import com.example.billionairehari.core.data.local.entity.Tenant
-import com.squareup.moshi.Moshi
-import com.squareup.moshi.Types
+import com.example.billionairehari.core.data.local.typeconverter.PaymentTypeConverter
 
 enum class PaymentType {
     CASH,
     UPI
-}
-
-class PaymentTypeConverter{
-    @TypeConverter
-    fun fromString(json:String?) : PaymentType {
-        json?.let { PaymentType.valueOf(it) }
-    }
-
-    @TypeConverter
-    fun toString(type: PaymentType?): String {
-        type?.let { it.name }
-    }
 }
 
 @TypeConverters(PaymentTypeConverter::class)
@@ -40,6 +25,11 @@ class PaymentTypeConverter{
             entity = Room::class,
             parentColumns = ["id"],
             childColumns = ["room_id"]
+        ),
+        ForeignKey(
+            entity = Owner::class,
+            parentColumns = ["id"],
+            childColumns = ["owner_id"]
         )
     ]
 )
@@ -49,5 +39,8 @@ data class Payment(
     @ColumnInfo(name = "room_id") val roomId:String,
     @ColumnInfo(name = "amount") val amount:Int,
     @ColumnInfo(name = "payment_date") val paymentDate:Long,
-    @ColumnInfo(name = "payment_type") val paymentType: PaymentType
+    @ColumnInfo(name = "due_date") val dueDate:Long,
+    @ColumnInfo(name = "is_paid") val isPaid:Boolean,
+    @ColumnInfo(name = "payment_type") val paymentType: PaymentType,
+    @ColumnInfo(name = "owner_id") val ownerId:String
 )

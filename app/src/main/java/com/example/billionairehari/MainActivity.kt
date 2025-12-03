@@ -38,7 +38,6 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-
             val activity = LocalView.current.context as Activity
             SideEffect {
                 activity.window.statusBarColor = Color.White.toArgb()

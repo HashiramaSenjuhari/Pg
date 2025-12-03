@@ -106,4 +106,7 @@ dependencies {
 
     // Permission
     implementation("com.google.accompanist:accompanist-permissions:0.37.3")
+
+    // Json converter
+    implementation("com.squareup.moshi:moshi:1.15.2")
 }

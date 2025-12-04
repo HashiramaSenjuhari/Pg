@@ -11,36 +11,28 @@ interface RoomDao {
     @Insert
     suspend fun insertRoom(room: Room)
 
+    data class RoomCard(
+        val id:String,
+        val name:String,
+        val bed_count:Int,
+        val due_date:Long,
+        val tenant_count:Int,
+        val not_paid:Int
+    )
+
     @Query("""
-        SELECT 
-            r.id,
-            r.name,
-            r.bed_count,
-            r.due_date,
-            COALESCE (tnp.not_paid,0) AS not_paid,
-            COALESCE (count_tenant,0) AS tenant_count
-        FROM rooms WHERE owner_id = :ownerId
-        LEFT JOIN (
-            SELECT t.room_id
-            FROM tenants t
-            WHERE r.id = t.room_id
-        ) AS count_tenant
-            ON count_tenant.room_id = r.id
-        LEFT JOIN (
-            SELECT
-            t.room_id,
-            COUNT(*) AS not_paid
-            FROM tenants t
-            AND NOT EXISTS (
-                SELECT 1
-                FROM payment p
-                WHERE strftime('%Y-%m',payment_date) = strftime('%Y-%m','now')
-            )
-        ) AS tnp ON
-            tnp.room_id = r.id
+        SELECT
+        r.id,r.name,r.bed_count,r.due_date,
+        COUNT(DISTINCT t.id) AS tenant_count,
+        COUNT(DISTINCT CASE WHEN p.id IS NULL THEN t.id END) AS not_paid
+        FROM rooms r
+        LEFT JOIN tenants t ON t.room_id = r.id
+        LEFT JOIN payments p ON p.tenant_id = t.id
+            AND strftime('%Y-%m',p.payment_date) = strftime('%Y-%m','now')
         WHERE r.owner_id = :ownerId
+        GROUP BY r.id,r.name,r.bed_count,r.due_date;
         """)
-    fun getRoomsFlow(ownerId:String) : Flow<List<Room>>
+    fun getRoomsFlow(ownerId:String) : Flow<List<RoomCard>>
 
     @Query("SELECT * FROM rooms WHERE owner_id = :ownerId")
     suspend fun getRooms(ownerId:String) : List<Room>

@@ -24,25 +24,4 @@ interface PaymentDao {
     """)
     suspend fun getTotalRevenue(ownerId:String): Revenue
     // ###############################################################################################
-
-
-
-
-
-    // ###############################################################################################
-    // Rent Detail Count
-    // ###############################################################################################
-
-    data class RentPaid(val rent_paid:Int)
-
-    @Query("""
-        SELECT COUNT(*) as rent_paid
-        FROM payments
-        WHERE
-            owner_id = :ownerId
-            AND strftime('%Y-%m',payment_date) = strftime('%Y-%m','now')
-    """)
-    fun getRentPaidFlow(ownerId:String): Flow<RentPaid>
-
-    // ###############################################################################################
 }

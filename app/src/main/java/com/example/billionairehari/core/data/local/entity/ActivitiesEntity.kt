@@ -1,5 +1,6 @@
 package com.example.billionairehari.core.data.local.entity
 
+import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.ForeignKey
 import androidx.room.PrimaryKey
@@ -19,5 +20,6 @@ data class Activity(
     @PrimaryKey val id:String,
     val name:String,
     val message:String,
-    val type:String
+    val type:String,
+    @ColumnInfo(name = "owner_id") val ownerId:String
 )

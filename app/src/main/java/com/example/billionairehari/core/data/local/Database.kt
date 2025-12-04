@@ -26,10 +26,10 @@ import com.example.billionairehari.core.data.local.entity.RecentSearch
     exportSchema = false
 )
 abstract class AppDatabase: RoomDatabase(){
-    abstract fun ownerDao: OwnerDao
-    abstract fun roomDao: RoomDao
-    abstract fun tenantDao: TenantDao
-    abstract fun paymentDao: PaymentDao
-    abstract fun activityDao: ActivityDao
-    abstract fun recentSearchDao: RecentSearchDao
+    abstract fun ownerDao(): OwnerDao
+    abstract fun roomDao(): RoomDao
+    abstract fun tenantDao(): TenantDao
+    abstract fun paymentDao(): PaymentDao
+    abstract fun activityDao(): ActivityDao
+    abstract fun recentSearchDao(): RecentSearchDao
 }

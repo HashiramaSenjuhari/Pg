@@ -15,47 +15,20 @@ interface TenantDao {
     //################################################################################################
     //                                    TenantRoomCard
     //################################################################################################
-    data class TenantCardDetails(val id:String,val name:String,val tenantRoomName:String,val phone_number:String,val current_paid:String)
+    data class TenantCardDetails(val id:String,val name:String,val phone_number:String,val roomName:String,val current_paid:Int)
 
     @Query("""
         SELECT
-            t.id,
-            t.name,
-            r.room as tenantRoomName,
-            t.phone_number,
-            CASE
-                WHEN p.id IS NOT NULL THEN 'Paid'
-                ELSE 'Not Paid'
-            END AS current_paid
-        FROM tenant t
-        INNER JOIN room r ON
-            r.owner_id = :ownerId
-            AND r.id = t.room_id
-        LEFT JOIN payments p ON
-            p.tenant_id = t.id
-            AND strftime('%Y-%m',p.payment_date) = strftime('%Y-%m','now');
+        t.id,t.name,t.phone_number,
+        r.name AS roomName,
+        CASE WHEN p.id IS NOT NULL THEN 1 ELSE 0 END AS current_paid
+        FROM tenants t
+        LEFT JOIN rooms r ON t.room_id = r.id
+        LEFT JOIN payments p ON p.tenant_id = t.id
+            AND strftime('%Y-%m',p.payment_date) = strftime('%Y-%m','now')
+        WHERE r.owner_id = :ownerId
     """)
-    fun getTenantFlow(ownerId:String) : Flow<List<TenantCardDetails>>
-
-    @Query("""
-        SELECT
-            t.id,
-            t.name,
-            r.room as tenantRoomName,
-            t.phone_number,
-            CASE
-                WHEN p.id IS NOT NULL THEN 'Paid'
-                ELSE 'Not Paid'
-            END AS current_paid
-            FROM tenant t
-            INNER JOIN room r ON
-                r.owner_id = :ownerId
-                AND r.id = t.room_id
-            LEFT JOIN payments p ON
-                p.tenant_id = t.id
-                AND strftime('%Y-%m',p.payment_date) = strftime('%Y-%m','now');
-    """)
-    suspend fun getTenants(ownerId:String) : List<TenantCardDetails>
+    fun getTenantsFlow(ownerId:String) : Flow<List<TenantCardDetails>>
 
     // ###############################################################################################
 
@@ -73,33 +46,20 @@ interface TenantDao {
 
     @Query("""
         SELECT
-            t.*,
-            r.name as tenantRoomName,
-            p.* as paymentHistory,
-            CASE
-                WHEN current_month.id IS NOT NULL THEN 'Paid'
-                ELSE 'Not Paid'
-            END AS current_paid
-        FROM tenant t
-        INNER JOIN rooms r
-            ON r.id = t.room_id
-        LEFT JOIN (
-            SELECT 
-                id,
-                payment_date,
-                due_date ,
-                is_paid,
-                amount
-            FROM payments
-            WHERE tenant_id = :tenantId
-            ORDER BY payment_date DESC
-            LIMIT 3
-        ) AS p ON
-            p.id = t.id
-        LEFT JOIN payments current_month
-            ON current_month.tenant_id = t.id
-            AND strftime('%Y-%m',current_month.payment_date) = strftime('%Y-%m','now')
-        WHERE t.id = :tenantId
+        t.*,
+        r.name AS roomName,
+        r.due_date AS dueDate,
+        CASE WHEN strftime('%Y-%m',p.payment_date) = strftime('%Y-%m','now') THEN 1 ELSE 0 END AS current_paid,
+        p.id AS paymentId,
+        p.payment_date AS paymentDate,
+        p.due_date AS dueDate,
+        p.is_paid AS isPaid,
+        p.amount AS amountPaid
+        FROM tenants t
+        INNER JOIN rooms r ON t.room_id = r.id
+        LEFT JOIN payments p ON p.tenant_id = t.id
+        WHERE r.owner_id = :ownerId
+        ORDER BY t.id,COALESCE(p.payment_date,'0000-00-00') DESC
     """)
     fun getTenant(tenantId:String) : TenantDetails
 
@@ -114,24 +74,27 @@ interface TenantDao {
     // ###############################################################################################
 
     data class RentNotPaid(val rent_not_paid:Int)
+    data class RentPaid(val rent_paid:Int)
 
     @Query("""
-        SELECT COUNT(*) as rent_not_paid
+        SELECT COUNT(DISTICT t.id) AS notPaid
         FROM tenants t
-        INNER JOIN rooms r
-            ON r.id = t.room_id
-        WHERE
-            r.owner_id = :ownerId
-            AND NOT EXIST(
-                SELECT 1
-                FROM payments p
-                WHERE 
-                t.id = p.tenant_id
-                AND strftime('%Y-%m',p.payment_date) = strftime('%Y-%m','now')
-            )
+        INNER JOIN rooms r ON r.id = t.room_id
+        LEFT JOIN payments p ON p.tenant_id = t.id
+            AND strftime('%Y-%m',p.payment_date) = strftime('%Y-%m','now')
+        WHERE r.owner_id = :ownerId AND p.id IS NULL
     """)
-    suspend fun getRentNotPaidFlow(ownerId:String): Flow<RentNotPaid>
+    fun getRentNotPaidFlow(ownerId:String): Flow<RentNotPaid>
 
+    @Query("""
+        SELECT COUNT(DISTINCT t.id) AS paid
+        FROM tenants t
+        INNER JOIN rooms r ON r.id = t.room_id
+        INNER JOIN payments p ON p.tenant_id = t.id
+            AND strftime('%Y-%m',p.payment_date) = strftime('%Y-%m','now')
+        WHERE r.owner_id = :ownerId
+    """)
+    fun getRentPaidFlow(ownerId:String) : Flow<RentPaid>
 
     // ###############################################################################################
 }

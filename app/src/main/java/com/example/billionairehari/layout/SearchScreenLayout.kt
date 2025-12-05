@@ -20,13 +20,14 @@ import androidx.compose.ui.unit.sp
 import com.example.billionairehari.R
 import com.example.billionairehari.components.RecentSearchBoard
 import com.example.billionairehari.components.SearchInput
+import com.example.billionairehari.viewmodels.SearchUiState
 
 
 @Composable
 fun SearchScreenLayout(
+    isLoading:Boolean,
     label:String,
     modifier:Modifier,
-    isNotEmpty:Boolean,
     query:String,
     onChangeQuery:(String) -> Unit,
     recent_searches:List<String>,
@@ -56,45 +57,14 @@ fun SearchScreenLayout(
                 onChangeQuery(it)
             },
             focus = focusRequester,
-            onClickBack = onClickBack
+            onClickBack = onClickBack,
+            isLoading = isLoading
         )
         Column(
             modifier = Modifier
                 .fillMaxSize()
         ) {
-            if(query.length <= 2) {
-                RecentSearchBoard(
-                    onClear = onClearRecentSearches,
-                    onPlaceQuery = {
-                        onChangeQuery(it)
-                    },
-                    names = recent_searches
-                )
-            }
-            else if(isNotEmpty){
-                ResultScreen.invoke()
-            }
-            else {
-                Column(
-                    modifier = Modifier.fillMaxSize(),
-                    verticalArrangement = Arrangement.Center,
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    Column(
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.spacedBy(24.dp)
-                    ) {
-                        Image(painter = painterResource(R.drawable.ic_launcher_background), contentDescription = "")
-                        Column(
-                            horizontalAlignment = Alignment.CenterHorizontally,
-                            verticalArrangement = Arrangement.spacedBy(13.dp)
-                        ) {
-                            Text("No results found", fontWeight = FontWeight.SemiBold, fontSize = 14.sp)
-                            Text("Check the spelling or try different word", color = Color.Black.copy(0.6f))
-                        }
-                    }
-                }
-            }
+            ResultScreen.invoke()
         }
     }
 }

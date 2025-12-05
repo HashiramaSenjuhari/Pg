@@ -84,21 +84,27 @@ val greats = listOf<RoomCardDetails>(
     )
 )
 
+sealed class SearchUiState {
+    object Default: SearchUiState()
+    data class Rooms(val rooms: List<RoomCardDetails>): SearchUiState()
+    object Loading: SearchUiState()
+}
+
 class RoomSearchViewModel(
     private val savedState: SavedStateHandle
 ): ViewModel() {
     private val _query = MutableStateFlow<TextFieldValue>(TextFieldValue(""))
     val query = _query.asStateFlow()
-    val result: StateFlow<List<RoomCardDetails>> = query
+    val result: StateFlow<SearchUiState> = query
         .debounce(300L)
         .distinctUntilChanged()
         .map { query ->
-            if(query.text.isBlank()) greats
-            else greats.filter { it.name.contains(query.text,ignoreCase = true) }
+            if(query.text.isBlank() || query.text.length <= 2) SearchUiState.Default
+            else SearchUiState.Rooms(greats.filter { it.name.contains(query.text,ignoreCase = true) })
         }.stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5000),
-            initialValue = emptyList()
+            initialValue = SearchUiState.Loading
         )
 
     fun update_query(query:String) {

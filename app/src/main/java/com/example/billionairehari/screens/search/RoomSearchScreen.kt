@@ -59,6 +59,7 @@ import com.example.billionairehari.viewmodels.RoomSearchViewModel
 import com.example.billionairehari.viewmodels.TenantSearchViewModel
 import com.example.billionairehari.R
 import com.example.billionairehari.layout.SearchScreenLayout
+import com.example.billionairehari.viewmodels.SearchUiState
 
 @Composable
 fun RoomSearchComponentScreen(
@@ -75,14 +76,14 @@ fun RoomSearchComponentScreen(
     /** viewmodel **/
     val query = viewmodel.query.collectAsState()
     val results = viewmodel.result.collectAsStateWithLifecycle()
-    val rooms = results.value
+    val state = results.value
     val scrollState = rememberScrollState()
 
     SearchScreenLayout(
         label = "Search Rooms",
+        isLoading = state == SearchUiState.Loading,
         modifier = Modifier.then(modifier),
         query = query.value.text,
-        isNotEmpty = rooms.isNotEmpty(),
         onChangeQuery = {
             viewmodel.update_query(it)
         },
@@ -94,20 +95,61 @@ fun RoomSearchComponentScreen(
     ) {
         Column(
             modifier = Modifier
+                .fillMaxSize()
                 .verticalScroll(
                     rememberScrollState()
                 ),
             verticalArrangement = Arrangement.spacedBy(6.dp)
         ) {
-            rooms.forEach {
-                    room ->
-                RoomCard(
-                    current_action = current_action,
-                    room_detail = room,
-                    onClick = {
-                        navController.navigate("rooms/${room.id}")
+
+            when(state){
+                is SearchUiState.Default -> {
+                    RecentSearchBoard(
+                        onClear = {},
+                        onPlaceQuery = {
+                            viewmodel.update_query(it)
+                        },
+                        names = listOf("Room 101","Room 102")
+                    )
+                }
+                is SearchUiState.Rooms -> {
+                    val size = state.rooms.size
+                    if(size === 0){
+                        Column(
+                            modifier = Modifier.fillMaxSize(),
+                            verticalArrangement = Arrangement.Center,
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            Column(
+                                horizontalAlignment = Alignment.CenterHorizontally,
+                                verticalArrangement = Arrangement.spacedBy(24.dp)
+                            ) {
+                                Image(painter = painterResource(R.drawable.ic_launcher_background), contentDescription = "")
+                                Column(
+                                    horizontalAlignment = Alignment.CenterHorizontally,
+                                    verticalArrangement = Arrangement.spacedBy(13.dp)
+                                ) {
+                                    Text("No results found", fontWeight = FontWeight.SemiBold, fontSize = 14.sp)
+                                    Text("Check the spelling or try different word", color = Color.Black.copy(0.6f))
+                                }
+                            }
+                        }
                     }
-                )
+                    else {
+                        state.rooms.forEach {
+                                room ->
+                            RoomCard(
+                                current_action = current_action,
+                                room_detail = room,
+                                onClick = {
+                                    navController.navigate("rooms/${room.id}")
+                                }
+                            )
+                        }
+                    }
+                }
+                is SearchUiState.Loading -> {
+                }
             }
         }
     }

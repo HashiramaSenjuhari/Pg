@@ -43,29 +43,29 @@ fun TenantSearchComponentScreen(
     val scrollState = rememberScrollState()
 
 
-    SearchScreenLayout(
-        modifier = Modifier.then(modifier),
-        label = "Search Tenants",
-        query = query.value,
-        onChangeQuery = {
-            viewmodel.update_query(it)
-        },
-        isNotEmpty = tenants.isNotEmpty(),
-        onClearRecentSearches = {},
-        recent_searches = listOf("BillionaireHari","BillionaireHari","BillionaireHari"),
-        onClickBack = {
-            navController.popBackStack()
-        }
-    ) {
-        tenants.forEach {
-            TenantCard(
-                tenant = it,
-                onClick = {
-                    navController.navigate("${Screens.TENANTS_SCREEN}/${it}")
-                },
-                onCLickMessage = {},
-                onClickCall = {}
-            )
-        }
-    }
+//    SearchScreenLayout(
+//        modifier = Modifier.then(modifier),
+//        label = "Search Tenants",
+//        query = query.value,
+//        onChangeQuery = {
+//            viewmodel.update_query(it)
+//        },
+//        isNotEmpty = tenants.isNotEmpty(),
+//        onClearRecentSearches = {},
+//        recent_searches = listOf("BillionaireHari","BillionaireHari","BillionaireHari"),
+//        onClickBack = {
+//            navController.popBackStack()
+//        }
+//    ) {
+//        tenants.forEach {
+//            TenantCard(
+//                tenant = it,
+//                onClick = {
+//                    navController.navigate("${Screens.TENANTS_SCREEN}/${it}")
+//                },
+//                onCLickMessage = {},
+//                onClickCall = {}
+//            )
+//        }
+//    }
 }

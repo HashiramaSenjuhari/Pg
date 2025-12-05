@@ -1,5 +1,7 @@
 package com.example.billionairehari.viewmodels
 
+import androidx.compose.ui.text.TextRange
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -85,14 +87,14 @@ val greats = listOf<RoomCardDetails>(
 class RoomSearchViewModel(
     private val savedState: SavedStateHandle
 ): ViewModel() {
-    private val _query = MutableStateFlow<String>("")
+    private val _query = MutableStateFlow<TextFieldValue>(TextFieldValue(""))
     val query = _query.asStateFlow()
     val result: StateFlow<List<RoomCardDetails>> = query
         .debounce(300L)
         .distinctUntilChanged()
         .map { query ->
-            if(query.isBlank()) greats
-            else greats.filter { it.name.contains(query, ignoreCase = true) }
+            if(query.text.isBlank()) greats
+            else greats.filter { it.name.contains(query.text,ignoreCase = true) }
         }.stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5000),
@@ -100,10 +102,13 @@ class RoomSearchViewModel(
         )
 
     fun update_query(query:String) {
-        _query.value = query
+        _query.value = TextFieldValue(
+            text = query,
+            selection = TextRange(query.length)
+        )
     }
 
     fun reset_query(){
-        _query.value = ""
+        _query.value = TextFieldValue(text = "", selection = TextRange(0))
     }
 }

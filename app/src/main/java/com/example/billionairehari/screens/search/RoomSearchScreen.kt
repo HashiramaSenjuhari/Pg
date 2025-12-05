@@ -1,17 +1,24 @@
 package com.example.billionairehari.screens.search
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.text.selection.TextSelectionColors
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.outlined.Search
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
@@ -32,6 +39,8 @@ import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.focus.onFocusEvent
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -40,11 +49,16 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.billionairehari.Screens
+import com.example.billionairehari.components.AppButton
+import com.example.billionairehari.components.RecentSearchBoard
 import com.example.billionairehari.layout.MODAL_TYPE
+import com.example.billionairehari.layout.component.ROw
 import com.example.billionairehari.screens.RoomCard
 import com.example.billionairehari.screens.TenantCard
 import com.example.billionairehari.viewmodels.RoomSearchViewModel
 import com.example.billionairehari.viewmodels.TenantSearchViewModel
+import com.example.billionairehari.R
+import com.example.billionairehari.layout.SearchScreenLayout
 
 @Composable
 fun RoomSearchComponentScreen(
@@ -53,128 +67,50 @@ fun RoomSearchComponentScreen(
     navController: NavController,
     viewmodel: RoomSearchViewModel = viewModel(),
 ){
-    /** Focus Requester **/
-    val focusRequester = remember { FocusRequester() }
 
-    LaunchedEffect(Unit) {
-        focusRequester.requestFocus()
-    }
 
+    /** mutable state **/
     val text = remember { mutableStateOf<String>("") }
+
+    /** viewmodel **/
     val query = viewmodel.query.collectAsState()
     val results = viewmodel.result.collectAsStateWithLifecycle()
     val rooms = results.value
     val scrollState = rememberScrollState()
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(Color.White)
-            .then(modifier),
-        verticalArrangement = Arrangement.spacedBy(6.dp)
+    SearchScreenLayout(
+        label = "Search Rooms",
+        modifier = Modifier.then(modifier),
+        query = query.value.text,
+        isNotEmpty = rooms.isNotEmpty(),
+        onChangeQuery = {
+            viewmodel.update_query(it)
+        },
+        recent_searches = listOf("BillionaireHari","BillionaireHari","BillionaireHariPrasath"),
+        onClearRecentSearches = {},
+        onClickBack = {
+            navController.popBackStack()
+        }
     ) {
-        SearchInput(
-            query = query.value,
-            onChangeValue = {
-                viewmodel.update_query(it)
-            },
-            focus = focusRequester
-        )
         Column(
             modifier = Modifier
-                .fillMaxSize()
+                .verticalScroll(
+                    rememberScrollState()
+                ),
+            verticalArrangement = Arrangement.spacedBy(6.dp)
         ) {
-            if(query.value.length === 0 && rooms.isEmpty()){
-                     
-            }else if(query.value.length > 1 && rooms.isEmpty()){
-                Column(
-                    modifier = Modifier.fillMaxSize()
-                        .padding(top = 40.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    Text(
-                        "No results found. Try a different word",
-                        fontSize = 16.sp,
-                        fontWeight = FontWeight.Normal
-                    )
-                }
-            }
-            else {
-                Column(
-                    modifier = Modifier
-                        .verticalScroll(
-                            rememberScrollState()
-                        ),
-                    verticalArrangement = Arrangement.spacedBy(6.dp)
-                ) {
-                    rooms.forEach {
-                            room ->
-                        RoomCard(
-                            current_action = current_action,
-                            room_detail = room,
-                            onClick = {
-                                navController.navigate("rooms/${room.id}")
-                            }
-                        )
+            rooms.forEach {
+                    room ->
+                RoomCard(
+                    current_action = current_action,
+                    room_detail = room,
+                    onClick = {
+                        navController.navigate("rooms/${room.id}")
                     }
-                }
+                )
             }
         }
     }
 }
 
 
-@Composable
-fun SearchInput(
-    query:String,
-    onChangeValue:(String) -> Unit,
-    focus: FocusRequester
-){
-    TextField(
-        value = query,
-        onValueChange = {
-            onChangeValue(it)
-        },
-        placeholder = {
-            Text("Search Rooms")
-        },
-        textStyle = TextStyle(fontSize = 16.sp),
-        modifier = Modifier
-            .fillMaxWidth()
-            .drawBehind{
-                drawLine(
-                    start = Offset(x = 0f,y = size.height),
-                    end = Offset(x = size.width, y = size.height),
-                    color = Color.Black,
-                    strokeWidth = 1f
-                )
-            }.padding(horizontal = 6.dp)
-            .focusRequester(focusRequester = focus),
-        colors = TextFieldDefaults.colors(
-            focusedContainerColor = Color.White,
-            unfocusedContainerColor = Color.White,
-            focusedIndicatorColor = Color.Transparent,
-            unfocusedIndicatorColor = Color.Transparent
-        ),
-        singleLine = true,
-        interactionSource = MutableInteractionSource(),
-        leadingIcon = {
-            IconButton(
-                onClick = {}
-            ) {
-                Icon(Icons.Default.ArrowBack, contentDescription = "")
-            }
-        },
-        trailingIcon = {
-            if(query.length > 0){
-                IconButton(
-                    onClick = {
-                        onChangeValue("")
-                    }
-                ) {
-                    Icon(Icons.Default.Close, contentDescription = "")
-                }
-            }
-        }
-    )
-}

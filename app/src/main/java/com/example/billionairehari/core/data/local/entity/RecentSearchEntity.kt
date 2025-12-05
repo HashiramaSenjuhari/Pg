@@ -19,6 +19,6 @@ import com.example.billionairehari.core.data.local.entity.Owner
 data class RecentSearch(
     @PrimaryKey val id:String,
     @ColumnInfo(name = "search_type") val searchType:String,
-    val text:String,
+    @ColumnInfo(index = true) val text:String,
     @ColumnInfo(name = "owner_id") val ownerId:String
 )

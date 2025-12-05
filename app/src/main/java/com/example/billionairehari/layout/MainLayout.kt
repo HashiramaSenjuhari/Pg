@@ -100,7 +100,7 @@ fun MainLayout(
     navController: NavHostController = rememberNavController(),
     context: Context = LocalContext.current,
     scope: CoroutineScope = rememberCoroutineScope(),
-    startDestination:String = Destinations.DASHBOARD_ROUTE,
+    startDestination:String = Destinations.DASHBOARD_ROUTE
 ){
     // states
     val scrollState = rememberScrollState()
@@ -136,6 +136,7 @@ fun MainLayout(
     val route_size = route?.size ?: 0
     val path = route?.get(0) ?: ""
 
+    Log.d("Current Path","$path ${listOf("auth","room_search","tenant_search").contains(path)}")
 
 
     Scaffold(
@@ -154,7 +155,7 @@ fun MainLayout(
 //            )
 //        },
         bottomBar = {
-            if(route_size === 1 && !listOf("auth","_search").contains(path)){
+            if(route_size === 1 && !listOf("auth","room_search","tenant_search").contains(path)){
                 BottomBar(
                     route = destination?.route ?: "dashboard",
                     navigation = navigation

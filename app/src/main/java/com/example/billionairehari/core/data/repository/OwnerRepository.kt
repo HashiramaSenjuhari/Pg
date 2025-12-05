@@ -5,7 +5,7 @@ import com.example.billionairehari.core.data.local.entity.Owner
 
 class OwnerRepository constructor(
     private val ownerDao: OwnerDao
-): OwnerRepositoryInterface() {
+): OwnerRepositoryInterface {
     override suspend fun createOwner(owner: Owner): Int {
         TODO("Not yet implemented")
     }

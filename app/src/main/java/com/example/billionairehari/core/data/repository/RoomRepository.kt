@@ -7,7 +7,7 @@ import kotlinx.coroutines.flow.Flow
 
 class RoomRepository constructor(
     private val roomDao: RoomDao
-): RoomRepositoryInterface() {
+): RoomRepositoryInterface {
     override suspend fun createRoom(room: Room): Boolean {
         TODO("Not yet implemented")
     }

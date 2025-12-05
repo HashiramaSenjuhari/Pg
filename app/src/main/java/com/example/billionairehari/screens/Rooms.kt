@@ -297,10 +297,10 @@ fun RoomCards(
     Column(
         modifier = Modifier
             .clip(RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp))
-            .fillMaxSize()
             .verticalScroll(scrollState)
+            .fillMaxSize()
             .padding(start = 6.dp, end = 6.dp,bottom = 90.dp, top = 13.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp)
+        verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
         final_rooms.forEach {
                 room ->

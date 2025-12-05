@@ -26,30 +26,32 @@ fun RecentSearchBoard(
     onPlaceQuery:(String) -> Unit,
     onClear:() -> Unit
 ) {
-    Column(
-        modifier = Modifier.fillMaxSize(),
-        verticalArrangement = Arrangement.spacedBy(6.dp)
-    ) {
-        ROw(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 24.dp)
+    if(names.size > 0){
+        Column(
+            modifier = Modifier.fillMaxSize(),
+            verticalArrangement = Arrangement.spacedBy(6.dp)
         ) {
-            Text("RECENT SEARCHES", color = Color.Black.copy(0.4f))
-            AppButton(
-                padding = PaddingValues(horizontal = 13.dp),
-                onClick = onClear
+            ROw(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 24.dp)
             ) {
-                Text("Clear All")
-            }
-        }
-        names.forEach{
-            SearchCard(
-                name = it,
-                onClickTenant = {
-                    onPlaceQuery(it)
+                Text("RECENT SEARCHES", color = Color.Black.copy(0.4f))
+                AppButton(
+                    padding = PaddingValues(horizontal = 13.dp),
+                    onClick = onClear
+                ) {
+                    Text("Clear All")
                 }
-            )
+            }
+            names.forEach{
+                SearchCard(
+                    name = it,
+                    onClickTenant = {
+                        onPlaceQuery(it)
+                    }
+                )
+            }
         }
     }
 }

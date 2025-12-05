@@ -25,19 +25,25 @@ data class TenantSearchCard(
 
 sealed class TenantSearchUiState {
     object Loading: TenantSearchUiState()
-    object Default: TenantSearchUiState()
+    data class Default(val recent_searches:List<String>): TenantSearchUiState()
     data class Tenants(val tenants:List<TenantData>): TenantSearchUiState()
 }
 class TenantSearchViewModel(
     private val savedState: SavedStateHandle
 ): ViewModel() {
+    var recent_searches = emptyList<String>()
+
+    init {
+        recent_searches = listOf("BillionaireHari","BillionaireHari")
+    }
+
     private val _query = MutableStateFlow<TextFieldValue>(TextFieldValue(""))
     val query = _query.asStateFlow()
     val result: StateFlow<TenantSearchUiState> = query
         .debounce(300L)
         .distinctUntilChanged()
         .map { query ->
-            if(query.text.length <= 2) TenantSearchUiState.Default
+            if(query.text.trim().length <= 2) TenantSearchUiState.Default(recent_searches = recent_searches)
             else TenantSearchUiState.Tenants(tenants.filter { it.name.contains(query.text, ignoreCase = true) })
         }.stateIn(
             scope = viewModelScope,

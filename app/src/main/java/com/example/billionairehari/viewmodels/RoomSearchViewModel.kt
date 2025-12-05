@@ -84,27 +84,31 @@ val greats = listOf<RoomCardDetails>(
     )
 )
 
-sealed class SearchUiState {
-    object Default: SearchUiState()
-    data class Rooms(val rooms: List<RoomCardDetails>): SearchUiState()
-    object Loading: SearchUiState()
+sealed class RoomSearchUiState {
+    data class Default(val recent_searches:List<String>): RoomSearchUiState()
+    data class Rooms(val rooms: List<RoomCardDetails>): RoomSearchUiState()
+    object Loading: RoomSearchUiState()
 }
 
 class RoomSearchViewModel(
     private val savedState: SavedStateHandle
 ): ViewModel() {
+    var recent_searches = emptyList<String>()
+    init {
+        recent_searches = listOf("Room 101","Room 102")
+    }
     private val _query = MutableStateFlow<TextFieldValue>(TextFieldValue(""))
     val query = _query.asStateFlow()
-    val result: StateFlow<SearchUiState> = query
+    val result: StateFlow<RoomSearchUiState> = query
         .debounce(300L)
         .distinctUntilChanged()
         .map { query ->
-            if(query.text.isBlank() || query.text.length <= 2) SearchUiState.Default
-            else SearchUiState.Rooms(greats.filter { it.name.contains(query.text,ignoreCase = true) })
+            if(query.text.trim().length <= 2) RoomSearchUiState.Default(recent_searches = recent_searches)
+            else RoomSearchUiState.Rooms(greats.filter { it.name.contains(query.text,ignoreCase = true) })
         }.stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5000),
-            initialValue = SearchUiState.Loading
+            initialValue = RoomSearchUiState.Loading
         )
 
     fun update_query(query:String) {

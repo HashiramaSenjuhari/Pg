@@ -96,13 +96,13 @@ fun TenantSearchComponentScreen(
                     }
                 }
             }
-            TenantSearchUiState.Default -> {
+            is TenantSearchUiState.Default -> {
                 RecentSearchBoard(
                     onClear = {},
                     onPlaceQuery = {
                         viewmodel.update_query(it)
                     },
-                    names = listOf("BillionaireHari","BillionaireHari")
+                    names = state.recent_searches
                 )
             }
             TenantSearchUiState.Loading -> {}

@@ -59,7 +59,7 @@ import com.example.billionairehari.viewmodels.RoomSearchViewModel
 import com.example.billionairehari.viewmodels.TenantSearchViewModel
 import com.example.billionairehari.R
 import com.example.billionairehari.layout.SearchScreenLayout
-import com.example.billionairehari.viewmodels.SearchUiState
+import com.example.billionairehari.viewmodels.RoomSearchUiState
 
 @Composable
 fun RoomSearchComponentScreen(
@@ -100,16 +100,16 @@ fun RoomSearchComponentScreen(
         ) {
 
             when(state){
-                is SearchUiState.Default -> {
+                is RoomSearchUiState.Default -> {
                     RecentSearchBoard(
                         onClear = {},
                         onPlaceQuery = {
                             viewmodel.update_query(it)
                         },
-                        names = listOf("Room 101","Room 102")
+                        names = state.recent_searches
                     )
                 }
-                is SearchUiState.Rooms -> {
+                is RoomSearchUiState.Rooms -> {
                     val size = state.rooms.size
                     if(size === 0){
                         Column(
@@ -145,8 +145,9 @@ fun RoomSearchComponentScreen(
                         }
                     }
                 }
-                is SearchUiState.Loading -> {
+                RoomSearchUiState.Loading -> {
                 }
+                else -> {}
             }
         }
     }

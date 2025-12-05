@@ -25,13 +25,10 @@ import com.example.billionairehari.viewmodels.SearchUiState
 
 @Composable
 fun SearchScreenLayout(
-    isLoading:Boolean,
     label:String,
     modifier:Modifier,
     query:String,
     onChangeQuery:(String) -> Unit,
-    recent_searches:List<String>,
-    onClearRecentSearches:() -> Unit,
     onClickBack:() -> Unit,
     ResultScreen:@Composable () -> Unit
 ){
@@ -57,8 +54,7 @@ fun SearchScreenLayout(
                 onChangeQuery(it)
             },
             focus = focusRequester,
-            onClickBack = onClickBack,
-            isLoading = isLoading
+            onClickBack = onClickBack
         )
         Column(
             modifier = Modifier

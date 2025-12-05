@@ -26,7 +26,6 @@ import androidx.compose.ui.unit.sp
 
 @Composable
 fun SearchInput(
-    isLoading:Boolean,
     label:String,
     query:String,
     onChangeValue:(String) -> Unit,
@@ -48,7 +47,7 @@ fun SearchInput(
                 drawLine(
                     start = Offset(x = 0f,y = size.height),
                     end = Offset(x = size.width, y = size.height),
-                    color = if(isLoading) Color.Blue else Color.Black,
+                    color = Color.Black,
                     strokeWidth = 1f
                 )
             }.padding(horizontal = 6.dp)

@@ -1,5 +1,6 @@
 package com.example.billionairehari.viewmodels
 
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -22,28 +23,33 @@ data class TenantSearchCard(
 )
 
 
+sealed class TenantSearchUiState {
+    object Loading: TenantSearchUiState()
+    object Default: TenantSearchUiState()
+    data class Tenants(val tenants:List<TenantData>): TenantSearchUiState()
+}
 class TenantSearchViewModel(
     private val savedState: SavedStateHandle
 ): ViewModel() {
-    private val _query = MutableStateFlow<String>("")
+    private val _query = MutableStateFlow<TextFieldValue>(TextFieldValue(""))
     val query = _query.asStateFlow()
-    val result: StateFlow<List<TenantData>> = query
+    val result: StateFlow<TenantSearchUiState> = query
         .debounce(300L)
         .distinctUntilChanged()
         .map { query ->
-            if(query.isBlank()) tenants
-            else tenants.filter { it.name.contains(query, ignoreCase = true) }
+            if(query.text.length <= 2) TenantSearchUiState.Default
+            else TenantSearchUiState.Tenants(tenants.filter { it.name.contains(query.text, ignoreCase = true) })
         }.stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5000),
-            initialValue = emptyList()
+            initialValue = TenantSearchUiState.Loading
         )
 
     fun update_query(query:String) {
-        _query.value = query
+        _query.value = TextFieldValue(query)
     }
 
     fun reset_query(){
-        _query.value = ""
+        _query.value = TextFieldValue("")
     }
 }

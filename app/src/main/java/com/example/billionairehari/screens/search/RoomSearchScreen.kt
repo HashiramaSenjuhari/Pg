@@ -81,14 +81,11 @@ fun RoomSearchComponentScreen(
 
     SearchScreenLayout(
         label = "Search Rooms",
-        isLoading = state == SearchUiState.Loading,
         modifier = Modifier.then(modifier),
         query = query.value.text,
         onChangeQuery = {
             viewmodel.update_query(it)
         },
-        recent_searches = listOf("BillionaireHari","BillionaireHari","BillionaireHariPrasath"),
-        onClearRecentSearches = {},
         onClickBack = {
             navController.popBackStack()
         }

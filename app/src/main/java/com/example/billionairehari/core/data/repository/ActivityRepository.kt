@@ -7,9 +7,10 @@ import com.example.billionairehari.core.data.local.entity.Activity
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.map
+import javax.inject.Inject
 
 
-class ActivityRepository constructor(
+class ActivityRepository @Inject constructor(
     private val activityDao: ActivityDao
 ): ActivityRepositoryInterface {
     override suspend fun insertActvity(activity: Activity) = activityDao.insertAcivity(acivity = activity)

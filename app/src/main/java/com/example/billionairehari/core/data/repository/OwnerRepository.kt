@@ -4,8 +4,9 @@ import com.example.billionairehari.core.ApiResult
 import com.example.billionairehari.core.data.interfaces.OwnerRepositoryInterface
 import com.example.billionairehari.core.data.local.dao.OwnerDao
 import com.example.billionairehari.core.data.local.entity.Owner
+import javax.inject.Inject
 
-class OwnerRepository constructor(
+class OwnerRepository @Inject constructor(
     private val ownerDao: OwnerDao
 ): OwnerRepositoryInterface {
     override suspend fun createOwner(owner: Owner)  {

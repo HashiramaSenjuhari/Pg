@@ -7,10 +7,11 @@ import com.example.billionairehari.core.data.local.entity.RecentSearch
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.map
+import javax.inject.Inject
 
 enum class RecentSearchType { ROOMS,TENANTS }
 
-class RecentSearchRepository constructor (
+class RecentSearchRepository @Inject constructor (
     private val recentSearchDao: RecentSearchDao
 ): RecentSearchRepositoryInterface {
     override suspend fun insertRecentSearch(recent_search: RecentSearch) {

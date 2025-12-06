@@ -8,8 +8,9 @@ import com.example.billionairehari.model.RoomCardDetails
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.map
+import javax.inject.Inject
 
-class RoomRepository constructor(
+class RoomRepository @Inject constructor(
     private val roomDao: RoomDao
 ): RoomRepositoryInterface {
     override suspend fun insertRoom(room: Room){

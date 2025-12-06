@@ -7,8 +7,9 @@ import com.example.billionairehari.core.data.local.entity.Payment
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.map
+import javax.inject.Inject
 
-class PaymentRepository constructor(
+class PaymentRepository @Inject constructor(
     private val paymentDao: PaymentDao
 ): PaymentRepositoryInterface {
     override suspend fun insertPayment(payment: Payment) {

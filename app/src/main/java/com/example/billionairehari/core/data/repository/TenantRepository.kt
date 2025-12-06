@@ -7,8 +7,9 @@ import com.example.billionairehari.core.data.local.entity.Tenant
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.map
+import javax.inject.Inject
 
-class TenantRepository constructor(
+class TenantRepository @Inject constructor(
     private val tenantDao: TenantDao
 ): TenantRepositoryInterface {
     override suspend fun insertTenant(tenant: Tenant) {

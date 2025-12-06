@@ -9,6 +9,12 @@ import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 
+/**
+ *  Flow works on conversing the flow
+ *  using try catch in flow make it one time function
+ *  so using flow directly makes flow
+ **/
+
 class TenantRepository @Inject constructor(
     private val tenantDao: TenantDao
 ): TenantRepositoryInterface {

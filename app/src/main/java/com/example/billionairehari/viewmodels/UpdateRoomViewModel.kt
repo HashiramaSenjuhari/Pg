@@ -5,7 +5,9 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
+import com.example.billionairehari.core.data.repository.RoomRepository
 import com.example.billionairehari.model.Room
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
@@ -23,7 +25,9 @@ data class RoomUpdateData(
     val depositError:String? = null
 )
 
+@HiltViewModel
 class UpdateRoomViewModel(
+    private val repository: RoomRepository,
     private val data: Room
 ) : ViewModel() {
     /**

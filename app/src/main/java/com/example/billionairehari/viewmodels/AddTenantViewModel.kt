@@ -7,6 +7,8 @@ import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import com.example.billionairehari.R
+import com.example.billionairehari.core.data.repository.TenantRepository
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
@@ -38,7 +40,9 @@ data class TenantData (
     val otpError:String? = null,
 )
 
-class AddTenantViewModel(
+@HiltViewModel
+class AddTenantViewModel @Inject constructor (
+    private val repository: TenantRepository,
     private val room:String? = null
 ): ViewModel(){
     var tenant = mutableStateOf(TenantData(room = room ?: ""))
@@ -110,6 +114,7 @@ class AddTenantViewModel(
         )
         viewModelScope.launch {
             try {
+//                repository.insertTenant()
                 delay(4000)
             }catch(error: Exception){
 

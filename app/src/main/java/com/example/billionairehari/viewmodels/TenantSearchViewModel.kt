@@ -4,8 +4,10 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.billionairehari.core.data.repository.RecentSearchRepository
 import com.example.billionairehari.screens.TenantData
 import com.example.billionairehari.screens.tenants
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -14,6 +16,7 @@ import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
+import javax.inject.Inject
 
 data class TenantSearchCard(
     val name:String = "",
@@ -28,7 +31,10 @@ sealed class TenantSearchUiState {
     data class Default(val recent_searches:List<String>): TenantSearchUiState()
     data class Tenants(val tenants:List<TenantData>): TenantSearchUiState()
 }
-class TenantSearchViewModel(
+
+@HiltViewModel
+class TenantSearchViewModel @Inject constructor (
+    private val repository: RecentSearchRepository,
     private val savedState: SavedStateHandle
 ): ViewModel() {
     var recent_searches = emptyList<String>()

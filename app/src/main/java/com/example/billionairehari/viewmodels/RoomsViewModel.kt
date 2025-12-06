@@ -10,6 +10,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine
 import javax.inject.Inject
 import com.example.billionairehari.components.rooms.RoomFilterTypes.ALL_ROOMS
+import com.example.billionairehari.core.data.repository.RoomRepository
 import com.example.billionairehari.model.Room
 import com.example.billionairehari.model.RoomCardDetails
 import kotlinx.coroutines.flow.SharingStarted
@@ -29,6 +30,7 @@ data class RoomUiState(
 
 @HiltViewModel
 class RoomsViewModel @Inject constructor(
+    private val repository: RoomRepository,
     private val savedStateHandle: SavedStateHandle
 ) : ViewModel() {
     private val _rooms = MutableStateFlow<List<RoomCardDetails>>(current_rooms)

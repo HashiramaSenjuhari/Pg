@@ -5,6 +5,8 @@ import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.billionairehari.core.data.repository.RoomRepository
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
@@ -22,7 +24,10 @@ data class RoomData(
     val isLoading:Boolean = false
 )
 
-class AddRoomViewModel: ViewModel(){
+@HiltViewModel
+class AddRoomViewModel @Inject constructor(
+    private val repository: RoomRepository
+): ViewModel(){
     private val _room = mutableStateOf(RoomData())
     val room: State<RoomData> get() = _room
 
@@ -107,6 +112,7 @@ class AddRoomViewModel: ViewModel(){
         )
         viewModelScope.launch {
             try {
+//                repository.insertRoom(room)
                 delay(4000)
             }catch(error: Exception){
 

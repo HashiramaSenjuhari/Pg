@@ -5,8 +5,10 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
+import com.example.billionairehari.core.data.repository.PaymentRepository
 import com.example.billionairehari.model.Tenant
 import com.example.billionairehari.model.TenantRentRecord
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
@@ -22,7 +24,9 @@ data class RecordData(
     val dateError:String? = null
 )
 
+@HiltViewModel
 class RecordRentViewModel(
+    private val repository: PaymentRepository,
     private val tenant: TenantRentRecord = TenantRentRecord()
 ) : ViewModel() {
     private val _record = mutableStateOf(RecordData(
@@ -76,6 +80,7 @@ class RecordRentViewModel(
                 _record.value = _record.value.copy(
                     isLoading = true
                 )
+//                repository.insertPayment()
                 delay(1000)
             }catch(error: Exception){
 

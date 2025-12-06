@@ -5,6 +5,8 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.billionairehari.core.data.repository.RecentSearchRepository
+import com.example.billionairehari.core.data.repository.RecentSearchType
 import com.example.billionairehari.model.RoomCardDetails
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -14,6 +16,7 @@ import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
+import javax.inject.Inject
 
 
 val greats = listOf<RoomCardDetails>(
@@ -90,11 +93,15 @@ sealed class RoomSearchUiState {
     object Loading: RoomSearchUiState()
 }
 
+@Inject
 class RoomSearchViewModel(
+    private val repository: RecentSearchRepository,
     private val savedState: SavedStateHandle
 ): ViewModel() {
     var recent_searches = emptyList<String>()
     init {
+//        repository.getRecentSearches(ownerId = "", RecentSearchType.ROOMS)
+
         recent_searches = listOf("Room 101","Room 102")
     }
     private val _query = MutableStateFlow<TextFieldValue>(TextFieldValue(""))

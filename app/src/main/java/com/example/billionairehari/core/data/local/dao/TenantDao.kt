@@ -28,8 +28,21 @@ interface TenantDao {
             AND strftime('%Y-%m',p.payment_date) = strftime('%Y-%m','now')
         WHERE r.owner_id = :ownerId
     """)
-    fun getTenantsFlow(ownerId:String) : Flow<List<TenantCardDetails>>
+    fun getTenantsCardFlow(ownerId:String) : Flow<List<TenantCardDetails>>
 
+
+    @Query("""
+        SELECT
+        t.id,t.name,t.phone_number,
+        r.name AS roomName,
+        CASE WHEN p.id IS NOT NULL THEN 1 ELSE 0 END AS current_paid
+        FROM tenants t
+        LEFT JOIN rooms r ON t.room_id = r.id
+        LEFT JOIN payments p ON p.tenant_id = t.id
+            AND strftime('%Y-%m',p.payment_date) = strftime('%Y-%m','now')
+        WHERE r.owner_id = :ownerId
+    """)
+    suspend fun getTenantsCard(ownerId:String) :List<TenantCardDetails>
     // ###############################################################################################
 
 

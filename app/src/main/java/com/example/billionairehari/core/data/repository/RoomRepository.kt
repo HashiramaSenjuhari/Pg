@@ -20,8 +20,15 @@ class RoomRepository @Inject constructor(
 
         }
     }
-    override suspend fun getRoomCards(ownerId: String): Flow<ApiResult<List<RoomDao.RoomCard>>> = roomDao
-        .getRoomsFlow(ownerId = ownerId)
+    override suspend fun getRoomCards(ownerId: String): ApiResult<List<RoomDao.RoomCard>> =
+        ApiResult.Success(roomDao.getRoomsCard(ownerId = ownerId))
+
+    override fun getRoomCardsFlow(ownerId: String): <ApiResult<List<RoomDao.RoomCard>>> = roomDao
+        .getRoomsCardFlow(ownerId = ownerId)
         .map { ApiResult.Success(it) }
         .catch { ApiResult.Error(code = 300, message = it.message ?: "") }
+    override fun searchRooms(ownerId: String, query: String): Flow<ApiResult<List<RoomDao.RoomCard>>> = roomDao
+        .searchRooms(ownerId = ownerId, query = query)
+        .map { ApiResult.Success(it) }
+        .catch { ApiResult.Error(message = it.message ?: "", code = 500) }
 }

@@ -22,10 +22,13 @@ class TenantRepository @Inject constructor(
         tenantDao.insertTenant(tenant = tenant)
     }
 
-    override fun getTenantsCard(ownerId: String): Flow<ApiResult<List<TenantDao.TenantCardDetails>>> = tenantDao
+    override fun getTenantsCardFlow(ownerId: String): Flow<ApiResult<List<TenantDao.TenantCardDetails>>> = tenantDao
         .getTenantsFlow(ownerId = ownerId)
         .map { ApiResult.Success(it) }
         .catch { ApiResult.Error(code = 300, message = it.message ?: "") }
+
+    override suspend fun getTenantsCard(ownerId: String): ApiResult<List<TenantDao.TenantCardDetails>> =
+        ApiResult.Success(tenantDao.getTenantsCard(ownerId = ownerId))
 
     override fun getTenant(
         tenantId: String,

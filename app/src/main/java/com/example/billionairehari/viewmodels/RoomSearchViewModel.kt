@@ -1,5 +1,6 @@
 package com.example.billionairehari.viewmodels
 
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.lifecycle.SavedStateHandle
@@ -7,13 +8,16 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.billionairehari.core.data.repository.RecentSearchRepository
 import com.example.billionairehari.core.data.repository.RecentSearchType
+import com.example.billionairehari.core.data.repository.RoomRepository
 import com.example.billionairehari.model.RoomCardDetails
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import javax.inject.Inject
@@ -88,35 +92,35 @@ val greats = listOf<RoomCardDetails>(
 )
 
 sealed class RoomSearchUiState {
-    data class Default(val recent_searches:List<String>): RoomSearchUiState()
-    data class Rooms(val rooms: List<RoomCardDetails>): RoomSearchUiState()
+    data class Default(val recent_searches:List<String>>): RoomSearchUiState()
+    data class Rooms(val rooms: Flow<List<RoomCardDetails>>): RoomSearchUiState()
     object Loading: RoomSearchUiState()
 }
 
 @Inject
 class RoomSearchViewModel(
-    private val repository: RecentSearchRepository,
+    private val room: RecentSearchRepository,
+    private val repository: RoomRepository,
     private val savedState: SavedStateHandle
 ): ViewModel() {
-    var recent_searches = emptyList<String>()
-    init {
-//        repository.getRecentSearches(ownerId = "", RecentSearchType.ROOMS)
+    var recent_searches = recentSearchRepository.getRecentSearches(type = RecentSearchType.ROOMS, ownerId = "billionairehari")
 
-        recent_searches = listOf("Room 101","Room 102")
-    }
-    private val _query = MutableStateFlow<TextFieldValue>(TextFieldValue(""))
-    val query = _query.asStateFlow()
-    val result: StateFlow<RoomSearchUiState> = query
+    val cards = query
         .debounce(300L)
         .distinctUntilChanged()
-        .map { query ->
-            if(query.text.trim().length <= 2) RoomSearchUiState.Default(recent_searches = recent_searches)
-            else RoomSearchUiState.Rooms(greats.filter { it.name.contains(query.text,ignoreCase = true) })
-        }.stateIn(
-            scope = viewModelScope,
+        .filter {
+            query ->
+            val text = query.text
+            val rooms = repository.searchRooms(ownerId = "", query = text)
+
+        }
+        .stateIn(
             started = SharingStarted.WhileSubscribed(5000),
             initialValue = RoomSearchUiState.Loading
         )
+
+    private val _query = MutableStateFlow<TextFieldValue>(TextFieldValue(""))
+    val query = _query.asStateFlow()
 
     fun update_query(query:String) {
         _query.value = TextFieldValue(

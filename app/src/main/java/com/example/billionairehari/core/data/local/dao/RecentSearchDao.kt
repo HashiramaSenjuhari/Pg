@@ -5,6 +5,7 @@ import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.Query
 import com.example.billionairehari.core.data.local.entity.RecentSearch
+import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface RecentSearchDao {
@@ -17,27 +18,13 @@ interface RecentSearchDao {
         SELECT
         text
         FROM recent_searches
-        WHERE owner_id = :ownerId AND search_type = 'room'
+        WHERE owner_id = :ownerId AND search_type = :type
         ORDER BY id
     """)
-    suspend fun getRoomRecentSearch(ownerId:String): RecentSearchData
+    fun getRecentSearch(ownerId:String,type:String): Flow<List<RecentSearchData>>
 
     @Query("""
-        SELECT
-        text
-        FROM recent_searches
-        WHERE owner_id = :ownerId AND search_type = 'tenant'
-        ORDER BY id
+        DELETE FROM recent_searches WHERE search_type = :type AND owner_id = :ownerId
     """)
-    suspend fun getTenantRecentSearch(ownerId:String) : RecentSearchData
-
-    @Query("""
-        DELETE FROM recent_searches WHERE search_type = 'room' AND owner_id = :ownerId
-    """)
-    suspend fun clearRoomRecentSearch(ownerId:String)
-
-    @Query("""
-        DELETE FROM recent_searches WHERE search_type = 'tenant' AND owner_id = :ownerId
-    """)
-    suspend fun clearTenantRecentSearch(ownerId:String)
+    suspend fun clearRecentSearch(ownerId:String,type: String)
 }

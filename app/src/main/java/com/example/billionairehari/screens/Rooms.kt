@@ -163,6 +163,7 @@ import com.example.billionairehari.components.DropDown
 import com.example.billionairehari.icons.CalendarIcon
 import com.example.billionairehari.icons.Rupee
 import com.example.billionairehari.layout.DIALOG_TYPE
+import com.example.billionairehari.layout.DynamicShowcaseScreen
 import com.example.billionairehari.layout.MODAL_TYPE
 import com.example.billionairehari.layout.component.ROw
 import com.example.billionairehari.model.Room
@@ -205,84 +206,6 @@ fun RoomsScreen(
             navController = navController,
             final_rooms = final_rooms,
             current_action = current_action
-        )
-    }
-
-}
-
-@Composable
-fun DynamicShowcaseScreen(
-    scrollState: ScrollState,
-    navController: NavController,
-    title: String,
-    placeholder: String,
-    search_route:String,
-    content:@Composable () -> Unit
-){
-
-    /** header Animation module - Start **/
-    /** header Animation module - End **/
-
-
-    val maxOffset = 100f
-    val progress = (scrollState.value.toFloat() / maxOffset).coerceIn(0f,1f)
-
-    val padding = animateDpAsState(targetValue = lerp(50.dp, 9.dp,progress))
-    val spacing = animateDpAsState(targetValue = lerp(13.dp,3.dp,progress))
-    val fontSize = animateFloatAsState(targetValue = lerp(24.sp, 21.sp,progress).value)
-    val activity = LocalView.current.context as Activity
-
-    SideEffect {
-        activity.window.statusBarColor = Color.Blue.copy(0.01f).toArgb()
-        val wc = WindowInsetsControllerCompat(activity.window,activity.window.decorView)
-        wc.isAppearanceLightStatusBars = true
-    }
-
-    Column(
-        modifier = Modifier
-            .animateContentSize()
-            .fillMaxSize()
-            .background(Brush.verticalGradient(colors = listOf(Color.Blue.copy(0.2f),Color.White,Color.White,Color.White,Color.White,Color.White)))
-            .padding(top = padding.value)
-    ) {
-        DynamicTopHeader(
-            title = title,
-            placeholder = placeholder,
-            onClickFilter = {},
-            onClickSearch = {
-                navController.navigate(search_route)
-            },
-            fontSize = fontSize.value.sp,
-            spacing = spacing.value
-        )
-        content.invoke()
-    }
-}
-
-@Composable
-fun DynamicTopHeader(
-    title:String,
-    placeholder:String,
-    spacing: Dp,
-    fontSize: TextUnit,
-    onClickSearch: () -> Unit,
-    onClickFilter: () -> Unit
-){
-    Column(
-        verticalArrangement = Arrangement.spacedBy(space = spacing),
-        modifier =  Modifier
-            .animateContentSize()
-            .padding(horizontal = 13.dp, vertical = 13.dp)
-    ) {
-        ROw(
-            modifier = Modifier.padding(6.dp)
-        ) {
-            Text(title, fontSize = fontSize, fontWeight = FontWeight.Bold)
-        }
-        StaticSearchBar(
-            placeholder = placeholder,
-            onClick = onClickSearch,
-            onClickFilter = onClickFilter
         )
     }
 }

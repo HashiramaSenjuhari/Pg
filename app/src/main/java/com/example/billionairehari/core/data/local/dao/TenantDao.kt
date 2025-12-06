@@ -89,7 +89,7 @@ interface TenantDao {
         WHERE r.owner_id = :ownerId AND t.id = :tenantId
         ORDER BY t.id,COALESCE(p.paymentDate,'0000-00-00') DESC
     """)
-    fun getTenant(ownerId:String,tenantId:String) : TenantDetails
+    fun getTenant(ownerId:String,tenantId:String) : Flow<TenantDetails>
 
     // ###############################################################################################
 

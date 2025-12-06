@@ -22,6 +22,6 @@ interface PaymentDao {
             p.owner_id = :ownerId
             AND strftime('%Y-%m',payment_date) = strftime('%Y-%m','now')
     """)
-    suspend fun getTotalRevenue(ownerId:String): Revenue
+    fun getTotalRevenue(ownerId:String): Flow<Revenue>
     // ###############################################################################################
 }

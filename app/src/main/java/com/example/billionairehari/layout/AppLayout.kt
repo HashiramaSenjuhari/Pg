@@ -2,10 +2,13 @@ package com.example.billionairehari.layout
 
 import android.content.Intent
 import android.util.Log
+import androidx.compose.animation.AnimatedContentTransitionScope
 import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
+import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideIn
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutHorizontally
@@ -84,7 +87,13 @@ fun AppLayout(
             )
         }
         composable(
-            route = Destinations.ROOMS_ROUTE
+            route = Destinations.ROOMS_ROUTE,
+            enterTransition = {
+                EnterTransition.None
+            },
+            exitTransition = {
+                ExitTransition.None
+            }
         ) {
             RoomsScreen(
                 viewmodel = hiltViewModel<RoomsViewModel>(),
@@ -94,7 +103,19 @@ fun AppLayout(
             )
         }
         composable(
-            route = Destinations.TENANTS_ROUTE
+            route = Destinations.TENANTS_ROUTE,
+            enterTransition = {
+                EnterTransition.None
+            },
+            exitTransition = {
+                ExitTransition.None
+            },
+            popEnterTransition = {
+                EnterTransition.None
+            },
+            popExitTransition = {
+                ExitTransition.None
+            }
         ){
             TenantsScreen(
                 modifier = Modifier.padding(padding),
@@ -116,7 +137,17 @@ fun AppLayout(
             exitTransition = {
                 slideOutHorizontally(
                     targetOffsetX = { fullWidth -> -fullWidth }
-                )
+                ) + fadeOut(animationSpec = tween(durationMillis = 300))
+            },
+            popEnterTransition = {
+                slideInHorizontally(
+                    initialOffsetX = { fullWidth -> -fullWidth }
+                ) + fadeIn(animationSpec = tween(durationMillis = 300))
+            },
+            popExitTransition = {
+                slideOutHorizontally(
+                    targetOffsetX = { fullWidth -> -fullWidth }
+                ) + fadeOut(animationSpec = tween(durationMillis = 300))
             }
         ){
             entry ->

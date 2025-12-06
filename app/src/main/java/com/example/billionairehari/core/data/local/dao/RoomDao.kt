@@ -33,7 +33,4 @@ interface RoomDao {
         GROUP BY r.id,r.name,r.bed_count,r.due_date;
         """)
     fun getRoomsFlow(ownerId:String) : Flow<List<RoomCard>>
-
-    @Query("SELECT * FROM rooms WHERE owner_id = :ownerId")
-    suspend fun getRooms(ownerId:String) : List<Room>
 }

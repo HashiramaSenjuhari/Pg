@@ -103,6 +103,7 @@ import com.example.billionairehari.viewmodels.TenantViewModel
 import com.example.billionairehari.viewmodels.TenantsViewModel
 import kotlin.math.min
 import com.example.billionairehari.R
+import com.example.billionairehari.layout.DynamicShowcaseScreen
 
 
 @Composable

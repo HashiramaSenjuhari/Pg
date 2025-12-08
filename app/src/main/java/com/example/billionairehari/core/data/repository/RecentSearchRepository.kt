@@ -21,7 +21,7 @@ class RecentSearchRepository @Inject constructor (
     override fun getRecentSearches(
         ownerId: String,
         type: RecentSearchType
-    ): Flow<ApiResult<List<RecentSearchDao.RecentSearchData>>> = recentSearchDao
+    ): Flow<List<RecentSearchDao.RecentSearchData>> = recentSearchDao
         .getRecentSearch(ownerId = ownerId, type = type.name.lowercase())
         .map { ApiResult.Success(it) }
         .catch { ApiResult.Error(code = 500,message = it.message ?: "") }

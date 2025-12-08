@@ -22,29 +22,21 @@ class TenantRepository @Inject constructor(
         tenantDao.insertTenant(tenant = tenant)
     }
 
-    override fun getTenantsCardFlow(ownerId: String): Flow<ApiResult<List<TenantDao.TenantCardDetails>>> = tenantDao
-        .getTenantsFlow(ownerId = ownerId)
-        .map { ApiResult.Success(it) }
-        .catch { ApiResult.Error(code = 300, message = it.message ?: "") }
+    override fun getTenantsCardFlow(ownerId: String): Flow<List<TenantDao.TenantCardDetails>> = tenantDao
+        .getTenantsCardFlow(ownerId = ownerId)
 
-    override suspend fun getTenantsCard(ownerId: String): ApiResult<List<TenantDao.TenantCardDetails>> =
-        ApiResult.Success(tenantDao.getTenantsCard(ownerId = ownerId))
+    override suspend fun getTenantsCard(ownerId: String): List<TenantDao.TenantCardDetails> =
+        tenantDao.getTenantsCard(ownerId = ownerId)
 
     override fun getTenant(
         tenantId: String,
         ownerId: String
-    ): Flow<ApiResult<TenantDao.TenantDetails>> = tenantDao
+    ): Flow<TenantDao.TenantDetails> = tenantDao
         .getTenant(tenantId = tenantId, ownerId = ownerId)
-        .map { ApiResult.Success(it) }
-        .catch { ApiResult.Error(code = 300, message = it.message ?: "") }
 
-    override fun getPaidCount(ownerId: String): Flow<ApiResult<TenantDao.RentPaid>> = tenantDao
+    override fun getPaidCount(ownerId: String): Flow<TenantDao.RentPaid> = tenantDao
         .getRentPaidFlow(ownerId = ownerId)
-        .map { ApiResult.Success(it) }
-        .catch { ApiResult.Error(500, message = it.message ?: "") }
 
-    override fun getNotPaidCount(ownerId: String): Flow<ApiResult<TenantDao.RentNotPaid>> = tenantDao
+    override fun getNotPaidCount(ownerId: String): Flow<TenantDao.RentNotPaid> = tenantDao
         .getRentNotPaidFlow(ownerId = ownerId)
-        .map { ApiResult.Success(it) }
-        .catch { ApiResult.Error(500, message = it.message ?: "") }
 }

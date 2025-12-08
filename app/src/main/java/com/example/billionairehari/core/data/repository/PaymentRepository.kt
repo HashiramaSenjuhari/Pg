@@ -16,7 +16,7 @@ class PaymentRepository @Inject constructor(
         paymentDao.insertPayment(payment = payment)
     }
 
-    override fun getRevenue(ownerId: String): Flow<ApiResult<PaymentDao.Revenue>> = paymentDao
+    override fun getRevenue(ownerId: String): Flow<PaymentDao.Revenue> = paymentDao
         .getTotalRevenue(ownerId = ownerId)
         .map { ApiResult.Success(it) }
         .catch { ApiResult.Error(message = it.message ?: "", code = 300) }

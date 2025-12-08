@@ -15,7 +15,7 @@ class ActivityRepository @Inject constructor(
 ): ActivityRepositoryInterface {
     override suspend fun insertActvity(activity: Activity) = activityDao.insertAcivity(acivity = activity)
 
-    override fun getActivities(ownerId: String): Flow<ApiResult<List<Activity>>> = activityDao
+    override fun getActivities(ownerId: String): Flow<List<Activity>> = activityDao
         .getActivities(ownerId = ownerId)
         .map { ApiResult.Success(it) }
         .catch { ApiResult.Error(code = 500, message = it.message!!) }

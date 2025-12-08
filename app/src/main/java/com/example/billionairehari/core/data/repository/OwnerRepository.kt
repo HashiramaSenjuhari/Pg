@@ -13,7 +13,7 @@ class OwnerRepository @Inject constructor(
         ownerDao.insertOwner(owner = owner)
     }
 
-    override suspend fun getOwner(phone: String): ApiResult<Owner> {
+    override suspend fun getOwner(phone: String): Owner {
         return try {
             val owner = ownerDao.getOwner(phone = phone)
             ApiResult.Success(owner)

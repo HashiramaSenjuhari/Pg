@@ -6,5 +6,5 @@ import kotlinx.coroutines.flow.Flow
 
 interface ActivityRepositoryInterface {
     suspend fun insertActvity(activity: Activity)
-    fun getActivities(ownerId:String): Flow<ApiResult<List<Activity>>>
+    fun getActivities(ownerId:String): Flow<List<Activity>>
 }

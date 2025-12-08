@@ -7,5 +7,5 @@ import kotlinx.coroutines.flow.Flow
 
 interface PaymentRepositoryInterface {
     suspend fun insertPayment(payment: Payment)
-    fun getRevenue(ownerId:String): Flow<ApiResult<PaymentDao.Revenue>>
+    fun getRevenue(ownerId:String): Flow<PaymentDao.Revenue>
 }

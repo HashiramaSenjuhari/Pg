@@ -7,9 +7,9 @@ import kotlinx.coroutines.flow.Flow
 
 interface TenantRepositoryInterface {
     suspend fun insertTenant(tenant: Tenant)
-    fun getTenantsCardFlow(ownerId:String): Flow<ApiResult<List<TenantDao.TenantCardDetails>>>
-    suspend fun getTenantsCard(ownerId:String): ApiResult<List<TenantDao.TenantCardDetails>>
-    fun getTenant(tenantId:String,ownerId:String): Flow<ApiResult<TenantDao.TenantDetails>>
-    fun getPaidCount(ownerId:String): Flow<ApiResult<TenantDao.RentPaid>>
-    fun getNotPaidCount(ownerId:String) : Flow<ApiResult<TenantDao.RentNotPaid>>
+    fun getTenantsCardFlow(ownerId:String): Flow<List<TenantDao.TenantCardDetails>>
+    suspend fun getTenantsCard(ownerId:String): List<TenantDao.TenantCardDetails>
+    fun getTenant(tenantId:String,ownerId:String): Flow<TenantDao.TenantDetails>
+    fun getPaidCount(ownerId:String): Flow<TenantDao.RentPaid>
+    fun getNotPaidCount(ownerId:String) : Flow<TenantDao.RentNotPaid>
 }

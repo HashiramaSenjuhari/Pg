@@ -8,6 +8,6 @@ import kotlinx.coroutines.flow.Flow
 
 interface RecentSearchRepositoryInterface {
     suspend fun insertRecentSearch(recent_search: RecentSearch)
-    fun getRecentSearches(ownerId:String,type: RecentSearchType): Flow<ApiResult<List<RecentSearchDao.RecentSearchData>>>
+    fun getRecentSearches(ownerId:String,type: RecentSearchType): Flow<List<RecentSearchDao.RecentSearchData>>
     suspend fun clearRecentSearches(ownerId:String,type: RecentSearchType)
 }

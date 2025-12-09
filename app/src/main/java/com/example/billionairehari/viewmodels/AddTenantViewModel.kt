@@ -11,6 +11,7 @@ import com.example.billionairehari.core.data.repository.TenantRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 data class TenantData (
     val image: ByteArray? = null,
@@ -42,10 +43,9 @@ data class TenantData (
 
 @HiltViewModel
 class AddTenantViewModel @Inject constructor (
-    private val repository: TenantRepository,
-    private val room:String? = null
+    private val repository: TenantRepository
 ): ViewModel(){
-    var tenant = mutableStateOf(TenantData(room = room ?: ""))
+    var tenant = mutableStateOf(TenantData(room = ""?: ""))
         private set
 
     /** update value **/
@@ -151,16 +151,4 @@ fun validateDate(date:Long):String? {
         return "please choose date"
     }
     return null
-}
-
-class AddTenantFactory(
-    private val room:String? = null
-): ViewModelProvider.Factory {
-    override fun <T : ViewModel> create(modelClass: Class<T>): T {
-        if(modelClass.isAssignableFrom(AddTenantViewModel::class.java)){
-            return AddTenantViewModel(room = room) as T
-        }else {
-            throw IllegalArgumentException("Please Provide Correct Class")
-        }
-    }
 }

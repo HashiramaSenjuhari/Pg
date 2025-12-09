@@ -214,7 +214,7 @@ fun TenantCards(
     scrollState: ScrollState,
     context: Context,
     navController: NavController,
-    viewmodel: ViewModel = TenantsViewModel()
+    viewmodel: TenantViewModel= hiltViewModel()
 ){
     Column(
         modifier = Modifier

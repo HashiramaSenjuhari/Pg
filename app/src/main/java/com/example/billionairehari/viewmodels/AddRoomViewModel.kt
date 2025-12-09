@@ -9,6 +9,7 @@ import com.example.billionairehari.core.data.repository.RoomRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 data class RoomData(
     val name:String = "",

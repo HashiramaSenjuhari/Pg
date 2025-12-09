@@ -26,12 +26,6 @@ data class TenantSearchCard(
 )
 
 
-sealed class TenantSearchUiState {
-    object Loading: TenantSearchUiState()
-    data class Default(val recent_searches:List<String>): TenantSearchUiState()
-    data class Tenants(val tenants:List<TenantData>): TenantSearchUiState()
-}
-
 @HiltViewModel
 class TenantSearchViewModel @Inject constructor (
     private val repository: RecentSearchRepository,
@@ -45,16 +39,16 @@ class TenantSearchViewModel @Inject constructor (
 
     private val _query = MutableStateFlow<TextFieldValue>(TextFieldValue(""))
     val query = _query.asStateFlow()
-    val result: StateFlow<TenantSearchUiState> = query
+    val result: StateFlow<SearchUiState<TenantData>> = query
         .debounce(300L)
         .distinctUntilChanged()
         .map { query ->
-            if(query.text.trim().length <= 2) TenantSearchUiState.Default(recent_searches = recent_searches)
-            else TenantSearchUiState.Tenants(tenants.filter { it.name.contains(query.text, ignoreCase = true) })
+            if(query.text.trim().length <= 2) SearchUiState.Default(recent_searches = recent_searches)
+            else SearchUiState.Data<TenantData>(tenants.filter { it.name.contains(query.text, ignoreCase = true) })
         }.stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5000),
-            initialValue = TenantSearchUiState.Loading
+            initialValue = SearchUiState.Loading
         )
 
     fun update_query(query:String) {

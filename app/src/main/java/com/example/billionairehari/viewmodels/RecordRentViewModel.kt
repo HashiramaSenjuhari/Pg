@@ -11,6 +11,7 @@ import com.example.billionairehari.model.TenantRentRecord
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 enum class PaymentMethod { CASH, UPI }
 
@@ -25,17 +26,11 @@ data class RecordData(
 )
 
 @HiltViewModel
-class RecordRentViewModel(
+class RecordRentViewModel @Inject constructor(
     private val repository: PaymentRepository,
-    private val tenant: TenantRentRecord = TenantRentRecord()
 ) : ViewModel() {
     private val _record = mutableStateOf(RecordData(
-        tenant = TenantSearchCard(
-            name = tenant.name,
-            room = tenant.room,
-            rent_amount = tenant.rent,
-            due = tenant.due_date
-        )
+        tenant = TenantSearchCard()
     ))
     val record: State<RecordData> get() = _record
 
@@ -91,14 +86,5 @@ class RecordRentViewModel(
 //                _record.value = RecordData()
             }
         }
-    }
-}
-
-class RecordRentFactory(private val tenant: TenantRentRecord): ViewModelProvider.Factory {
-    override fun <T : ViewModel> create(modelClass: Class<T>): T {
-        if(modelClass.isAssignableFrom(RecordRentViewModel::class.java)){
-            return RecordRentViewModel(tenant = tenant) as T
-        }
-        throw IllegalArgumentException("Provide RecordRentViewModel Class")
     }
 }

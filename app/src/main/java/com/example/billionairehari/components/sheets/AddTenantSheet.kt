@@ -120,7 +120,6 @@ import com.example.billionairehari.icons.Phone
 import com.example.billionairehari.icons.TenantIcon
 import com.example.billionairehari.model.Tenant
 import com.example.billionairehari.layout.component.ROw
-import com.example.billionairehari.viewmodels.AddTenantFactory
 import com.example.billionairehari.viewmodels.AddTenantViewModel
 import com.google.android.material.tabs.TabLayout
 import kotlinx.coroutines.CoroutineScope
@@ -138,10 +137,7 @@ fun TenantSheet(
     Log.d("ROOM_GREAT",room.toString())
     val owner = LocalViewModelStoreOwner.current
 
-    val viewmodel: AddTenantViewModel = viewModel(
-        factory = AddTenantFactory(room = room),
-        viewModelStoreOwner = owner!!
-    )
+    val viewmodel: AddTenantViewModel = hiltViewModel()
     val aadhar = remember { mutableStateOf("") }
     val otp = remember { mutableStateOf("") }
 

@@ -87,6 +87,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import androidx.compose.ui.zIndex
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.viewmodel.compose.LocalViewModelStoreOwner
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
@@ -107,7 +108,6 @@ import com.example.billionairehari.components.AppButton
 import com.example.billionairehari.model.TenantRentRecord
 import com.example.billionairehari.screens.StaticSearchBar
 import com.example.billionairehari.viewmodels.PaymentMethod
-import com.example.billionairehari.viewmodels.RecordRentFactory
 import com.example.billionairehari.viewmodels.RecordRentViewModel
 import com.example.billionairehari.viewmodels.TenantSearchCard
 
@@ -119,10 +119,7 @@ fun RecordRentPriceModal(
 ){
     val owner = LocalViewModelStoreOwner.current
 
-    val viewmodel: RecordRentViewModel = viewModel(
-        factory = RecordRentFactory(tenant = tenant),
-        viewModelStoreOwner = owner!!
-    )
+    val viewmodel: RecordRentViewModel = hiltViewModel()
 
     val scrollState = rememberScrollState()
     val expanded = remember { mutableStateOf<Boolean>(false) }

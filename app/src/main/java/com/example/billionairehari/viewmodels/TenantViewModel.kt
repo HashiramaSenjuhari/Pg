@@ -8,8 +8,8 @@ import javax.inject.Inject
 
 @HiltViewModel
 class TenantViewModel @Inject constructor(
-    private val repository: TenantRepository,
-    private val savedStateHandle: SavedStateHandle
+    private val savedStateHandle: SavedStateHandle,
+    private val repository: TenantRepository
 ): ViewModel() {
     private val _id:String? = savedStateHandle["tenantId"]
     val id = _id

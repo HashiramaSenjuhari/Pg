@@ -20,7 +20,6 @@ import androidx.compose.ui.unit.sp
 import com.example.billionairehari.R
 import com.example.billionairehari.components.RecentSearchBoard
 import com.example.billionairehari.components.SearchInput
-import com.example.billionairehari.viewmodels.RoomSearchUiState
 
 
 @Composable

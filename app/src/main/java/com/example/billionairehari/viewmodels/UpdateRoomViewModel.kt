@@ -10,6 +10,7 @@ import com.example.billionairehari.model.Room
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 data class RoomUpdateData(
     val name:String,
@@ -26,9 +27,8 @@ data class RoomUpdateData(
 )
 
 @HiltViewModel
-class UpdateRoomViewModel(
+class UpdateRoomViewModel @Inject constructor(
     private val repository: RoomRepository,
-    private val data: Room
 ) : ViewModel() {
     /**
      *  architecture
@@ -39,12 +39,12 @@ class UpdateRoomViewModel(
      * **/
     private val _room = mutableStateOf<RoomUpdateData>(
         RoomUpdateData(
-            name = data.name,
-            count = data.total_beds,
-            features = data.features,
-            images = data.images,
-            deposit = data.deposit_per_tenant,
-            rent = data.rent_per_tenant
+            name = "",
+            count = "",
+            features = emptyList(),
+            images = emptyList(),
+            deposit = "",
+            rent = ""
         )
     )
 
@@ -123,16 +123,5 @@ class UpdateRoomViewModel(
                 )
             }
         }
-    }
-}
-
-class UpdateRoomFactory(
-    private val room: Room
-): ViewModelProvider.Factory {
-    override fun <T : ViewModel> create(modelClass: Class<T>): T {
-        if(modelClass.isAssignableFrom(UpdateRoomViewModel::class.java)){
-            return UpdateRoomViewModel(data = room) as T
-        }
-        throw IllegalArgumentException("Unknown ViewModel class")
     }
 }

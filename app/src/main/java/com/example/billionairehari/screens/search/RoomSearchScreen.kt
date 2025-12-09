@@ -45,6 +45,7 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
@@ -59,14 +60,15 @@ import com.example.billionairehari.viewmodels.RoomSearchViewModel
 import com.example.billionairehari.viewmodels.TenantSearchViewModel
 import com.example.billionairehari.R
 import com.example.billionairehari.layout.SearchScreenLayout
-import com.example.billionairehari.viewmodels.RoomSearchUiState
+import com.example.billionairehari.model.RoomCardDetails
+import com.example.billionairehari.viewmodels.SearchUiState
 
 @Composable
 fun RoomSearchComponentScreen(
     modifier: Modifier = Modifier,
     current_action: MutableState<MODAL_TYPE>,
     navController: NavController,
-    viewmodel: RoomSearchViewModel = viewModel(),
+    viewmodel: RoomSearchViewModel = hiltViewModel()
 ){
 
 
@@ -75,7 +77,7 @@ fun RoomSearchComponentScreen(
 
     /** viewmodel **/
     val query = viewmodel.query.collectAsState()
-    val results = viewmodel.result.collectAsStateWithLifecycle()
+    val results = viewmodel.results.collectAsStateWithLifecycle()
     val state = results.value
     val scrollState = rememberScrollState()
 
@@ -100,7 +102,7 @@ fun RoomSearchComponentScreen(
         ) {
 
             when(state){
-                is RoomSearchUiState.Default -> {
+                is SearchUiState.Default -> {
                     RecentSearchBoard(
                         onClear = {},
                         onPlaceQuery = {
@@ -109,8 +111,8 @@ fun RoomSearchComponentScreen(
                         names = state.recent_searches
                     )
                 }
-                is RoomSearchUiState.Rooms -> {
-                    val size = state.rooms.size
+                is SearchUiState.Data<RoomCardDetails> -> {
+                    val size = state.data.size
                     if(size === 0){
                         Column(
                             modifier = Modifier.fillMaxSize(),
@@ -133,7 +135,7 @@ fun RoomSearchComponentScreen(
                         }
                     }
                     else {
-                        state.rooms.forEach {
+                        state.data.forEach {
                                 room ->
                             RoomCard(
                                 current_action = current_action,
@@ -145,9 +147,8 @@ fun RoomSearchComponentScreen(
                         }
                     }
                 }
-                RoomSearchUiState.Loading -> {
+                SearchUiState.Loading -> {
                 }
-                else -> {}
             }
         }
     }

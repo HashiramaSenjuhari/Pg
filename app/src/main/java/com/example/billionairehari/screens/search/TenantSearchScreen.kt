@@ -22,6 +22,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
@@ -32,7 +33,8 @@ import com.example.billionairehari.layout.ChildLayout
 import com.example.billionairehari.layout.SearchScreenLayout
 import com.example.billionairehari.screens.RoomCard
 import com.example.billionairehari.screens.TenantCard
-import com.example.billionairehari.viewmodels.TenantSearchUiState
+import com.example.billionairehari.screens.TenantData
+import com.example.billionairehari.viewmodels.SearchUiState
 import com.example.billionairehari.viewmodels.TenantSearchViewModel
 
 
@@ -40,7 +42,7 @@ import com.example.billionairehari.viewmodels.TenantSearchViewModel
 fun TenantSearchComponentScreen(
     modifier: Modifier = Modifier,
     navController: NavController,
-    viewmodel: TenantSearchViewModel = viewModel(),
+    viewmodel: TenantSearchViewModel = hiltViewModel(),
 ){
     val query = viewmodel.query.collectAsState()
     val results = viewmodel.result.collectAsStateWithLifecycle()
@@ -60,8 +62,8 @@ fun TenantSearchComponentScreen(
         }
     ) {
         when(state){
-            is TenantSearchUiState.Tenants -> {
-                val size = state.tenants.size
+            is SearchUiState.Data<TenantData> -> {
+                val size = state.data.size
                 if(size === 0){
                     Column(
                         modifier = Modifier.fillMaxSize(),
@@ -84,7 +86,7 @@ fun TenantSearchComponentScreen(
                     }
                 }
                 else {
-                    state.tenants.forEach {
+                    state.data.forEach {
                         TenantCard(
                             tenant = it,
                             onClick = {
@@ -96,7 +98,7 @@ fun TenantSearchComponentScreen(
                     }
                 }
             }
-            is TenantSearchUiState.Default -> {
+            is SearchUiState.Default -> {
                 RecentSearchBoard(
                     onClear = {},
                     onPlaceQuery = {
@@ -105,7 +107,7 @@ fun TenantSearchComponentScreen(
                     names = state.recent_searches
                 )
             }
-            TenantSearchUiState.Loading -> {}
+            SearchUiState.Loading -> {}
         }
     }
 }

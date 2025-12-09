@@ -23,8 +23,6 @@ class RecentSearchRepository @Inject constructor (
         type: RecentSearchType
     ): Flow<List<RecentSearchDao.RecentSearchData>> = recentSearchDao
         .getRecentSearch(ownerId = ownerId, type = type.name.lowercase())
-        .map { ApiResult.Success(it) }
-        .catch { ApiResult.Error(code = 500,message = it.message ?: "") }
 
     override suspend fun clearRecentSearches(ownerId: String, type: RecentSearchType) {
         recentSearchDao.clearRecentSearch(ownerId = ownerId, type = type.name.lowercase())

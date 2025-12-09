@@ -17,6 +17,4 @@ class ActivityRepository @Inject constructor(
 
     override fun getActivities(ownerId: String): Flow<List<Activity>> = activityDao
         .getActivities(ownerId = ownerId)
-        .map { ApiResult.Success(it) }
-        .catch { ApiResult.Error(code = 500, message = it.message!!) }
 }

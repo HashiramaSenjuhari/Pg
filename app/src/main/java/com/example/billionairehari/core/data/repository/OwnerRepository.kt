@@ -13,14 +13,7 @@ class OwnerRepository @Inject constructor(
         ownerDao.insertOwner(owner = owner)
     }
 
-    override suspend fun getOwner(phone: String): Owner {
-        return try {
-            val owner = ownerDao.getOwner(phone = phone)
-            ApiResult.Success(owner)
-        }catch(error: Exception){
-            ApiResult.Error(code = 500, message = error.message ?: "")
-        }
-    }
+    override suspend fun getOwner(phone: String): Owner = ownerDao.getOwner(phone = phone)
 
     override suspend fun updateOwner(ownerId: String): Int {
         TODO("Not yet implemented")

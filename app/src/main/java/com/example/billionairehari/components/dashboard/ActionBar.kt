@@ -58,7 +58,6 @@ import com.example.billionairehari.model.Room
 import com.example.billionairehari.model.TenantRentRecord
 import com.example.billionairehari.viewmodels.AddRoomViewModel
 import com.example.billionairehari.viewmodels.RoomsViewModel
-import com.example.billionairehari.viewmodels.UpdateRoomFactory
 import com.example.billionairehari.viewmodels.UpdateRoomViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 
@@ -190,10 +189,7 @@ fun UpdateRoomSheet(
      * **/
 
     Log.d("RoomViewModel",room.toString())
-    val viewmodel: UpdateRoomViewModel = viewModel(
-        viewModelStoreOwner = owner!!,
-        factory = UpdateRoomFactory(room = room)
-    )
+    val viewmodel: UpdateRoomViewModel = hiltViewModel()
 
     val room = viewmodel.room.value
 

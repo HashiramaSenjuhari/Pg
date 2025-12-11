@@ -61,6 +61,7 @@ import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.materialIcon
+import androidx.compose.material3.AlertDialogDefaults
 import androidx.compose.material3.Badge
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -76,6 +77,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.ModalDrawerSheet
 import androidx.compose.material3.RichTooltip
 import androidx.compose.material3.RichTooltipColors
@@ -130,6 +132,7 @@ import androidx.compose.ui.unit.lerp
 import androidx.compose.ui.unit.min
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import androidx.compose.ui.window.PopupPositionProvider
 import androidx.core.view.WindowInsetsControllerCompat
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -170,12 +173,13 @@ import com.example.billionairehari.layout.component.ROw
 import com.example.billionairehari.model.Room
 import com.example.billionairehari.model.RoomCardDetails
 import com.example.billionairehari.model.Tenant
+import com.example.billionairehari.viewmodels.FILTER
 import com.example.billionairehari.viewmodels.RoomsViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlin.text.toFloat
 
 
-@OptIn(ExperimentalFoundationApi::class)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun RoomsScreen(
     navController: NavController,
@@ -185,12 +189,15 @@ fun RoomsScreen(
     viewmodel: RoomsViewModel = hiltViewModel()
 ) {
 
+    val type = viewmodel.type.collectAsState()
     val scrollState = rememberScrollState()
 
     /** viewmodel - start **/
     val filtered_rooms = viewmodel.rooms.collectAsState()
     Log.d("Rooms",filtered_rooms.toString())
     /** viewmodel - end **/
+
+    val filter_type = mutableStateOf<FILTER>(type.value)
 
     val final_rooms = filtered_rooms.value
 
@@ -201,7 +208,10 @@ fun RoomsScreen(
         placeholder = "Search Room",
         scrollState = scrollState,
         navController = navController,
-        search_route = Destinations.ROOM_SEARCH_ROUTE
+        search_route = Destinations.ROOM_SEARCH_ROUTE,
+        onClickFilter = {
+            is_open.value = true
+        }
     ) {
         RoomCards(
             scrollState = scrollState,
@@ -209,6 +219,74 @@ fun RoomsScreen(
             final_rooms = final_rooms,
             current_action = current_action
         )
+    }
+    if(is_open.value){
+        ModalBottomSheet(
+            sheetState = rememberModalBottomSheetState(),
+            dragHandle = null,
+            containerColor = Color.White,
+            onDismissRequest = {
+                is_open.value = false
+            },
+            scrimColor = Color.Black.copy(0.1f)
+        ){
+            Column(
+                modifier = Modifier.fillMaxWidth()
+                    .background(Color.White)
+                    .padding(vertical = 24.dp,horizontal = 16.dp),
+            ){
+                Column(
+                    verticalArrangement = Arrangement.spacedBy(24.dp)
+                ) {
+                    Text(
+                        "Select Option to Filter",
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.SemiBold
+                    )
+                    Column(
+                        verticalArrangement = Arrangement.spacedBy(13.dp)
+                    ) {
+                        FilterOption(
+                            onClick = {
+                                filter_type.value = FILTER.RENT_DUE
+                            },
+                            selected = filter_type.value === FILTER.RENT_DUE,
+                            option = "Rent Due"
+                        )
+                        FilterOption(
+                            onClick = {
+                                filter_type.value = FILTER.AVAILABLE
+                            },
+                            selected = filter_type.value === FILTER.AVAILABLE,
+                            option = "Available"
+                        )
+                    }
+                    ROw(
+                        horizontalArrangement = Arrangement.spacedBy(13.dp)
+                    ) {
+                        AppButton(
+                            onClick = {
+                                viewmodel.update_filter(FILTER.DEFAULT)
+                            },
+                            modifier = Modifier.fillMaxWidth(0.5f),
+                            border = BorderStroke(1.dp, color = Color.Black.copy(0.3f))
+                        ) {
+                            Text("Reset")
+                        }
+                        AppButton(
+                            onClick = {
+                                viewmodel.update_filter(filter_type.value)
+                            },
+                            modifier = Modifier.fillMaxWidth(1f),
+                            containerColor = Color.Black.copy(0.9f),
+                            contentColor = Color.White
+                        ) {
+                            Text("Apply")
+                        }
+                    }
+                }
+            }
+        }
     }
 }
 

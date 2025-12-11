@@ -119,7 +119,8 @@ fun TenantsScreen(
         placeholder = "Search Tenant",
         scrollState = scrollState,
         navController = navController,
-        search_route = Destinations.TENANT_SEARCH_ROUTE
+        search_route = Destinations.TENANT_SEARCH_ROUTE,
+        onClickFilter = {}
     ) {
         TenantCards(
             scrollState = scrollState,

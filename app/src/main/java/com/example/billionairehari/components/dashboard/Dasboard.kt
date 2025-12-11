@@ -30,6 +30,7 @@ import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -48,11 +49,13 @@ import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.billionairehari.components.DateFilterSheet
 import com.example.billionairehari.components.convertLocalToLong
 import com.example.billionairehari.components.convertMilliToDate
 import com.example.billionairehari.components.mergeDates
 import com.example.billionairehari.screens.formatIndianRupee
+import com.example.billionairehari.viewmodels.GetTotalRevenueAndInfoViewModel
 import java.text.SimpleDateFormat
 import java.time.LocalDate
 import java.util.Calendar
@@ -60,7 +63,10 @@ import java.util.Calendar
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun DashboardBoard(){
+fun DashboardBoard(
+    viewModel: GetTotalRevenueAndInfoViewModel = hiltViewModel()
+){
+    val amount = viewModel.revenue.collectAsState()
     val is_open = rememberSaveable { mutableStateOf(false) }
     val dynamic_height = if(is_open.value) 340.dp else 180.dp
 
@@ -92,7 +98,7 @@ fun DashboardBoard(){
                 BriefBoard(
                     is_open = is_open,
                     percentage = "",
-                    revenue = ""
+                    revenue = amount.value.revenue.toString()
                 )
                 if(is_open.value){
                     Text("Billionaire")
@@ -178,7 +184,7 @@ fun BriefBoard(
     is_open: MutableState<Boolean>
 ){
 
-    val money = formatIndianRupee("6000") /** TODO: Add Revenue **/
+    val money = formatIndianRupee(revenue) /** TODO: Add Revenue **/
     val fontSize = when {
         money.length > 9 -> {
             30.sp

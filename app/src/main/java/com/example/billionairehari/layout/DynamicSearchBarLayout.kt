@@ -27,6 +27,7 @@ import androidx.core.view.WindowInsetsControllerCompat
 import androidx.navigation.NavController
 import com.example.billionairehari.layout.component.ROw
 import com.example.billionairehari.screens.StaticSearchBar
+import com.example.billionairehari.viewmodels.FILTER
 
 
 @Composable
@@ -36,6 +37,7 @@ fun DynamicShowcaseScreen(
     title: String,
     placeholder: String,
     search_route:String,
+    onClickFilter:() -> Unit,
     content:@Composable () -> Unit
 ){
 
@@ -59,7 +61,7 @@ fun DynamicShowcaseScreen(
         DynamicTopHeader(
             title = title,
             placeholder = placeholder,
-            onClickFilter = {},
+            onClickFilter = onClickFilter,
             onClickSearch = {
                 navController.navigate(search_route)
             },

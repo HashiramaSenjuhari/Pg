@@ -18,6 +18,7 @@ import com.example.billionairehari.model.RoomCardDetails
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -31,11 +32,19 @@ data class RoomUiState(
     val status:String? = null
 )
 
+enum class FILTER {
+    RENT_DUE,
+    AVAILABLE,
+    DEFAULT
+}
+
 @HiltViewModel
 class RoomsViewModel @Inject constructor(
     private val repository: RoomRepository,
     private val savedStateHandle: SavedStateHandle
 ) : ViewModel() {
+    private val _type = MutableStateFlow<FILTER>(FILTER.DEFAULT)
+    val type = _type.asStateFlow()
     init {
         viewModelScope.launch {
             val rooms = repository.getTables()
@@ -43,11 +52,22 @@ class RoomsViewModel @Inject constructor(
         }
     }
 
-    val rooms: StateFlow<List<RoomDao.RoomCard>> = repository.getRoomCardsFlow("1")
-        .stateIn(
-            scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(5000),
-            initialValue = emptyList()
-        )
-    val _saved_filter_type = savedStateHandle.getStateFlow(ROOM_FILTER_SAVED_STATE,ALL_ROOMS)
+    val rooms: StateFlow<List<RoomDao.RoomCard>> = combine(
+        _type.debounce(300) ,repository.getRoomCardsFlow("1")
+    ){
+        type, rooms ->
+        when(type){
+            FILTER.DEFAULT -> rooms
+            FILTER.AVAILABLE -> rooms.filter { roomCard -> roomCard.tenant_count < roomCard.bed_count }
+            FILTER.RENT_DUE -> rooms.filter { roomCard -> roomCard.due_date > 0 }
+        }
+    }.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5000),
+        initialValue = emptyList()
+    )
+
+    fun update_filter(type: FILTER){
+        _type.value = type
+    }
 }

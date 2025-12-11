@@ -20,7 +20,7 @@ interface PaymentDao {
         FROM payments p
         WHERE
             p.owner_id = :ownerId
-            AND strftime('%Y-%m',payment_date) = strftime('%Y-%m','now')
+            AND strftime('%Y-%m',payment_date) = strftime('%Y-%m','now','localtime')
     """)
     fun getTotalRevenue(ownerId:String): Flow<Revenue>
     // ###############################################################################################

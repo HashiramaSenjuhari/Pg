@@ -59,8 +59,10 @@ import com.example.billionairehari.screens.TenantCard
 import com.example.billionairehari.viewmodels.RoomSearchViewModel
 import com.example.billionairehari.viewmodels.TenantSearchViewModel
 import com.example.billionairehari.R
+import com.example.billionairehari.core.data.local.dao.RoomDao
 import com.example.billionairehari.layout.SearchScreenLayout
 import com.example.billionairehari.model.RoomCardDetails
+import com.example.billionairehari.viewmodels.RoomData
 import com.example.billionairehari.viewmodels.SearchUiState
 
 @Composable
@@ -111,7 +113,7 @@ fun RoomSearchComponentScreen(
                         names = state.recent_searches
                     )
                 }
-                is SearchUiState.Data<RoomCardDetails> -> {
+                is SearchUiState.Data<RoomDao.RoomCard> -> {
                     val size = state.data.size
                     if(size === 0){
                         Column(
@@ -135,16 +137,16 @@ fun RoomSearchComponentScreen(
                         }
                     }
                     else {
-                        state.data.forEach {
-                                room ->
-                            RoomCard(
-                                current_action = current_action,
-                                room_detail = room,
-                                onClick = {
-                                    navController.navigate("rooms/${room.id}")
-                                }
-                            )
-                        }
+//                        state.data.forEach {
+//                                room ->
+//                            RoomCard(
+//                                current_action = current_action,
+//                                room_detail = room,
+//                                onClick = {
+//                                    navController.navigate("rooms/${room.id}")
+//                                }
+//                            )
+//                        }
                     }
                 }
                 SearchUiState.Loading -> {

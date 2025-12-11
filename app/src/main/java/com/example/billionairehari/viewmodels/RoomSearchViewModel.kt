@@ -1,16 +1,20 @@
 package com.example.billionairehari.viewmodels
 
+import android.util.Log
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.billionairehari.core.data.local.dao.RoomDao
 import com.example.billionairehari.core.data.repository.RecentSearchRepository
 import com.example.billionairehari.core.data.repository.RecentSearchType
 import com.example.billionairehari.core.data.repository.RoomRepository
 import com.example.billionairehari.model.RoomCardDetails
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -21,6 +25,9 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 
@@ -110,16 +117,23 @@ class RoomSearchViewModel @Inject constructor(
 //            started = SharingStarted.WhileSubscribed(5000),
 //            initialValue = emptyList()
 //        )
+    var rooms:List<RoomDao.RoomCard> = emptyList()
+    init {
+        viewModelScope.launch {
+            rooms = repository.getRoomCards(ownerId = "1")
+        }
+    }
 
     private val _query = MutableStateFlow<TextFieldValue>(TextFieldValue(""))
     val query = _query.asStateFlow()
-    val results: StateFlow<SearchUiState<RoomCardDetails>> = query
+    val results: StateFlow<SearchUiState<RoomDao.RoomCard>> = query
         .debounce(300L)
         .distinctUntilChanged()
         .map {
             text ->
-            if(text.text.length <= 2) SearchUiState.Default(listOf("Billionaire","BillionaireHari"))
-            else SearchUiState.Data<RoomCardDetails>(greats.filter { it.name.contains(text.text) })
+            Log.d("BillionaireHari",rooms.toString())
+            if(text.text.length <= 2) SearchUiState.Default(listOf("BillionaireHari","BillionaireHari"))
+            else SearchUiState.Data<RoomDao.RoomCard>(rooms.filter { it.name.contains(text.text) })
         }.stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5000),

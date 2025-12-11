@@ -20,12 +20,12 @@ import com.example.billionairehari.core.data.local.typeconverter.ListConverter
 )
 data class Room(
     @PrimaryKey val id:String,
-    @ColumnInfo(index = true) val name:String,
+    @ColumnInfo(index = true) var name:String,
+    var images:List<String>,
     @ColumnInfo(name = "bed_count") var bedCount:Int,
     @ColumnInfo(name = "rent_price") var rentPrice: Int,
     var deposit:Int,
     var features: List<String>,
-    val property_id:String,
-    @ColumnInfo(name = "due_date") val dueDate:Long,
+    @ColumnInfo(name = "due_date") var dueDate:Long,
     @ColumnInfo(name = "owner_id") val ownerId:String
 )

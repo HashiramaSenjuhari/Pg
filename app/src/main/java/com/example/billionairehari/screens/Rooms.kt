@@ -1,6 +1,7 @@
 package com.example.billionairehari.screens
 
 import android.app.Activity
+import android.content.Context
 import android.graphics.LinearGradient
 import android.graphics.Rect
 import android.graphics.drawable.VectorDrawable
@@ -92,7 +93,6 @@ import androidx.compose.material3.rememberTooltipState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.SnapshotMutationPolicy
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
@@ -160,6 +160,7 @@ import kotlinx.coroutines.launch
 import com.example.billionairehari.components.rooms.RoomFilterTypes
 import com.example.billionairehari.R.drawable
 import com.example.billionairehari.components.DropDown
+import com.example.billionairehari.core.data.local.dao.RoomDao
 import com.example.billionairehari.icons.CalendarIcon
 import com.example.billionairehari.icons.Rupee
 import com.example.billionairehari.layout.DIALOG_TYPE
@@ -188,6 +189,7 @@ fun RoomsScreen(
 
     /** viewmodel - start **/
     val filtered_rooms = viewmodel.rooms.collectAsState()
+    Log.d("Rooms",filtered_rooms.toString())
     /** viewmodel - end **/
 
     val final_rooms = filtered_rooms.value
@@ -214,7 +216,7 @@ fun RoomsScreen(
 fun RoomCards(
     scrollState: ScrollState,
     navController: NavController,
-    final_rooms: List<RoomCardDetails>,
+    final_rooms: List<RoomDao.RoomCard>,
     current_action: MutableState<MODAL_TYPE>
 ){
     Column(
@@ -285,7 +287,7 @@ fun StaticSearchBar(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun RoomCard(
-    room_detail: RoomCardDetails,
+    room_detail: RoomDao.RoomCard,
     onClick:() -> Unit,
     current_action: MutableState<MODAL_TYPE>
 ) {
@@ -313,9 +315,9 @@ fun RoomCard(
                 Spacer(modifier = Modifier.padding(vertical = 6.dp))
                 RoomCardContent(
                     available = 3,
-                    beds = 6,
+                    beds = room_detail.bed_count,
                     due_date = "Nov 24",
-                    due_count = 6,
+                    due_count = room_detail.not_paid,
                     current_action = current_action
                 )
             }

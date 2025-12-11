@@ -76,6 +76,12 @@ fun AppLayout(
         }
     ){
         composable(
+            enterTransition = {
+                EnterTransition.None
+            },
+            exitTransition = {
+                ExitTransition.None
+            },
             route = Destinations.DASHBOARD_ROUTE
         ) {
             DashboardScreen(

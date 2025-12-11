@@ -57,8 +57,9 @@ fun FormButton(
         ) {
             if(isLoading){
                 CircularProgressIndicator(
-                    strokeWidth = 4.dp,
+                    strokeWidth = 3.dp,
                     modifier = Modifier.size(24.dp),
+                    color = Color.Black
                 )
             }else {
                 Text("Add")

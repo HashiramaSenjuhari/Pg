@@ -118,7 +118,7 @@ fun ActionBar(
 @Composable
 fun RoomSheet(
     scrollState: ScrollState,
-    viewmodel: AddRoomViewModel = viewModel()
+    viewmodel: AddRoomViewModel = hiltViewModel()
 ){
     val room = viewmodel.room.value
 

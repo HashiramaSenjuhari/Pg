@@ -8,8 +8,20 @@ import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface RoomDao {
-    @Insert
+
+    @Query("SELECT name FROM sqlite_master WHERE type='table'")
+    suspend fun getAllTables(): List<String>
+
+    @Insert()
     suspend fun insertRoom(room: Room)
+
+    @Query("""
+        SELECT * FROM rooms WHERE id = :roomId AND owner_id = :ownerId
+    """)
+    suspend fun getRoom(roomId:String,ownerId:String): Room
+
+    @Query("SELECT * FROM rooms")
+    suspend fun getRooms(): List<Room>
 
     data class RoomCard(
         val id:String,
@@ -62,4 +74,14 @@ interface RoomDao {
         GROUP BY r.id,r.name,r.bed_count,r.due_date
     """)
     fun searchRooms(ownerId:String,query:String): Flow<List<RoomCard>>
+
+    @Query("""
+        DELETE FROM rooms WHERE id = :roomId AND owner_id = :ownerId
+    """)
+    suspend fun deleteRoom(ownerId:String,roomId:String)
+
+    @Query("""
+        DELETE FROM rooms
+    """)
+    suspend fun deleteRooms()
 }

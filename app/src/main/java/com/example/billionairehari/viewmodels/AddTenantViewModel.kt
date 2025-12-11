@@ -7,6 +7,7 @@ import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import com.example.billionairehari.R
+import com.example.billionairehari.core.data.local.entity.Tenant
 import com.example.billionairehari.core.data.repository.TenantRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.delay
@@ -79,6 +80,17 @@ class AddTenantViewModel @Inject constructor (
         tenant.value = tenant.value.copy(isSendingOtp = true, aadharError = null)
         viewModelScope.launch {
             try {
+                repository.insertTenant(Tenant(
+                    id = "billioonairegreat",
+                    name = "Billionaire",
+                    image = "",
+                    alternateNumber = "8668072363",
+                    automaticRentRemainder = true,
+                    isActive = true,
+                    joiningDate = 0L,
+                    phoneNumber = "8668072363",
+                    roomId = "billionaire"
+                ))
                 delay(4000)
                 /** CALL SEND OTP FUNCTION **/
                 tenant.value = tenant.value.copy(sendingOtpError = null, isOptSent = true)

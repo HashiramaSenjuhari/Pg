@@ -18,6 +18,7 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -27,13 +28,19 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.billionairehari.components.AppButton
 import com.example.billionairehari.icons.RemaindIcon
 import com.example.billionairehari.layout.component.ROw
 import com.example.billionairehari.ui.theme.robotoFontFamily
+import com.example.billionairehari.viewmodels.GetTenantPaidCountViewModel
 
 @Composable
-fun RentDetails(){
+fun RentDetails(
+    rent_paid: GetTenantPaidCountViewModel = hiltViewModel()
+){
+    val paid = rent_paid.paid.collectAsState()
+    val not_paid = rent_paid.not_paid.collectAsState()
     ROw(
         modifier = Modifier.fillMaxWidth()
             .border(1.dp, color = Color.Black.copy(0.1f), shape = RoundedCornerShape(13.dp))
@@ -46,7 +53,8 @@ fun RentDetails(){
         ) {
             RentDetailCard(
                 modifier = Modifier.fillMaxWidth(),
-                type = RentDetailType.PAID
+                type = RentDetailType.PAID,
+                count = paid.value.rentPaid
             )
             AppButton(
                 modifier = Modifier
@@ -73,7 +81,8 @@ fun RentDetails(){
         ) {
             RentDetailCard(
                 modifier = Modifier.fillMaxWidth(),
-                type = RentDetailType.NOT_PAID
+                type = RentDetailType.NOT_PAID,
+                count = not_paid.value.notPaid
             )
             AppButton(
                 modifier = Modifier.fillMaxWidth()
@@ -101,7 +110,8 @@ enum class RentDetailType {
 @Composable
 fun RentDetailCard(
     modifier:Modifier = Modifier,
-    type: RentDetailType
+    type: RentDetailType,
+    count:Int
 ){
     Row(
         modifier = Modifier.then(modifier)
@@ -125,7 +135,7 @@ fun RentDetailCard(
         )
         Column(
         ) {
-            Text("300", fontSize = 24.sp, fontWeight = FontWeight.Bold, fontFamily = robotoFontFamily,color =  if(type == RentDetailType.PAID) {Color.Black} else {Color.Red})
+            Text(count.toString(), fontSize = 24.sp, fontWeight = FontWeight.Bold, fontFamily = robotoFontFamily,color =  if(type == RentDetailType.PAID) {Color.Black} else {Color.Red})
             Text("Tenants",color = Color(0xFF909090), fontSize = 12.sp, fontFamily = robotoFontFamily)
         }
     }

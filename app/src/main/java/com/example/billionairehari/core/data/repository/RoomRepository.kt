@@ -1,5 +1,6 @@
 package com.example.billionairehari.core.data.repository
 
+import android.util.Log
 import com.example.billionairehari.core.ApiResult
 import com.example.billionairehari.core.data.interfaces.RoomRepositoryInterface
 import com.example.billionairehari.core.data.local.dao.RoomDao
@@ -15,14 +16,22 @@ class RoomRepository @Inject constructor(
 ): RoomRepositoryInterface {
     override suspend fun insertRoom(room: Room){
         try {
+            Log.d("BillionaireRoom",room.toString())
             roomDao.insertRoom(room = room)
         }catch(error: Exception){
 
         }
     }
+
+    override suspend fun getRoom(roomId:String,ownerId:String): Room = roomDao.getRoom(roomId = roomId,ownerId = ownerId)
     override suspend fun getRoomCards(ownerId: String): List<RoomDao.RoomCard> = roomDao.getRoomsCard(ownerId = ownerId)
 
+    override suspend fun getRooms() : List<Room> = roomDao.getRooms()
     override fun getRoomCardsFlow(ownerId: String): Flow<List<RoomDao.RoomCard>> = roomDao.getRoomsCardFlow(ownerId = ownerId)
     override fun searchRooms(ownerId: String, query: String): Flow<List<RoomDao.RoomCard>> = roomDao
         .searchRooms(ownerId = ownerId, query = query)
+
+    override suspend fun getTables(): List<String> = roomDao.getAllTables()
+    override suspend fun deleteRoom(ownerId: String, roomId: String) = roomDao.deleteRoom(ownerId = ownerId,roomId = roomId)
+    override suspend fun deleteRooms() = roomDao.deleteRooms()
 }

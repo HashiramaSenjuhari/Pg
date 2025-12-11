@@ -110,7 +110,9 @@ fun TenantScreen(
 
     ChildLayout(
         label = "Tenants",
-        modifier = Modifier.then(modifier),
+        modifier = Modifier
+            .background(Color.White)
+            .then(modifier),
         contentModifier = Modifier.padding(horizontal = 13.dp),
         verticalArrangement = 13.dp,
         trailingContent = {

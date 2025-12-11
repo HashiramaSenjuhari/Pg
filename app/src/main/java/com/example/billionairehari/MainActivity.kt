@@ -40,7 +40,6 @@ class MainActivity : ComponentActivity() {
         setContent {
             val activity = LocalView.current.context as Activity
             SideEffect {
-                activity.window.statusBarColor = Color.White.toArgb()
                 val wc = WindowInsetsControllerCompat(activity.window,activity.window.decorView)
                 wc.isAppearanceLightStatusBars = true
             }

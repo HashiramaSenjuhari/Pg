@@ -1,7 +1,10 @@
 package com.example.billionairehari.di
 
 import android.content.Context
+import android.util.Log
 import androidx.room.Room
+import androidx.room.RoomDatabase
+import androidx.sqlite.SQLiteConnection
 import com.example.billionairehari.core.data.local.dao.ActivityDao
 import com.example.billionairehari.core.data.local.dao.OwnerDao
 import com.example.billionairehari.core.data.local.dao.PaymentDao
@@ -25,9 +28,16 @@ object RoomModule {
     fun provideDatabase(@ApplicationContext context: Context) : AppDatabase = Room
         .databaseBuilder(
             context = context,
-            name = "test_billionaire",
+            name = "test_billionaire1",
             klass = AppDatabase::class.java
-        ).fallbackToDestructiveMigration()
+        )
+        .addCallback(object: RoomDatabase.Callback() {
+            override fun onOpen(connection: SQLiteConnection) {
+                super.onOpen(connection)
+                Log.d("BillionaireHariGreat","Room Opened")
+            }
+        })
+        .fallbackToDestructiveMigration()
         .build()
 
     /** DAO bind **/

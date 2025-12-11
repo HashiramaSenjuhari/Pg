@@ -5,11 +5,19 @@ import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.billionairehari.core.data.local.entity.Owner
+import com.example.billionairehari.core.data.local.entity.Room
+import com.example.billionairehari.core.data.repository.OwnerRepository
 import com.example.billionairehari.core.data.repository.RoomRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import okhttp3.Dispatcher
+import java.util.UUID
 import javax.inject.Inject
+import kotlin.uuid.Uuid
 
 data class RoomData(
     val name:String = "",
@@ -27,6 +35,7 @@ data class RoomData(
 
 @HiltViewModel
 class AddRoomViewModel @Inject constructor(
+    private val ownerDao : OwnerRepository,
     private val repository: RoomRepository
 ): ViewModel(){
     private val _room = mutableStateOf(RoomData())
@@ -112,9 +121,24 @@ class AddRoomViewModel @Inject constructor(
             isLoading = true
         )
         viewModelScope.launch {
+            val data = _room.value
+            val id = UUID.randomUUID().toString()
             try {
-//                repository.insertRoom(room)
-                delay(4000)
+                val room = Room(
+                    id = id,
+                    name = data.name,
+                    ownerId = "1",
+                    rentPrice = data.rent_price.toInt(),
+                    dueDate = 0L,
+                    bedCount = data.no_of_beds.toInt(),
+                    deposit = data.deposit.toInt(),
+                    features = data.features,
+                    images = emptyList()
+                )
+                repository.insertRoom(room)
+                val great = repository.getRoom(roomId = id, ownerId = "1")
+                Log.d("RoomCreated", great.toString())
+//                delay(1000)
             }catch(error: Exception){
 
             }finally {

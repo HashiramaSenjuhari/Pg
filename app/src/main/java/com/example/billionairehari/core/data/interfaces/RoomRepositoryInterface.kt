@@ -8,10 +8,15 @@ import kotlinx.coroutines.flow.Flow
 interface RoomRepositoryInterface {
     suspend fun insertRoom(room: Room)
 
+    suspend fun getRooms(): List<Room>
+    suspend fun getRoom(roomId:String,ownerId:String): Room
     fun getRoomCardsFlow(ownerId:String): Flow<List<RoomDao.RoomCard>>
 
     suspend fun getRoomCards(ownerId:String): List<RoomDao.RoomCard>
 
     fun searchRooms(ownerId:String,query:String): Flow<List<RoomDao.RoomCard>>
+    suspend fun getTables():List<String>
+    suspend fun deleteRooms()
+    suspend fun deleteRoom(ownerId:String,roomId:String)
 //    suspend fun getRoom(ownerId:String,roomId:String) : Room
 }

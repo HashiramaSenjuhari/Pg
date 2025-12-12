@@ -133,7 +133,7 @@ class RoomSearchViewModel @Inject constructor(
             text ->
             Log.d("BillionaireHari",rooms.toString())
             if(text.text.length <= 2) SearchUiState.Default(listOf("BillionaireHari","BillionaireHari"))
-            else SearchUiState.Data<RoomDao.RoomCard>(rooms.filter { it.name.contains(text.text) })
+            else SearchUiState.Data<RoomDao.RoomCard>(rooms.filter { it.name.contains(text.text, ignoreCase = true) })
         }.stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5000),

@@ -1,5 +1,6 @@
 package com.example.billionairehari.screens.search
 
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -80,6 +81,7 @@ fun RoomSearchComponentScreen(
     /** viewmodel **/
     val query = viewmodel.query.collectAsState()
     val results = viewmodel.results.collectAsStateWithLifecycle()
+    Log.d("SEARCHBILLIONAIRE",results.toString())
     val state = results.value
     val scrollState = rememberScrollState()
 
@@ -114,6 +116,7 @@ fun RoomSearchComponentScreen(
                     )
                 }
                 is SearchUiState.Data<RoomDao.RoomCard> -> {
+                    Log.d("SEARCHBILLIONAIRES",state.data.size.toString())
                     val size = state.data.size
                     if(size === 0){
                         Column(
@@ -137,16 +140,16 @@ fun RoomSearchComponentScreen(
                         }
                     }
                     else {
-//                        state.data.forEach {
-//                                room ->
-//                            RoomCard(
-//                                current_action = current_action,
-//                                room_detail = room,
-//                                onClick = {
-//                                    navController.navigate("rooms/${room.id}")
-//                                }
-//                            )
-//                        }
+                        state.data.forEach {
+                                room ->
+                            RoomCard(
+                                current_action = current_action,
+                                room_detail = room,
+                                onClick = {
+                                    navController.navigate("rooms/${room.id}")
+                                }
+                            )
+                        }
                     }
                 }
                 SearchUiState.Loading -> {

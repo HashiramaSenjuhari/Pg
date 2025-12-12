@@ -22,7 +22,7 @@ data class Tenant(
     val image:String,
     @ColumnInfo(name = "phone_number") val phoneNumber:String,
     @ColumnInfo(name = "alternate_number") val alternateNumber:String,
-    @ColumnInfo(name = "joining_date") val joiningDate:Long,
+    @ColumnInfo(name = "joining_date") val joiningDate:String,
     @ColumnInfo(name = "automatic_rent_remainder") val automaticRentRemainder:Boolean,
     @ColumnInfo(name = "is_active") val isActive: Boolean,
     @ColumnInfo(name = "room_id") val roomId:String,

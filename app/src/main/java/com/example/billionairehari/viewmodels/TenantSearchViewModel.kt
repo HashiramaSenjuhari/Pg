@@ -43,7 +43,7 @@ class TenantSearchViewModel @Inject constructor (
         .debounce(300L)
         .distinctUntilChanged()
         .map { query ->
-            if(query.text.trim().length <= 2) SearchUiState.Default(recent_searches = recent_searches)
+            if(query.text.trim().length <= 2) SearchUiState.Default
             else SearchUiState.Data<TenantData>(tenants.filter { it.name.contains(query.text, ignoreCase = true) })
         }.stateIn(
             scope = viewModelScope,

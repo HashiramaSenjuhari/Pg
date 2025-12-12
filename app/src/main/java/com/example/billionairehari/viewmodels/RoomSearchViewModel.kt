@@ -8,10 +8,12 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.billionairehari.core.data.local.dao.RoomDao
+import com.example.billionairehari.core.data.local.entity.RecentSearch
 import com.example.billionairehari.core.data.repository.RecentSearchRepository
 import com.example.billionairehari.core.data.repository.RecentSearchType
 import com.example.billionairehari.core.data.repository.RoomRepository
 import com.example.billionairehari.model.RoomCardDetails
+import com.example.billionairehari.utils.currentDateTime
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.coroutineScope
@@ -28,6 +30,7 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
+import java.util.UUID
 import javax.inject.Inject
 
 
@@ -100,7 +103,7 @@ val greats = listOf<RoomCardDetails>(
 )
 
 sealed class SearchUiState<out T> {
-    data class Default(val recent_searches:List<String>): SearchUiState<Nothing>()
+    object Default: SearchUiState<Nothing>()
     data class Data<T>(val data:List<T>): SearchUiState<T>()
     object Loading: SearchUiState<Nothing>()
 }
@@ -111,12 +114,13 @@ class RoomSearchViewModel @Inject constructor(
     private val repository: RoomRepository,
     private val savedState: SavedStateHandle
 ): ViewModel() {
-//    var recent_searches = recent_search.getRecentSearches(type = RecentSearchType.ROOMS, ownerId = "billionairehari")
-//        .stateIn(
-//            scope = viewModelScope,
-//            started = SharingStarted.WhileSubscribed(5000),
-//            initialValue = emptyList()
-//        )
+    var recent_searches = recent_search.getRecentSearches(type = RecentSearchType.ROOMS, ownerId = "1")
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = emptyList()
+        )
+
     var rooms:List<RoomDao.RoomCard> = emptyList()
     init {
         viewModelScope.launch {
@@ -132,7 +136,7 @@ class RoomSearchViewModel @Inject constructor(
         .map {
             text ->
             Log.d("BillionaireHari",rooms.toString())
-            if(text.text.length <= 2) SearchUiState.Default(listOf("BillionaireHari","BillionaireHari"))
+            if(text.text.length <= 2) SearchUiState.Default
             else SearchUiState.Data<RoomDao.RoomCard>(rooms.filter { it.name.contains(text.text, ignoreCase = true) })
         }.stateIn(
             scope = viewModelScope,
@@ -140,6 +144,32 @@ class RoomSearchViewModel @Inject constructor(
             initialValue = SearchUiState.Loading
         )
 
+    fun save_recent_search() {
+        viewModelScope.launch {
+            val id = UUID.randomUUID().toString()
+            val currentDateTime = currentDateTime()
+            val data = RecentSearch(
+                ownerId = "1",
+                id = id,
+                text = query.value.text,
+                searchType = RecentSearchType.ROOMS.name.lowercase(),
+                createdAt = currentDateTime
+            )
+            val count = recent_search.totalRecentSearches(ownerId = "1", type = RecentSearchType.ROOMS)
+            Log.d("BILLIONAIREGREAT",count.toString())
+            if(count >= 5){
+                recent_search.clearOldSearch(ownerId = "1", type = RecentSearchType.ROOMS)
+            }
+            recent_search.insertRecentSearch(recent_search = data)
+        }
+    }
+    fun clear_room_recent_search(){
+        val ownerId:String = "1"
+        val type = RecentSearchType.ROOMS
+        viewModelScope.launch {
+            recent_search.clearRecentSearches(ownerId = ownerId, type = type)
+        }
+    }
     fun update_query(query:String) {
         _query.value = TextFieldValue(
             text = query,

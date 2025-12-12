@@ -29,6 +29,7 @@ import androidx.navigation.NavController
 import com.example.billionairehari.R
 import com.example.billionairehari.Screens
 import com.example.billionairehari.components.RecentSearchBoard
+import com.example.billionairehari.core.data.local.dao.RecentSearchDao
 import com.example.billionairehari.layout.ChildLayout
 import com.example.billionairehari.layout.SearchScreenLayout
 import com.example.billionairehari.screens.RoomCard
@@ -104,7 +105,7 @@ fun TenantSearchComponentScreen(
                     onPlaceQuery = {
                         viewmodel.update_query(it)
                     },
-                    names = state.recent_searches
+                    names = listOf(RecentSearchDao.RecentSearchData(text = "billionaire"))
                 )
             }
             SearchUiState.Loading -> {}

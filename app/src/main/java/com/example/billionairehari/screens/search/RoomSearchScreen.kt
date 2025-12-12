@@ -74,14 +74,10 @@ fun RoomSearchComponentScreen(
     viewmodel: RoomSearchViewModel = hiltViewModel()
 ){
 
-
-    /** mutable state **/
-    val text = remember { mutableStateOf<String>("") }
-
     /** viewmodel **/
+    val recent_searches = viewmodel.recent_searches.collectAsState()
     val query = viewmodel.query.collectAsState()
     val results = viewmodel.results.collectAsStateWithLifecycle()
-    Log.d("SEARCHBILLIONAIRE",results.toString())
     val state = results.value
     val scrollState = rememberScrollState()
 
@@ -106,17 +102,18 @@ fun RoomSearchComponentScreen(
         ) {
 
             when(state){
-                is SearchUiState.Default -> {
+                SearchUiState.Default -> {
                     RecentSearchBoard(
-                        onClear = {},
+                        onClear = {
+                            viewmodel.clear_room_recent_search()
+                        },
                         onPlaceQuery = {
                             viewmodel.update_query(it)
                         },
-                        names = state.recent_searches
+                        names = recent_searches.value
                     )
                 }
                 is SearchUiState.Data<RoomDao.RoomCard> -> {
-                    Log.d("SEARCHBILLIONAIRES",state.data.size.toString())
                     val size = state.data.size
                     if(size === 0){
                         Column(
@@ -146,7 +143,9 @@ fun RoomSearchComponentScreen(
                                 current_action = current_action,
                                 room_detail = room,
                                 onClick = {
-                                    navController.navigate("rooms/${room.id}")
+                                    Log.d("SEARCHQUERY",query.value.text)
+                                    viewmodel.save_recent_search()
+//                                    navController.navigate("rooms/${room.id}")
                                 }
                             )
                         }

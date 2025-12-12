@@ -12,5 +12,6 @@ data class Owner(
     val name:String,
     val phone:String,
     @ColumnInfo(name = "pg_name") val pgName:String,
-    @ColumnInfo(name = "is_verified") val isVerified:Boolean
+    @ColumnInfo(name = "is_verified") val isVerified:Boolean,
+    @ColumnInfo(name = "created_at") val createdAt:String
 )

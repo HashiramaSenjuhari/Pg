@@ -39,7 +39,7 @@ data class Payment(
     @ColumnInfo(name = "room_id") val roomId:String,
     @ColumnInfo(name = "amount") val amount:Int,
     @ColumnInfo(name = "payment_date") val paymentDate:Long,
-    @ColumnInfo(name = "due_date") val dueDate:Long,
+    @ColumnInfo(name = "due_date") val dueDate:String,
     @ColumnInfo(name = "is_paid") val isPaid:Boolean,
     @ColumnInfo(name = "payment_type") val paymentType: PaymentType,
     @ColumnInfo(name = "owner_id") val ownerId:String

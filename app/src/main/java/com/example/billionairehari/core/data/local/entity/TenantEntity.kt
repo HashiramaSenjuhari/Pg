@@ -25,5 +25,6 @@ data class Tenant(
     @ColumnInfo(name = "joining_date") val joiningDate:Long,
     @ColumnInfo(name = "automatic_rent_remainder") val automaticRentRemainder:Boolean,
     @ColumnInfo(name = "is_active") val isActive: Boolean,
-    @ColumnInfo(name = "room_id") val roomId:String
+    @ColumnInfo(name = "room_id") val roomId:String,
+    @ColumnInfo(name = "created_at") val createdAt:String
 )

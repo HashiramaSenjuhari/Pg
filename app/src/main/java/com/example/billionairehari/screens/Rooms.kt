@@ -179,7 +179,6 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlin.text.toFloat
 
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun RoomsScreen(
     navController: NavController,
@@ -221,68 +220,92 @@ fun RoomsScreen(
         )
     }
     if(is_open.value){
-        ModalBottomSheet(
-            sheetState = rememberModalBottomSheetState(),
-            dragHandle = null,
-            containerColor = Color.White,
-            onDismissRequest = {
+        FilterDialog(
+            is_open = is_open,
+            onReset = {
                 is_open.value = false
+                viewmodel.update_filter(FILTER.DEFAULT)
             },
-            scrimColor = Color.Black.copy(0.1f)
+            onFilter = {
+                is_open.value = false
+                viewmodel.update_filter(filter_type.value)
+            },
+            filter_type = filter_type
+        )
+    }
+}
+
+data class FilterType(
+    val name:String,
+    val filter: FILTER
+)
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun FilterDialog(
+    filter_type:MutableState<FILTER>,
+    is_open: MutableState<Boolean>,
+    onFilter:() -> Unit,
+    onReset:() -> Unit
+){
+    val filter_types = listOf<FilterType>(
+        FilterType(name = "Available", filter = FILTER.AVAILABLE),
+        FilterType(name = "Rent Due", filter = FILTER.RENT_DUE)
+    )
+
+    ModalBottomSheet(
+        sheetState = rememberModalBottomSheetState(),
+        dragHandle = null,
+        containerColor = Color.White,
+        onDismissRequest = {
+            is_open.value = false
+        },
+        scrimColor = Color.Black.copy(0.1f)
+    ){
+        Column(
+            modifier = Modifier.fillMaxWidth()
+                .background(Color.White)
+                .padding(vertical = 24.dp,horizontal = 16.dp),
         ){
             Column(
-                modifier = Modifier.fillMaxWidth()
-                    .background(Color.White)
-                    .padding(vertical = 24.dp,horizontal = 16.dp),
-            ){
+                verticalArrangement = Arrangement.spacedBy(24.dp)
+            ) {
+                Text(
+                    "Select Option to Filter",
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.SemiBold
+                )
                 Column(
-                    verticalArrangement = Arrangement.spacedBy(24.dp)
+                    verticalArrangement = Arrangement.spacedBy(13.dp)
                 ) {
-                    Text(
-                        "Select Option to Filter",
-                        fontSize = 16.sp,
-                        fontWeight = FontWeight.SemiBold
-                    )
-                    Column(
-                        verticalArrangement = Arrangement.spacedBy(13.dp)
-                    ) {
+                    filter_types.forEach {
+                        (name, filter) ->
                         FilterOption(
                             onClick = {
-                                filter_type.value = FILTER.RENT_DUE
+                                filter_type.value = filter
                             },
-                            selected = filter_type.value === FILTER.RENT_DUE,
-                            option = "Rent Due"
-                        )
-                        FilterOption(
-                            onClick = {
-                                filter_type.value = FILTER.AVAILABLE
-                            },
-                            selected = filter_type.value === FILTER.AVAILABLE,
-                            option = "Available"
+                            option = name,
+                            selected = filter_type.value == filter
                         )
                     }
-                    ROw(
-                        horizontalArrangement = Arrangement.spacedBy(13.dp)
+                }
+                ROw(
+                    horizontalArrangement = Arrangement.spacedBy(13.dp)
+                ) {
+                    AppButton(
+                        onClick = onReset,
+                        modifier = Modifier.fillMaxWidth(0.5f),
+                        border = BorderStroke(1.dp, color = Color.Black.copy(0.3f))
                     ) {
-                        AppButton(
-                            onClick = {
-                                viewmodel.update_filter(FILTER.DEFAULT)
-                            },
-                            modifier = Modifier.fillMaxWidth(0.5f),
-                            border = BorderStroke(1.dp, color = Color.Black.copy(0.3f))
-                        ) {
-                            Text("Reset")
-                        }
-                        AppButton(
-                            onClick = {
-                                viewmodel.update_filter(filter_type.value)
-                            },
-                            modifier = Modifier.fillMaxWidth(1f),
-                            containerColor = Color.Black.copy(0.9f),
-                            contentColor = Color.White
-                        ) {
-                            Text("Apply")
-                        }
+                        Text("Reset")
+                    }
+                    AppButton(
+                        onClick = onFilter,
+                        modifier = Modifier.fillMaxWidth(1f),
+                        containerColor = Color.Black.copy(0.9f),
+                        contentColor = Color.White
+                    ) {
+                        Text("Apply")
                     }
                 }
             }

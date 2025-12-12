@@ -9,6 +9,7 @@ import com.example.billionairehari.core.data.local.entity.Owner
 import com.example.billionairehari.core.data.local.entity.Room
 import com.example.billionairehari.core.data.repository.OwnerRepository
 import com.example.billionairehari.core.data.repository.RoomRepository
+import com.example.billionairehari.utils.currentDateTime
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -124,12 +125,21 @@ class AddRoomViewModel @Inject constructor(
             val data = _room.value
             val id = UUID.randomUUID().toString()
             try {
+//                val owner = Owner(
+//                    id = "1",
+//                    name = "hari",
+//                    phone = "8668072363",
+//                    isVerified = true,
+//                    pgName = "BillionaireHari",
+//                    createdAt = currentDateTime()
+//                )
+//                ownerDao.createOwner(owner)
                 val room = Room(
                     id = id,
                     name = data.name,
                     ownerId = "1",
                     rentPrice = data.rent_price.toInt(),
-                    dueDate = 0L,
+                    dueDate = currentDateTime(),
                     bedCount = data.no_of_beds.toInt(),
                     deposit = data.deposit.toInt(),
                     features = data.features,

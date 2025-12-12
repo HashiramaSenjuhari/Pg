@@ -13,6 +13,7 @@ import com.example.billionairehari.core.data.repository.RecentSearchRepository
 import com.example.billionairehari.core.data.repository.RecentSearchType
 import com.example.billionairehari.core.data.repository.RoomRepository
 import com.example.billionairehari.model.RoomCardDetails
+import com.example.billionairehari.utils.ROOMS
 import com.example.billionairehari.utils.currentDateTime
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
@@ -114,7 +115,7 @@ class RoomSearchViewModel @Inject constructor(
     private val repository: RoomRepository,
     private val savedState: SavedStateHandle
 ): ViewModel() {
-    var recent_searches = recent_search.getRecentSearches(type = RecentSearchType.ROOMS, ownerId = "1")
+    var recent_searches = recent_search.getRecentSearches(type = ROOMS, ownerId = "1")
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5000),
@@ -152,22 +153,21 @@ class RoomSearchViewModel @Inject constructor(
                 ownerId = "1",
                 id = id,
                 text = query.value.text,
-                searchType = RecentSearchType.ROOMS.name.lowercase(),
+                searchType = ROOMS,
                 createdAt = currentDateTime
             )
-            val count = recent_search.totalRecentSearches(ownerId = "1", type = RecentSearchType.ROOMS)
+            val count = recent_search.totalRecentSearches(ownerId = "1", type = ROOMS)
             Log.d("BILLIONAIREGREAT",count.toString())
             if(count >= 5){
-                recent_search.clearOldSearch(ownerId = "1", type = RecentSearchType.ROOMS)
+                recent_search.clearOldSearch(ownerId = "1", type = ROOMS)
             }
             recent_search.insertRecentSearch(recent_search = data)
         }
     }
     fun clear_room_recent_search(){
         val ownerId:String = "1"
-        val type = RecentSearchType.ROOMS
         viewModelScope.launch {
-            recent_search.clearRecentSearches(ownerId = ownerId, type = type)
+            recent_search.clearRecentSearches(ownerId = ownerId, type = ROOMS)
         }
     }
     fun update_query(query:String) {

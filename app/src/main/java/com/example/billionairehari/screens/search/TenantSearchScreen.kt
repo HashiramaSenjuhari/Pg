@@ -46,6 +46,7 @@ fun TenantSearchComponentScreen(
     viewmodel: TenantSearchViewModel = hiltViewModel(),
 ){
     val query = viewmodel.query.collectAsState()
+    val recent_search = viewmodel.recent_searches.collectAsState()
     val results = viewmodel.result.collectAsStateWithLifecycle()
     val state = results.value
     val scrollState = rememberScrollState()
@@ -91,7 +92,8 @@ fun TenantSearchComponentScreen(
                         TenantCard(
                             tenant = it,
                             onClick = {
-                                navController.navigate("${Screens.TENANTS_SCREEN}/${it}")
+                                viewmodel.save_recent_search()
+//                                navController.navigate("${Screens.TENANTS_SCREEN}/${it}")
                             },
                             onCLickMessage = {},
                             onClickCall = {}
@@ -101,11 +103,13 @@ fun TenantSearchComponentScreen(
             }
             is SearchUiState.Default -> {
                 RecentSearchBoard(
-                    onClear = {},
+                    onClear = {
+                        viewmodel.clearRecentSearch()
+                    },
                     onPlaceQuery = {
                         viewmodel.update_query(it)
                     },
-                    names = listOf(RecentSearchDao.RecentSearchData(text = "billionaire"))
+                    names = recent_search.value
                 )
             }
             SearchUiState.Loading -> {}

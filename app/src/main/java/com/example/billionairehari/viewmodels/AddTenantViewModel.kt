@@ -9,6 +9,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import com.example.billionairehari.R
 import com.example.billionairehari.core.data.local.entity.Tenant
 import com.example.billionairehari.core.data.repository.TenantRepository
+import com.example.billionairehari.utils.currentDateTime
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -87,7 +88,8 @@ class AddTenantViewModel @Inject constructor (
                     alternateNumber = "8668072363",
                     automaticRentRemainder = true,
                     isActive = true,
-                    joiningDate = 0L,
+                    joiningDate = currentDateTime(),
+                    createdAt = currentDateTime(),
                     phoneNumber = "8668072363",
                     roomId = "billionaire"
                 ))

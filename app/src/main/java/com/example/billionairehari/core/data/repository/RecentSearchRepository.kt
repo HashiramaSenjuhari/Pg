@@ -20,16 +20,16 @@ class RecentSearchRepository @Inject constructor (
 
     override fun getRecentSearches(
         ownerId: String,
-        type: RecentSearchType
+        type: String
     ): Flow<List<RecentSearchDao.RecentSearchData>> = recentSearchDao
-        .getRecentSearch(ownerId = ownerId, type = type.name.lowercase())
+        .getRecentSearch(ownerId = ownerId, type = type)
 
-    override suspend fun totalRecentSearches(ownerId: String, type: RecentSearchType): Int = recentSearchDao
-        .countRecentSearch(ownerId = ownerId, type = type.name.lowercase())
-    override suspend fun clearRecentSearches(ownerId: String, type: RecentSearchType) {
-        recentSearchDao.clearRecentSearch(ownerId = ownerId, type = type.name.lowercase())
+    override suspend fun totalRecentSearches(ownerId: String, type: String): Int = recentSearchDao
+        .countRecentSearch(ownerId = ownerId, type = type)
+    override suspend fun clearRecentSearches(ownerId: String, type: String) {
+        recentSearchDao.clearRecentSearch(ownerId = ownerId, type = type)
     }
 
-    override suspend fun clearOldSearch(ownerId: String, type: RecentSearchType)= recentSearchDao
-        .clearOldSearch(ownerId = ownerId, type = type.name.lowercase())
+    override suspend fun clearOldSearch(ownerId: String, type: String)= recentSearchDao
+        .clearOldSearch(ownerId = ownerId, type = type)
 }

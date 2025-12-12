@@ -17,12 +17,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.unit.dp
+import com.example.billionairehari.core.data.local.dao.RecentSearchDao
 import com.example.billionairehari.layout.component.ROw
 
 
 @Composable
 fun RecentSearchBoard(
-    names:List<String>,
+    names:List<RecentSearchDao.RecentSearchData>,
     onPlaceQuery:(String) -> Unit,
     onClear:() -> Unit
 ) {
@@ -46,9 +47,9 @@ fun RecentSearchBoard(
             }
             names.forEach{
                 SearchCard(
-                    name = it,
+                    name = it.text,
                     onClickTenant = {
-                        onPlaceQuery(it)
+                        onPlaceQuery(it.text)
                     }
                 )
             }

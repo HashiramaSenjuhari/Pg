@@ -38,9 +38,12 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.Call
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.outlined.Call
 import androidx.compose.material.icons.outlined.Person
+import androidx.compose.material3.Badge
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
@@ -55,6 +58,7 @@ import androidx.compose.material3.RadioButtonColors
 import androidx.compose.material3.RadioButtonDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SheetState
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Tab
@@ -77,8 +81,10 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.layout.onGloballyPositioned
@@ -98,6 +104,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import androidx.core.text.isDigitsOnly
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.viewmodel.compose.LocalViewModelStoreOwner
@@ -118,9 +126,11 @@ import com.example.billionairehari.components.SelectOption
 import com.example.billionairehari.components.contacts.dial
 import com.example.billionairehari.icons.Phone
 import com.example.billionairehari.icons.TenantIcon
+import com.example.billionairehari.layout.BottomDialogSearchScreen
 import com.example.billionairehari.model.Tenant
 import com.example.billionairehari.layout.component.ROw
 import com.example.billionairehari.viewmodels.AddTenantViewModel
+import com.example.billionairehari.viewmodels.BottomDialogRoomSearchViewModel
 import com.google.android.material.tabs.TabLayout
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
@@ -131,13 +141,15 @@ import kotlinx.coroutines.launch
 fun TenantSheet(
     room:String? = null,
     scrollState: ScrollState,
-    context: Context
+    context: Context,
+    viewmodel: AddTenantViewModel = hiltViewModel()
 ) {
 
+//    val rooms = viewmodel.rooms.collectAsState()
     Log.d("ROOM_GREAT",room.toString())
+    val room = viewmodel.room.collectAsState()
     val owner = LocalViewModelStoreOwner.current
 
-    val viewmodel: AddTenantViewModel = hiltViewModel()
     val aadhar = remember { mutableStateOf("") }
     val otp = remember { mutableStateOf("") }
 
@@ -146,7 +158,8 @@ fun TenantSheet(
     val errors = tenant
 
     Mannual(
-        room =  tenant.room,
+        rooms = emptyList(),
+        room = "",
         phone = tenant.phone,
         image = tenant.image,
         aadhar = aadhar.value,
@@ -205,6 +218,7 @@ val fakeItems = listOf(
 
 @Composable
 fun Mannual(
+
     phone:String,
     update_phone:(String) -> Unit,
     phone_error:String? = null,
@@ -212,6 +226,9 @@ fun Mannual(
     room:String,
     update_room:(String) -> Unit,
     room_error:String? = null,
+
+
+    rooms:List<String>,
 
     joining_date:Long,
     update_joining_date:(Long) -> Unit,
@@ -251,9 +268,14 @@ fun Mannual(
     onDial:() -> Unit,
 
     scrollState: ScrollState,
+    viewmodel: BottomDialogRoomSearchViewModel = hiltViewModel()
 ){
+    val query = viewmodel.query.collectAsState()
+    val results = viewmodel.results.collectAsState()
+
     val sendOtp = remember { mutableStateOf(false) }
     val context = LocalContext.current
+    val isOpen = remember { mutableStateOf(false) }
 
     Column(
         modifier = Modifier.fillMaxHeight(),
@@ -406,17 +428,14 @@ fun Mannual(
                     horizontalArrangement = Arrangement.spacedBy(13.dp),
                     verticalAlignment = Alignment.Top
                 ) {
-                    DropDown(
-                        label = "Choose Room",
-                        is_important = true,
-                        error = room_error,
-                        items =  fakeItems,
-                        onChangeValue = {
-                            update_room(it)
+                    OutlinedInput(
+                        value = "",
+                        onValueChange = {},
+                        onClick = {
+                            isOpen.value = true
                         },
-                        value = if(room.isEmpty()) "Select Room"
-                        else room,
-                        size = 0.5f
+                        label = "Select Rooms",
+                        modifier = Modifier.fillMaxWidth(0.5f)
                     )
                     DateInput(
                         label = "Joining Date",
@@ -487,4 +506,64 @@ fun Mannual(
             onSubmit = onSubmit
         )
     }
+    if(isOpen.value){
+        BottomDialogSearchScreen(
+            value = query.value,
+            onChangeValue = {
+                viewmodel.update_query(it)
+            },
+            search_label = "Search Room",
+            is_open = isOpen
+        ){
+            results.value.forEach {
+                RoomSearchCard(
+                    name = it,
+                    location = "up",
+                    available = 0
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun RoomSearchCard(
+    name:String,
+    location:String,
+    available:Int
+){
+    val isAvailable = if(available > 0) true else false
+        ROw(
+            modifier = Modifier.fillMaxWidth()
+                .drawBehind{
+                    drawLine(
+                        start = Offset(x = 0f, y = size.height),
+                        end = Offset(x = size.width, y = size.height),
+                        color = Color.Black.copy(0.4f),
+                        strokeWidth = 1f
+                    )
+                }
+                .padding(13.dp)
+        ) {
+            Column(
+                verticalArrangement = Arrangement.spacedBy(6.dp)
+            ) {
+                Text(name,fontSize= 16.sp)
+                Text(location, fontSize = 13.sp,color = Color.Black.copy(0.6f))
+            }
+            Badge(
+                modifier = Modifier.clip(CircleShape)
+                    .width(80.dp)
+                    .background(
+                        if(isAvailable) Color.Green else {
+                            Color.Red
+                        }
+                    )
+                    .padding(vertical = 6.dp),
+                containerColor = Color.Transparent,
+                contentColor = if(isAvailable) Color.Black else Color.White
+            ) {
+                Text(if(isAvailable) "$available Available" else "Full")
+            }
+        }
 }

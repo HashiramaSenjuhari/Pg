@@ -44,18 +44,15 @@ fun DropDown(
     modifier:Modifier = Modifier,
     onChangeValue:(String) -> Unit,
     value:String,
-    items: List<DropDownItem>,
+    items: List<String>,
     is_important:Boolean,
     label:String,
     error:String? = null,
-    size: Float = 100f
+    size: Float = 100f,
 ) {
-    val interactionSource = remember { MutableInteractionSource() }
     val expanded = rememberSaveable { mutableStateOf(false) }
     val parentSize = remember { mutableStateOf(IntSize.Zero) }
-    if(interactionSource.collectIsPressedAsState().value){
-        expanded.value = true
-    }
+
     Column(
         verticalArrangement = Arrangement.spacedBy(6.dp)
     ) {
@@ -63,21 +60,18 @@ fun DropDown(
             modifier = Modifier.fillMaxWidth(size)
         ) {
             Box(
-                modifier = Modifier.clickable{
-                    expanded.value = true
-                }.background(Color.White)
             ){
                 OutlinedInput(
                     value = value,
-                    onValueChange = {},
+                    onValueChange = {
+                        onChangeValue(it)
+                    },
                     modifier = Modifier.then(modifier).onGloballyPositioned{
                             layoutCoordinates ->
                         parentSize.value = layoutCoordinates.size
                     },
-                    interactionSource = interactionSource,
                     label = "Choose Room",
                     label_font_size = 12.sp,
-                    readOnly = true,
                     trailingIcon = {
                         Icon(
                             Icons.Default.KeyboardArrowDown,
@@ -106,13 +100,13 @@ fun DropDown(
             ) {
                 items.forEach { item ->
                     DropdownMenuItem(
-                        modifier = Modifier.background(if (value == item.name) Color(0xFFF0F0F0) else Color.Transparent),
+                        modifier = Modifier.background(if (value == item) Color(0xFFF0F0F0) else Color.Transparent),
                         onClick = {
-                            onChangeValue(item.name)
+                            onChangeValue(item)
                             expanded.value = false
                         },
                         text = {
-                            Text(item.name)
+                            Text(item)
                         }
                     )
                 }

@@ -90,6 +90,7 @@ fun AddTenantWithRoomName(
         loadingOtp = false,
         verifyingOtp = false,
         isOtpSent = false,
-        aadhar_error = null
+        aadhar_error = null,
+        rooms = emptyList()
     )
 }

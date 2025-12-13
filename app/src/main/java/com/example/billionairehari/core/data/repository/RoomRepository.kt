@@ -15,12 +15,7 @@ class RoomRepository @Inject constructor(
     private val roomDao: RoomDao
 ): RoomRepositoryInterface {
     override suspend fun insertRoom(room: Room){
-        try {
-            Log.d("BillionaireRoom",room.toString())
-            roomDao.insertRoom(room = room)
-        }catch(error: Exception){
-
-        }
+        roomDao.insertRoom(room = room)
     }
 
     override suspend fun getRoom(roomId:String,ownerId:String): Room = roomDao.getRoom(roomId = roomId,ownerId = ownerId)
@@ -34,4 +29,7 @@ class RoomRepository @Inject constructor(
     override suspend fun getTables(): List<String> = roomDao.getAllTables()
     override suspend fun deleteRoom(ownerId: String, roomId: String) = roomDao.deleteRoom(ownerId = ownerId,roomId = roomId)
     override suspend fun deleteRooms() = roomDao.deleteRooms()
+    override fun getRoomNames(ownerId: String): Flow<List<String>> = roomDao.getRoomNames(ownerId = ownerId)
+    override fun getRoomNameAndAvailability(ownerId: String): Flow<List<String>> = roomDao
+        .getRoomNameAndTenantCount(ownerId)
 }

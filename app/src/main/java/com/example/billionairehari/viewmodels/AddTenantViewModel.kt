@@ -8,10 +8,15 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import com.example.billionairehari.R
 import com.example.billionairehari.core.data.local.entity.Tenant
+import com.example.billionairehari.core.data.repository.RoomRepository
 import com.example.billionairehari.core.data.repository.TenantRepository
 import com.example.billionairehari.utils.currentDateTime
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -45,8 +50,27 @@ data class TenantData (
 
 @HiltViewModel
 class AddTenantViewModel @Inject constructor (
-    private val repository: TenantRepository
+    private val repository: TenantRepository,
+    private val room_repository: RoomRepository
 ): ViewModel(){
+    private val _room = MutableStateFlow<String>("")
+    val room = _room.asStateFlow()
+
+    private val rooms_values = room_repository.getRoomNames(ownerId = "1")
+
+
+//    val rooms: StateFlow<List<String>> = combine(
+//        _room,
+//        rooms_values
+//    ){
+//        emptyList()
+//    }.stateIn(
+//        scope = viewModelScope,
+//        started = SharingStarted.WhileSubscribed(5000),
+//        initialValue = emptyList()
+//    )
+
+
     var tenant = mutableStateOf(TenantData(room = ""?: ""))
         private set
 

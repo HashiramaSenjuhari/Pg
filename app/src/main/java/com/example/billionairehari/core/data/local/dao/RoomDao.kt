@@ -12,6 +12,8 @@ interface RoomDao {
     @Query("SELECT name FROM sqlite_master WHERE type='table'")
     suspend fun getAllTables(): List<String>
 
+    @Query("SELECT name FROM rooms WHERE owner_id = :ownerId")
+    fun getRoomNames(ownerId:String): Flow<List<String>>
     @Insert()
     suspend fun insertRoom(room: Room)
 
@@ -84,4 +86,18 @@ interface RoomDao {
         DELETE FROM rooms
     """)
     suspend fun deleteRooms()
+
+    data class RoomNameAndTenantCount(
+        val name:String
+    )
+
+    @Query("""
+        SELECT
+        r.name
+        FROM rooms r
+        LEFT JOIN tenants t ON t.room_id = r.id
+        WHERE r.owner_id = :ownerId
+        ORDER BY r.name ASC
+    """)
+    fun getRoomNameAndTenantCount(ownerId:String): Flow<List<String>>
 }

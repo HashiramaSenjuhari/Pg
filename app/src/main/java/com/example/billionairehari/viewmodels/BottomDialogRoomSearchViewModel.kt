@@ -35,12 +35,6 @@ class BottomDialogRoomSearchViewModel @Inject constructor(
             initialValue = emptyList()
         )
 
-    val rooms_great = room_repository.getRoomCardsFlow(ownerId = "1")
-        .stateIn(
-            scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(5000),
-            initialValue = emptyList()
-        )
     val results: StateFlow<List<RoomDao.RoomNameAndTenantCount>> = query
         .debounce(300)
         .distinctUntilChanged()

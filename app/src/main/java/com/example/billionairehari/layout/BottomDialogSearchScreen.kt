@@ -14,13 +14,18 @@ import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import com.example.billionairehari.components.Input
+import com.example.billionairehari.components.SearchInput
 
 
 @Composable
@@ -31,6 +36,11 @@ fun BottomDialogSearchScreen(
     is_open: MutableState<Boolean>,
     content:@Composable () -> Unit
 ){
+    val focusRequester = remember { FocusRequester() }
+
+    LaunchedEffect(Unit) {
+        focusRequester.requestFocus()
+    }
     Dialog(
         onDismissRequest = {
             is_open.value = false
@@ -47,22 +57,16 @@ fun BottomDialogSearchScreen(
                 modifier = Modifier.fillMaxSize()
                     .padding(13.dp)
             ) {
-                Input(
-                    value = value,
-                    onValueChange = {
+                SearchInput(
+                    query = value,
+                    onChangeValue = {
                         onChangeValue(it)
                     },
-                    inner_label = search_label,
-                    modifier = Modifier
-                        .fillMaxWidth(),
-                    leadingIcon = {
-                        Icon(Icons.Default.Search, contentDescription = "")
+                    label = "Search Room",
+                    onClickBack = {
+                        is_open.value = false
                     },
-                    trailingIcon = {
-                        if(value.length > 3) {
-                            Icon(Icons.Default.Close, contentDescription = "")
-                        }
-                    }
+                    focus = focusRequester
                 )
                 Column(
                     modifier = Modifier

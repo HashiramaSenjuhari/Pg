@@ -14,6 +14,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -159,7 +160,7 @@ fun TenantSheet(
 
     Mannual(
         rooms = emptyList(),
-        room = "",
+        room = tenant.room,
         phone = tenant.phone,
         image = tenant.image,
         aadhar = aadhar.value,
@@ -272,9 +273,6 @@ fun Mannual(
 ){
     val query = viewmodel.query.collectAsState()
     val results = viewmodel.results.collectAsState()
-
-    val billionaire = viewmodel.rooms_great.collectAsState()
-    Log.d("BILLIONAIREBILLIONAIRE",results.value.toString())
 
     val sendOtp = remember { mutableStateOf(false) }
     val context = LocalContext.current
@@ -432,11 +430,12 @@ fun Mannual(
                     verticalAlignment = Alignment.Top
                 ) {
                     OutlinedInput(
-                        value = "",
+                        value = room,
                         onValueChange = {},
                         onClick = {
                             isOpen.value = true
                         },
+                        readOnly = true,
                         label = "Select Rooms",
                         modifier = Modifier.fillMaxWidth(0.5f)
                     )
@@ -522,7 +521,12 @@ fun Mannual(
                 RoomSearchCard(
                     name = it.name,
                     location = "up",
-                    available = it.available_beds
+                    available = it.available_beds,
+                    onClick = {
+                        update_room(it.name)
+                        isOpen.value = false
+                        viewmodel.update_query("")
+                    }
                 )
             }
         }
@@ -533,11 +537,18 @@ fun Mannual(
 fun RoomSearchCard(
     name:String,
     location:String,
-    available:Int
+    available:Int,
+    onClick:() -> Unit
 ){
     val isAvailable = if(available > 0) true else false
         ROw(
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier
+                .clickable(
+                    onClick = onClick,
+                    interactionSource = MutableInteractionSource(),
+                    indication = null,
+                    role = Role.Button
+                ).fillMaxWidth()
                 .drawBehind{
                     drawLine(
                         start = Offset(x = 0f, y = size.height),

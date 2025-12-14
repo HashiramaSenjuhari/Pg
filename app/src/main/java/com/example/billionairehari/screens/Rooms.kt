@@ -333,6 +333,7 @@ fun RoomCards(
             RoomCard(
                 room_detail = room,
                 onClick = {
+                    Log.d("IDDD",room.id)
                     navController.navigate("rooms/${room.id}")
                 },
                 current_action = current_action
@@ -392,6 +393,7 @@ fun RoomCard(
     onClick:() -> Unit,
     current_action: MutableState<MODAL_TYPE>
 ) {
+    val available = room_detail.bed_count - room_detail.tenant_count
     val is_open = rememberSaveable { mutableStateOf<Boolean>(false) }
         Card(
             shape = RoundedCornerShape(24.dp),
@@ -409,15 +411,16 @@ fun RoomCard(
             ) {
                 RoomCardHeader(
                     name = room_detail.name,
-                    available_count = 4
+                    available_count = available
                 )
                 Spacer(modifier = Modifier.padding(vertical = 3.dp))
                 HorizontalDivider(color = Color.Black.copy(0.1f))
                 Spacer(modifier = Modifier.padding(vertical = 6.dp))
                 RoomCardContent(
                     name = room_detail.name,
-                    available = 3,
+                    available = available,
                     beds = room_detail.bed_count,
+                    tenant_count = room_detail.tenant_count,
                     due_date = "Nov 24",
                     due_count = room_detail.not_paid,
                     current_action = current_action
@@ -474,6 +477,7 @@ fun RoomCardHeader(
 fun RoomCardContent(
     name:String,
     beds:Int,
+    tenant_count:Int,
     available:Int,
     due_count:Int,
     due_date:String,
@@ -527,7 +531,7 @@ fun RoomCardContent(
                 RoomCardContentLabel(
                     title = "OCCUPANCY",
                     value = {
-                        Text("4/4", fontWeight = FontWeight.Medium)
+                        Text("${tenant_count}/${beds}", fontWeight = FontWeight.Medium)
                     },
                     icon = R.drawable.person,
                     width = 0.5f

@@ -257,12 +257,12 @@ fun FloatingButton(
     }
     if(route?.size == 2 && path == "rooms"){
         val id = navBackStack.value?.arguments?.getString("roomId")
-        val room_id = hiltViewModel<GetRoomTenantCountViewModel, GetRoomTenantCountViewModel.GetRoomTenantCountFactory>{
-                factory -> factory.create(id!!)
-        }
+//        val room_id = hiltViewModel<GetRoomTenantCountViewModel, GetRoomTenantCountViewModel.GetRoomTenantCountFactory>{
+//                factory -> factory.create(id!!)
+//        }
         FloatingActionButton(
             onClick = {
-                current_action.value = MODAL_TYPE.ADD_TENANT(room = room_id.roomId)
+                current_action.value = MODAL_TYPE.ADD_TENANT(room = "")
                 is_open.value = true
             },
             containerColor =  Color(0xFFB2B0E8)

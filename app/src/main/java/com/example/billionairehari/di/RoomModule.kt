@@ -28,7 +28,7 @@ object RoomModule {
     fun provideDatabase(@ApplicationContext context: Context) : AppDatabase = Room
         .databaseBuilder(
             context = context,
-            name = "test_billionaire4",
+            name = "test_billionaire5",
             klass = AppDatabase::class.java
         )
         .addCallback(object: RoomDatabase.Callback() {

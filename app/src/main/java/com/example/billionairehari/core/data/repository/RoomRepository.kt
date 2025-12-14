@@ -18,7 +18,9 @@ class RoomRepository @Inject constructor(
         roomDao.insertRoom(room = room)
     }
 
-    override suspend fun getRoom(roomId:String,ownerId:String): Room = roomDao.getRoom(roomId = roomId,ownerId = ownerId)
+    override suspend fun getRoom(roomId: String, ownerId: String): Room {
+        TODO("Not yet implemented")
+    }
     override suspend fun getRoomCards(ownerId: String): List<RoomDao.RoomCard> = roomDao.getRoomsCard(ownerId = ownerId)
 
     override suspend fun getRooms() : List<Room> = roomDao.getRooms()
@@ -32,4 +34,14 @@ class RoomRepository @Inject constructor(
     override fun getRoomNames(ownerId: String): Flow<List<String>> = roomDao.getRoomNames(ownerId = ownerId)
     override fun getRoomNameAndAvailability(ownerId: String): Flow<List<RoomDao.RoomNameAndTenantCount>> = roomDao
         .getRoomNameAndTenantCount(ownerId)
+
+    override fun getRoomDetail(
+        ownerId: String,
+        roomId: String
+    ): Flow<RoomDao.RoomWithTenantAndDueCount> = roomDao.getRoomFlow(ownerId = ownerId, roomId = roomId)
+
+//    override fun getRoomTenants(
+//        ownerId: String,
+//        roomId: String
+//    ): Flow<List<RoomDao.RoomTenantDetails>> = roomDao.getRoomTenantDetails(ownerId = ownerId, roomId = roomId)
 }

@@ -75,6 +75,7 @@ import androidx.compose.material3.rememberTooltipState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -130,6 +131,7 @@ import com.example.billionairehari.components.FormButton
 import com.example.billionairehari.components.Input
 import com.example.billionairehari.components.InputType
 import com.example.billionairehari.components.sheets.BottomModalLayout
+import com.example.billionairehari.core.data.local.dao.RoomDao
 import com.example.billionairehari.icons.ChatIcon
 import com.example.billionairehari.icons.DeleteIcon
 import com.example.billionairehari.icons.EditIcon
@@ -141,6 +143,7 @@ import com.example.billionairehari.layout.component.ROw
 import com.example.billionairehari.model.Room
 import com.example.billionairehari.model.Tenant
 import com.example.billionairehari.model.TenantRentRecord
+import com.example.billionairehari.viewmodels.UiLoadingState
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -164,9 +167,13 @@ fun RoomScreen(
     onTenantNotice:(String) -> Unit,
 
     onBackNavigation:() -> Unit,
-    onTenantNavigate:(String) -> Unit
+    onTenantNavigate:(String) -> Unit,
 ) {
-    val room = hiltViewModel<RoomViewModel>()
+
+    val viewmodel: RoomViewModel = hiltViewModel(
+
+    )
+    val room_details = viewmodel.room_detail.collectAsState()
     val is_more = remember { mutableStateOf<Boolean>(false) }
 
 
@@ -188,7 +195,7 @@ fun RoomScreen(
         ){
             StaticBar(
                 onRoomEdit = {
-                    current_action.value = MODAL_TYPE.UPDATE_ROOM(room = room.room.value)
+//                    current_action.value = MODAL_TYPE.UPDATE_ROOM(room = room.room.value)
                 },
                 onRoomShare = {
 //                    onRoomShare(room.room.value.id)
@@ -206,80 +213,94 @@ fun RoomScreen(
                 photos = photos
             )
         }
-        RoomDetails(
-            name = "",
-            filled = 0,
-            rent_due = 0,
-            due_date = "",
-            beds = "4",
-            available = true,
+        when(room_details.value){
+            is UiLoadingState.Data<RoomDao.RoomWithTenantAndDueCount> -> {
+                val data = (room_details.value as UiLoadingState.Data<RoomDao.RoomWithTenantAndDueCount>).data
+                RoomDetails(
+                    name = data.name,
+                    filled = data.tenantCount,
+                    rent_due = data.dueCount,
+                    due_date = data.due_date,
+                    beds = data.bed_count.toString(),
+                    available = if(data.bed_count - data.tenantCount > 0) true else false,
 
-            rent = 4000,
-            deposit = 4000,
+                    rent = data.rent_price,
+                    deposit = data.deposit,
 
-            tenants = listOf(
-                TenantRentRecord(
-                    name = "Billionaire",
-                    room = "Billionairehari",
-                    image = "",
-                    rent = "",
-                    due_date = 0L,
-                    isPaid = true
-                ),
-                TenantRentRecord(
-                    name = "Billionaire",
-                    room = "Billionairehari",
-                    image = "",
-                    rent = "",
-                    due_date = 0L,
-                    isPaid = true
-                ),
-
-                TenantRentRecord(
-                    name = "Billionaire",
-                    room = "Billionairehari",
-                    image = "",
-                    rent = "",
-                    due_date = 0L,
-                    isPaid = true
-                ),
-                TenantRentRecord(
-                    name = "Billionaire",
-                    room = "Billionairehari",
-                    image = "",
-                    rent = "",
-                    due_date = 0L,
-                    isPaid = true
-                ),
-                TenantRentRecord(
-                    name = "Billionaire",
-                    room = "Billionairehari",
-                    image = "",
-                    rent = "",
-                    due_date = 0L,
-                    isPaid = true
-                ),
-            ),
-            features = listOf("Billionaire"),
-            onTenant = {
-                onTenant(it)
-            },
-            onTenantRentUpdate = {
-                onTenantRentUpdate(it)
-            },
-            onTenantDelete = {
-                onTenantDelete(it)
-            },
-            onTenantMessage = {
-                onTenantMessage(it)
-            },
-            onTenantNotice = {
-                onTenantNotice(it)
+                    tenants = emptyList(),
+                    features = listOf("Billionaire"),
+                    onTenant = {
+                        onTenant(it)
+                    },
+                    onTenantRentUpdate = {
+                        onTenantRentUpdate(it)
+                    },
+                    onTenantDelete = {
+                        onTenantDelete(it)
+                    },
+                    onTenantMessage = {
+                        onTenantMessage(it)
+                    },
+                    onTenantNotice = {
+                        onTenantNotice(it)
+                    }
+                )
             }
-        )
+            UiLoadingState.Loading -> {
+                Column {
+                    Text("Loading")
+                }
+            }
+        }
     }
 }
 
+/**
+ *
+ * listOf(
+ *                         TenantRentRecord(
+ *                             name = "Billionaire",
+ *                             room = "Billionairehari",
+ *                             image = "",
+ *                             rent = "",
+ *                             due_date = 0L,
+ *                             isPaid = true
+ *                         ),
+ *                         TenantRentRecord(
+ *                             name = "Billionaire",
+ *                             room = "Billionairehari",
+ *                             image = "",
+ *                             rent = "",
+ *                             due_date = 0L,
+ *                             isPaid = true
+ *                         ),
+ *
+ *                         TenantRentRecord(
+ *                             name = "Billionaire",
+ *                             room = "Billionairehari",
+ *                             image = "",
+ *                             rent = "",
+ *                             due_date = 0L,
+ *                             isPaid = true
+ *                         ),
+ *                         TenantRentRecord(
+ *                             name = "Billionaire",
+ *                             room = "Billionairehari",
+ *                             image = "",
+ *                             rent = "",
+ *                             due_date = 0L,
+ *                             isPaid = true
+ *                         ),
+ *                         TenantRentRecord(
+ *                             name = "Billionaire",
+ *                             room = "Billionairehari",
+ *                             image = "",
+ *                             rent = "",
+ *                             due_date = 0L,
+ *                             isPaid = true
+ *                         ),
+ *                     )
+ * **/
 
 sealed class IconType {
     data class IntType(val int: Int) : IconType()
@@ -292,6 +313,13 @@ data class DropDownParams(
     val onClick:() -> Unit
 )
 
+val dropdowns = listOf<DropDownParams>(
+    DropDownParams(name = "Edit Room", icon = IconType.Vector(EditIcon), onClick = {}),
+    DropDownParams(name = "Message", icon = IconType.Vector(ChatIcon), onClick = {}),
+    DropDownParams(name = "Share", icon = IconType.Vector(ShareIcon), onClick = {}),
+    DropDownParams(name = "Delete", icon = IconType.Vector(DeleteIcon), onClick = {}),
+)
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun StaticBar(
@@ -302,12 +330,7 @@ fun StaticBar(
     onRoomShare:() -> Unit,
     onRoomDelete:() -> Unit
 ){
-    val dropdowns = listOf<DropDownParams>(
-        DropDownParams(name = "Edit Room", icon = IconType.Vector(EditIcon), onClick = onRoomEdit),
-        DropDownParams(name = "Message", icon = IconType.Vector(ChatIcon), onClick = onRoomMessage),
-        DropDownParams(name = "Share", icon = IconType.Vector(ShareIcon), onClick = onRoomDelete),
-        DropDownParams(name = "Delete", icon = IconType.Vector(DeleteIcon), onClick = onRoomDelete),
-    )
+
     val coroutine = rememberCoroutineScope()
     ROw(
         modifier = Modifier.fillMaxWidth()

@@ -21,4 +21,6 @@ interface RoomRepositoryInterface {
     suspend fun deleteRoom(ownerId:String,roomId:String)
 
     fun getRoomNameAndAvailability(ownerId:String): Flow<List<RoomDao.RoomNameAndTenantCount>>
+    fun getRoomDetail(ownerId:String,roomId:String): Flow<RoomDao.RoomWithTenantAndDueCount>
+//    fun getRoomTenants(ownerId:String,roomId:String): Flow<List<RoomDao.RoomTenantDetails>>
 }

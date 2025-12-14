@@ -124,6 +124,7 @@ fun RoomSheet(
 
     AddRoomSheet(
         room_name = room.name,
+        location = room.location,
         bed_count = room.no_of_beds,
         rent = room.rent_price,
         deposit = room.deposit,
@@ -133,6 +134,9 @@ fun RoomSheet(
 
         onRoomNameChange = {
             viewmodel.update_name(it)
+        },
+        onLocationChange = {
+            viewmodel.update_location(it)
         },
         onRentChange = {
             viewmodel.update_rent(it)
@@ -165,6 +169,7 @@ fun RoomSheet(
         rent_error = room.rentPriceError,
         deposit_error = room.depositError,
         features_error = null,
+        locationError = room.locationError,
 
         scrollState = scrollState,
         onSubmit = {
@@ -193,56 +198,56 @@ fun UpdateRoomSheet(
 
     val room = viewmodel.room.value
 
-    AddRoomSheet(
-        room_name = room.name,
-        bed_count = room.count.toString(),
-        rent = room.rent,
-        deposit = room.deposit,
-        features = room.features,
-        images = emptyList(),
-        isLoading = false,
-
-        onRoomNameChange = {
-            viewmodel.update_name(it)
-        },
-        onRentChange = {
-            viewmodel.update_rent(it)
-        },
-        onDepositChange = {
-            viewmodel.update_deposit(it)
-        },
-        onNoOfBedChange = {
-            viewmodel.update_beds(it)
-        },
-        onImageAdd = {
-        },
-        onImageRemove = {
-        },
-        onImageError = {
-
-        },
-        onFeatureAdd = {
-            viewmodel.update_features(it)
-        },
-        onFeatureRemove = {
-            viewmodel.remove_features(it)
-        },
-
-        images_error = null,
-        room_name_error = room.nameError,
-        beds_error = room.countError,
-        rent_error = room.rentError,
-        deposit_error = room.depositError,
-        features_error = null,
-
-        scrollState = scrollState,
-        onSubmit = {
-            viewmodel.submit()
-        },
-        onReset = {
-//            viewmodel.reset()
-        }
-    )
+//    AddRoomSheet(
+//        room_name = room.name,
+//        bed_count = room.count.toString(),
+//        rent = room.rent,
+//        deposit = room.deposit,
+//        features = room.features,
+//        images = emptyList(),
+//        isLoading = false,
+//
+//        onRoomNameChange = {
+//            viewmodel.update_name(it)
+//        },
+//        onRentChange = {
+//            viewmodel.update_rent(it)
+//        },
+//        onDepositChange = {
+//            viewmodel.update_deposit(it)
+//        },
+//        onNoOfBedChange = {
+//            viewmodel.update_beds(it)
+//        },
+//        onImageAdd = {
+//        },
+//        onImageRemove = {
+//        },
+//        onImageError = {
+//
+//        },
+//        onFeatureAdd = {
+//            viewmodel.update_features(it)
+//        },
+//        onFeatureRemove = {
+//            viewmodel.remove_features(it)
+//        },
+//
+//        images_error = null,
+//        room_name_error = room.nameError,
+//        beds_error = room.countError,
+//        rent_error = room.rentError,
+//        deposit_error = room.depositError,
+//        features_error = null,
+//
+//        scrollState = scrollState,
+//        onSubmit = {
+//            viewmodel.submit()
+//        },
+//        onReset = {
+////            viewmodel.reset()
+//        }
+//    )
 }
 
 private fun ValidateRoom(

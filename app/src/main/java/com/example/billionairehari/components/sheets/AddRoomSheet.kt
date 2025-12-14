@@ -71,12 +71,14 @@ import kotlinx.coroutines.selects.select
 fun AddRoomSheet(
     images:List<ByteArray>,
     room_name:String,
+    location:String,
     bed_count:String,
     rent:String,
     deposit:String,
     features:List<String>,
     images_error:String? = null,
     room_name_error:String? = null,
+    locationError:String? = null,
     beds_error:String? = null,
     rent_error:String? = null,
     deposit_error:String? = null,
@@ -85,6 +87,7 @@ fun AddRoomSheet(
     onImageRemove:(Int) -> Unit,
     onImageError:() -> Unit,
     onRoomNameChange:(String) -> Unit,
+    onLocationChange:(String) -> Unit,
     onNoOfBedChange:(String) -> Unit,
     onRentChange:(String) -> Unit,
     onDepositChange:(String) -> Unit,
@@ -132,6 +135,17 @@ fun AddRoomSheet(
                 verticalAlignment = Alignment.Top
             ) {
                 Input(
+                    value = location,
+                    onValueChange = {
+                            value ->
+                        onLocationChange(value)
+                    },
+                    label = "Location",
+                    error = locationError,
+                    inner_label = "Eg. Second Floor",
+                    modifier = Modifier.fillMaxWidth(0.5f)
+                )
+                Input(
                     value = bed_count,
                     onValueChange = {
                         value ->
@@ -143,8 +157,12 @@ fun AddRoomSheet(
                     keyBoardType = KeyboardType.Number,
                     maxLength = 2,
                     inner_label = "Eg. 4",
-                    modifier = Modifier.fillMaxWidth(0.5f)
+                    modifier = Modifier.fillMaxWidth()
                 )
+            }
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(6.dp)
+            ) {
                 Input(
                     value = rent.toString(),
                     onValueChange = {
@@ -155,14 +173,9 @@ fun AddRoomSheet(
                     keyBoardType = KeyboardType.Number,
                     type = InputType.NUMBER,
                     inner_label = "Eg. 2000",
-                    modifier =  Modifier.fillMaxWidth(),
+                    modifier =  Modifier.fillMaxWidth(0.5f),
                     maxLength = 9
                 )
-            }
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(6.dp)
-            ) {
-
                 Input(
                     value = deposit.toString(),
                     onValueChange = {
@@ -172,7 +185,7 @@ fun AddRoomSheet(
                     type = InputType.NUMBER,
                     label = "Deposit",
                     error = deposit_error,
-                    modifier = Modifier.fillMaxWidth(0.5f),
+                    modifier = Modifier.fillMaxWidth(),
                     maxLength = 9,
                     inner_label = "Eg. 2000"
                 )

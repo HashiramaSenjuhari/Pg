@@ -81,7 +81,6 @@ sealed class MODAL_TYPE {
     object ADD_ROOM: MODAL_TYPE()
     object NONE: MODAL_TYPE()
     data class ADD_TENANT(val room:String? = null): MODAL_TYPE()
-    data class ADD_TENANT_WITH_PRE_ROOM(val roomName:String): MODAL_TYPE()
     data class UPDATE_TENANT(val tenant: Tenant): MODAL_TYPE()
     data class UPDATE_ROOM(val room: Room): MODAL_TYPE()
     data class UPDATE_TENANT_RENT(val tenant: TenantRentRecord): MODAL_TYPE()
@@ -125,7 +124,6 @@ fun MainLayout(
         is MODAL_TYPE.UPDATE_TENANT_RENT -> "Record Rent"
         is MODAL_TYPE.UPDATE_ROOM -> "Update Room"
         MODAL_TYPE.NONE -> ""
-        is MODAL_TYPE.ADD_TENANT_WITH_PRE_ROOM -> "Add Tenant"
         else -> ""
     }
 
@@ -264,7 +262,7 @@ fun FloatingButton(
         }
         FloatingActionButton(
             onClick = {
-                current_action.value = MODAL_TYPE.ADD_TENANT_WITH_PRE_ROOM(roomName = room_id.roomId)
+                current_action.value = MODAL_TYPE.ADD_TENANT(room = room_id.roomId)
                 is_open.value = true
             },
             containerColor =  Color(0xFFB2B0E8)
@@ -385,12 +383,6 @@ fun ModalUi(
                 scrollState = scrollState,
                 context = context
             )
-            is MODAL_TYPE.ADD_TENANT_WITH_PRE_ROOM -> {
-                TenantSheet(
-                    scrollState = scrollState,
-                    context = context
-                )
-            }
             is MODAL_TYPE.UPDATE_ROOM -> {
                 UpdateRoomSheet(
                     scrollState = scrollState,

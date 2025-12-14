@@ -146,8 +146,9 @@ fun TenantSheet(
     viewmodel: AddTenantViewModel = hiltViewModel()
 ) {
 
-//    val rooms = viewmodel.rooms.collectAsState()
-    Log.d("ROOM_GREAT",room.toString())
+    LaunchedEffect(Unit) {
+        viewmodel.update_room(room ?: "")
+    }
     val room = viewmodel.room.collectAsState()
     val owner = LocalViewModelStoreOwner.current
 

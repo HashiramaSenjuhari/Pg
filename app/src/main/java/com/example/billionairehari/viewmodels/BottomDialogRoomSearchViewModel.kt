@@ -28,20 +28,26 @@ class BottomDialogRoomSearchViewModel @Inject constructor(
     private val _query = MutableStateFlow<String>("")
     val query = _query.asStateFlow()
 
-    private val rooms: StateFlow<List<String>> = room_repository.getRoomNameAndAvailability(ownerId = "1")
+    private val rooms: StateFlow<List<RoomDao.RoomNameAndTenantCount>> = room_repository.getRoomNameAndAvailability(ownerId = "1")
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5000),
             initialValue = emptyList()
         )
 
-    val results: StateFlow<List<String>> = query
+    val rooms_great = room_repository.getRoomCardsFlow(ownerId = "1")
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = emptyList()
+        )
+    val results: StateFlow<List<RoomDao.RoomNameAndTenantCount>> = query
         .debounce(300)
         .distinctUntilChanged()
         .combine(rooms){   // this referesh the rooms if rooms get updated or query
             query,rooms->
             Log.d("BILLIONAIREGREATHARI",rooms.toString())
-            if(query.length >= 3) rooms.filter { room -> room.contains(query, ignoreCase = true) }
+            if(query.length >= 3) rooms.filter { room -> room.name.contains(query, ignoreCase = true) }
             else rooms
         }.stateIn(
             scope = viewModelScope,

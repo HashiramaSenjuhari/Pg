@@ -88,16 +88,19 @@ interface RoomDao {
     suspend fun deleteRooms()
 
     data class RoomNameAndTenantCount(
-        val name:String
+        val name:String,
+        val available_beds:Int
     )
 
     @Query("""
         SELECT
-        r.name
+        r.name,
+        r.bed_count - COALESCE(COUNT(t.id),0) as available_beds
         FROM rooms r
         LEFT JOIN tenants t ON t.room_id = r.id
         WHERE r.owner_id = :ownerId
+        GROUP BY r.id,r.name
         ORDER BY r.name ASC
     """)
-    fun getRoomNameAndTenantCount(ownerId:String): Flow<List<String>>
+    fun getRoomNameAndTenantCount(ownerId:String): Flow<List<RoomNameAndTenantCount>>
 }

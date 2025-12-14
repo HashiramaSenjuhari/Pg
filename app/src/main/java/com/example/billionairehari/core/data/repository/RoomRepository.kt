@@ -30,6 +30,6 @@ class RoomRepository @Inject constructor(
     override suspend fun deleteRoom(ownerId: String, roomId: String) = roomDao.deleteRoom(ownerId = ownerId,roomId = roomId)
     override suspend fun deleteRooms() = roomDao.deleteRooms()
     override fun getRoomNames(ownerId: String): Flow<List<String>> = roomDao.getRoomNames(ownerId = ownerId)
-    override fun getRoomNameAndAvailability(ownerId: String): Flow<List<String>> = roomDao
+    override fun getRoomNameAndAvailability(ownerId: String): Flow<List<RoomDao.RoomNameAndTenantCount>> = roomDao
         .getRoomNameAndTenantCount(ownerId)
 }

@@ -273,6 +273,9 @@ fun Mannual(
     val query = viewmodel.query.collectAsState()
     val results = viewmodel.results.collectAsState()
 
+    val billionaire = viewmodel.rooms_great.collectAsState()
+    Log.d("BILLIONAIREBILLIONAIRE",results.value.toString())
+
     val sendOtp = remember { mutableStateOf(false) }
     val context = LocalContext.current
     val isOpen = remember { mutableStateOf(false) }
@@ -517,9 +520,9 @@ fun Mannual(
         ){
             results.value.forEach {
                 RoomSearchCard(
-                    name = it,
+                    name = it.name,
                     location = "up",
-                    available = 0
+                    available = it.available_beds
                 )
             }
         }

@@ -173,6 +173,7 @@ import com.example.billionairehari.layout.component.ROw
 import com.example.billionairehari.model.Room
 import com.example.billionairehari.model.RoomCardDetails
 import com.example.billionairehari.model.Tenant
+import com.example.billionairehari.utils.currentMonth
 import com.example.billionairehari.viewmodels.FILTER
 import com.example.billionairehari.viewmodels.RoomsViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -339,6 +340,7 @@ fun RoomCards(
                 current_action = current_action
             )
         }
+        Spacer(modifier = Modifier.padding(24.dp))
     }
 }
 
@@ -421,7 +423,7 @@ fun RoomCard(
                     available = available,
                     beds = room_detail.bed_count,
                     tenant_count = room_detail.tenant_count,
-                    due_date = "Nov 24",
+                    due_day = room_detail.due_day,
                     due_count = room_detail.not_paid,
                     current_action = current_action
                 )
@@ -480,10 +482,10 @@ fun RoomCardContent(
     tenant_count:Int,
     available:Int,
     due_count:Int,
-    due_date:String,
+    due_day:Int,
     current_action: MutableState<MODAL_TYPE>
 ){
-    val isDue = if(due_count === 0) false else true
+    val isDue = if(due_count == 0) false else true
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceBetween,
@@ -511,7 +513,7 @@ fun RoomCardContent(
                             if(!isDue){
                                 "All Paid"
                             }else {
-                                if(due_count === 1){
+                                if(due_count == 1){
                                     "${due_count.toString()} person"
                                 }else{
                                     "${due_count.toString()} persons"
@@ -539,7 +541,7 @@ fun RoomCardContent(
                 RoomCardContentLabel(
                     title = "Due Date",
                     value = {
-                        Text("Nov 24", fontWeight = FontWeight.Normal)
+                        Text("${currentMonth()} ${due_day}", fontWeight = FontWeight.Normal)
                     },
                     icon = R.drawable.outline_calendar_today_24,
                     width = 1f

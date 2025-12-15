@@ -72,12 +72,14 @@ fun AddRoomSheet(
     images:List<ByteArray>,
     room_name:String,
     location:String,
+    dueDay:String,
     bed_count:String,
     rent:String,
     deposit:String,
     features:List<String>,
     images_error:String? = null,
     room_name_error:String? = null,
+    dueDayError:String? = null,
     locationError:String? = null,
     beds_error:String? = null,
     rent_error:String? = null,
@@ -88,6 +90,7 @@ fun AddRoomSheet(
     onImageError:() -> Unit,
     onRoomNameChange:(String) -> Unit,
     onLocationChange:(String) -> Unit,
+    onDueDayChange:(String) -> Unit,
     onNoOfBedChange:(String) -> Unit,
     onRentChange:(String) -> Unit,
     onDepositChange:(String) -> Unit,
@@ -121,15 +124,31 @@ fun AddRoomSheet(
             if(images_error != null){
                 Text(images_error.toString(), fontSize = 13.sp, color =  Color.Red)
             }
-            OutlinedInput(
-                value = room_name,
-                onValueChange = { value ->
-                    onRoomNameChange(value) },
-                label = "Room Name",
-                error = room_name_error,
-                leadingIcon = RoomIcon,
-                modifier = Modifier.fillMaxWidth()
-            )
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(6.dp),
+                verticalAlignment = Alignment.Top
+            ){
+                OutlinedInput(
+                    value = room_name,
+                    onValueChange = { value ->
+                        onRoomNameChange(value) },
+                    label = "Room Name",
+                    error = room_name_error,
+                    leadingIcon = RoomIcon,
+                    modifier = Modifier.fillMaxWidth(0.5f)
+                )
+                OutlinedInput(
+                    label = "Due Day",
+                    value = dueDay,
+                    onValueChange = {
+                        if((it.toIntOrNull() ?: 0) < 31) {
+                            onDueDayChange(it)
+                        }
+                    },
+                    type = InputType.NUMBER,
+                    keyBoardType = KeyboardType.Number
+                )
+            }
             Row(
                 horizontalArrangement = Arrangement.spacedBy(13.dp),
                 verticalAlignment = Alignment.Top

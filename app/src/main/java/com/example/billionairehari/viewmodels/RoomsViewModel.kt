@@ -59,7 +59,7 @@ class RoomsViewModel @Inject constructor(
         when(type){
             FILTER.DEFAULT -> rooms
             FILTER.AVAILABLE -> rooms.filter { roomCard -> roomCard.tenant_count < roomCard.bed_count }
-            FILTER.RENT_DUE -> rooms.filter { roomCard -> roomCard.due_date > 0 }
+            FILTER.RENT_DUE -> rooms.filter { roomCard -> roomCard.due_day > 0 }
         }
     }.stateIn(
         scope = viewModelScope,

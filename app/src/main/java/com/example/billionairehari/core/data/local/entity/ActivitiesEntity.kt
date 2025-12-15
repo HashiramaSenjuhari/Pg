@@ -21,6 +21,6 @@ data class Activity(
     val name:String,
     val message:String,
     val type:String,
-    @ColumnInfo(name = "owner_id") val ownerId:String,
-    @ColumnInfo(name = "created_at") val createdAt:String
+    @ColumnInfo(name = "owner_id", index = true) val ownerId:String,
+    @ColumnInfo(name = "created_at", index = true) val createdAt:String
 )

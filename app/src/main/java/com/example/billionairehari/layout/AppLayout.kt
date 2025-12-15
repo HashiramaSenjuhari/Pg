@@ -187,8 +187,9 @@ fun AppLayout(
             }
         ) {
             entry ->
-            val roomId = entry.arguments?.getString(Arguments.ROOM_ID_ARGS)
+            val roomId = entry.arguments?.getString(Arguments.ROOM_ID_ARGS) ?: "Unknown"
             RoomScreen(
+                id = roomId,
                 modifier = Modifier.padding(padding),
                 onBackNavigation = {
                     val route = navController.popBackStack()

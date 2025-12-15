@@ -1,6 +1,7 @@
 package com.example.billionairehari.screens
 
 import android.graphics.drawable.VectorDrawable
+import android.text.format.DateFormat
 import android.util.Log
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
@@ -143,14 +144,38 @@ import com.example.billionairehari.layout.component.ROw
 import com.example.billionairehari.model.Room
 import com.example.billionairehari.model.Tenant
 import com.example.billionairehari.model.TenantRentRecord
-import com.example.billionairehari.viewmodels.UiLoadingState
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import javax.inject.Inject
+import com.example.billionairehari.R
+import com.example.billionairehari.utils.currentMonth
+import java.time.LocalDate
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
+
+
+val fake_tenants = listOf(
+    RoomDao.RoomTenantDetails(
+        id = "1",
+        image = "",
+        name = "BillionaireHari",
+        phoneNumber = "",
+        paymentStatus = 2
+    )
+)
+
+val photos = listOf(
+    "https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fi.pinimg.com%2Foriginals%2F6d%2F80%2F73%2F6d80739dc844d81325c81a73d3fa5cc6.jpg&f=1&nofb=1&ipt=e7fb2752441029b26dce1e075c76003253d17a36339ef2aa990c536d77173484\"",
+    "https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fi.pinimg.com%2Foriginals%2F6d%2F80%2F73%2F6d80739dc844d81325c81a73d3fa5cc6.jpg&f=1&nofb=1&ipt=e7fb2752441029b26dce1e075c76003253d17a36339ef2aa990c536d77173484\"",
+    "https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fi.pinimg.com%2Foriginals%2F6d%2F80%2F73%2F6d80739dc844d81325c81a73d3fa5cc6.jpg&f=1&nofb=1&ipt=e7fb2752441029b26dce1e075c76003253d17a36339ef2aa990c536d77173484\"",
+    "https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fi.pinimg.com%2Foriginals%2F6d%2F80%2F73%2F6d80739dc844d81325c81a73d3fa5cc6.jpg&f=1&nofb=1&ipt=e7fb2752441029b26dce1e075c76003253d17a36339ef2aa990c536d77173484\""
+)
 
 @Composable
 fun RoomScreen(
+    id:String,
     modifier: Modifier,
     current_action:MutableState<MODAL_TYPE>,
 
@@ -169,33 +194,26 @@ fun RoomScreen(
     onBackNavigation:() -> Unit,
     onTenantNavigate:(String) -> Unit,
 ) {
-
     val viewmodel: RoomViewModel = hiltViewModel(
-
+        creationCallback = { factory: RoomViewModel.RoomViewModelFactory -> factory.create(id) }
     )
     val room_details = viewmodel.room_detail.collectAsState()
-    val is_more = remember { mutableStateOf<Boolean>(false) }
+    val tenants = viewmodel.tenants.collectAsState()
+    val data = room_details.value
 
-
-    val photos = listOf(
-        "https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fi.pinimg.com%2Foriginals%2F6d%2F80%2F73%2F6d80739dc844d81325c81a73d3fa5cc6.jpg&f=1&nofb=1&ipt=e7fb2752441029b26dce1e075c76003253d17a36339ef2aa990c536d77173484\"",
-        "https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fi.pinimg.com%2Foriginals%2F6d%2F80%2F73%2F6d80739dc844d81325c81a73d3fa5cc6.jpg&f=1&nofb=1&ipt=e7fb2752441029b26dce1e075c76003253d17a36339ef2aa990c536d77173484\"",
-        "https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fi.pinimg.com%2Foriginals%2F6d%2F80%2F73%2F6d80739dc844d81325c81a73d3fa5cc6.jpg&f=1&nofb=1&ipt=e7fb2752441029b26dce1e075c76003253d17a36339ef2aa990c536d77173484\"",
-        "https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fi.pinimg.com%2Foriginals%2F6d%2F80%2F73%2F6d80739dc844d81325c81a73d3fa5cc6.jpg&f=1&nofb=1&ipt=e7fb2752441029b26dce1e075c76003253d17a36339ef2aa990c536d77173484\""
-    )
     val pagerState = rememberPagerState(initialPage = 0, pageCount = {
         photos.size
     })
     ChildLayout(
         label = "Rooms",
         modifier = Modifier.then(modifier)
-    ){
+    ) {
         Box(
             modifier = Modifier.fillMaxWidth().height(240.dp).zIndex(0f)
-        ){
+        ) {
             StaticBar(
                 onRoomEdit = {
-//                    current_action.value = MODAL_TYPE.UPDATE_ROOM(room = room.room.value)
+                    current_action.value = MODAL_TYPE.UPDATE_ROOM(id = data.id)
                 },
                 onRoomShare = {
 //                    onRoomShare(room.room.value.id)
@@ -213,94 +231,107 @@ fun RoomScreen(
                 photos = photos
             )
         }
-        when(room_details.value){
-            is UiLoadingState.Data<RoomDao.RoomWithTenantAndDueCount> -> {
-                val data = (room_details.value as UiLoadingState.Data<RoomDao.RoomWithTenantAndDueCount>).data
-                RoomDetails(
+        Column(
+            modifier = Modifier.padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(24.dp)
+        ) {
+            Column(
+                verticalArrangement = Arrangement.spacedBy(13.dp)
+            ) {
+                RoomHeader(
                     name = data.name,
+                    location = data.location,
+                    available = (data.bed_count - data.tenantCount > 0)
+                )
+                RoomBriefDetail(
+                    beds = data.bed_count,
+                    due_date = data.due_day,
                     filled = data.tenantCount,
-                    rent_due = data.dueCount,
-                    due_date = data.due_date,
-                    beds = data.bed_count.toString(),
-                    available = if(data.bed_count - data.tenantCount > 0) true else false,
-
-                    rent = data.rent_price,
-                    deposit = data.deposit,
-
-                    tenants = emptyList(),
-                    features = listOf("Billionaire"),
-                    onTenant = {
-                        onTenant(it)
-                    },
-                    onTenantRentUpdate = {
-                        onTenantRentUpdate(it)
-                    },
-                    onTenantDelete = {
-                        onTenantDelete(it)
-                    },
-                    onTenantMessage = {
-                        onTenantMessage(it)
-                    },
-                    onTenantNotice = {
-                        onTenantNotice(it)
-                    }
+                    rent_due = data.dueCount
                 )
             }
-            UiLoadingState.Loading -> {
-                Column {
-                    Text("Loading")
+
+            Tenants(
+                tenants = tenants.value,
+                onTenant = {
+//                    onTenant(it)
+                },
+                onTenantDelete = {
+//                    onTenantDelete(it)
+                },
+                onTenantRentUpdate = {
+//                    onTenantRentUpdate(it)
+                },
+                onTenantMessage = {
+//                    onTenantMessage(it)
+                },
+                onTenantNotice = {
+//                    onTenantNotice(it)
                 }
+            )
+            PriceDetails(
+                deposit = data.deposit,
+                current_rent_due = data.dueCount,
+                room_rent = data.rent_price
+            )
+            val features = data.features.split(",").toList()
+            if(features.size > 0 && features[0] != "") {
+                FeaturesPreview(
+                    features = features
+                )
             }
+            Spacer(modifier = Modifier.padding(24.dp))
         }
     }
 }
 
-/**
- *
- * listOf(
- *                         TenantRentRecord(
- *                             name = "Billionaire",
- *                             room = "Billionairehari",
- *                             image = "",
- *                             rent = "",
- *                             due_date = 0L,
- *                             isPaid = true
- *                         ),
- *                         TenantRentRecord(
- *                             name = "Billionaire",
- *                             room = "Billionairehari",
- *                             image = "",
- *                             rent = "",
- *                             due_date = 0L,
- *                             isPaid = true
- *                         ),
- *
- *                         TenantRentRecord(
- *                             name = "Billionaire",
- *                             room = "Billionairehari",
- *                             image = "",
- *                             rent = "",
- *                             due_date = 0L,
- *                             isPaid = true
- *                         ),
- *                         TenantRentRecord(
- *                             name = "Billionaire",
- *                             room = "Billionairehari",
- *                             image = "",
- *                             rent = "",
- *                             due_date = 0L,
- *                             isPaid = true
- *                         ),
- *                         TenantRentRecord(
- *                             name = "Billionaire",
- *                             room = "Billionairehari",
- *                             image = "",
- *                             rent = "",
- *                             due_date = 0L,
- *                             isPaid = true
- *                         ),
- *                     )
- * **/
+@Composable
+fun RoomHeader(
+    name:String,
+    location:String,
+    available:Boolean
+){
+    Column {
+        ROw(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            ROw(
+                horizontalArrangement = Arrangement.spacedBy(13.dp)
+            ) {
+                Icon(
+                    RoomIcon,
+                    contentDescription = "",
+                    modifier = Modifier.clip(RoundedCornerShape(16.dp))
+                        .size(40.dp)
+                        .background(Color(0xFFF8F8FF))
+                        .padding(6.dp)
+                )
+                val roomName = if(name.length > 16){
+                    name.take(16) + "..."
+                } else {
+                    name
+                }
+                Column {
+                    Text(roomName, fontSize = 24.sp, fontWeight = FontWeight.SemiBold)
+                    Text(location, fontSize = 13.sp, fontWeight = FontWeight.Medium,color = Color.Black.copy(0.3f))
+                }
+            }
+            Badge(
+                modifier = Modifier.clip(CircleShape)
+                    .border(1.dp, color = Color(0xFFB9F8CF),shape = CircleShape)
+                    .background(Color(0xFFF0FDF4))
+                    .padding(vertical = 6.dp, horizontal = 13.dp),
+                containerColor = Color.Transparent,
+                contentColor = Color.Black,
+            ){
+                Text(if(available) "Available" else "Full")
+            }
+        }
+        Spacer(modifier = Modifier.height(13.dp))
+        Divider()
+    }
+}
 
 sealed class IconType {
     data class IntType(val int: Int) : IconType()
@@ -458,101 +489,6 @@ fun ImagePreview(
 }
 
 @Composable
-fun RoomDetails(
-    name:String,
-    available:Boolean,
-
-    beds:String,
-    filled: Int,
-    due_date: String,
-    rent_due: Int,
-    tenants:List<TenantRentRecord>,
-    rent:Int,
-    deposit:Int,
-    features:List<String>,
-
-    onTenant:(String) -> Unit,
-    onTenantRentUpdate: (TenantRentRecord) -> Unit,
-    onTenantDelete:(String) -> Unit,
-    onTenantNotice:(String) -> Unit,
-    onTenantMessage:(String) -> Unit
-) {
-    Column(
-        modifier = Modifier.fillMaxWidth()
-            .padding(16.dp)
-    ) {
-        ROw(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            ROw(
-                horizontalArrangement = Arrangement.spacedBy(13.dp)
-            ) {
-                Icon(
-                    RoomIcon,
-                    contentDescription = "",
-                    modifier = Modifier.clip(RoundedCornerShape(16.dp))
-                        .size(40.dp)
-                        .background(Color(0xFFF8F8FF))
-                        .padding(6.dp)
-                )
-                Text(name, fontSize = 24.sp, fontWeight = FontWeight.Bold)
-            }
-            Badge(
-                modifier = Modifier.clip(CircleShape)
-                    .border(1.dp, color = Color(0xFFB9F8CF),shape = CircleShape)
-                    .background(Color(0xFFF0FDF4))
-                    .padding(vertical = 6.dp, horizontal = 13.dp),
-                containerColor = Color.Transparent,
-                contentColor = Color.Black,
-            ){
-                Text(if(available) "Available" else "Full")
-            }
-        }
-        Spacer(modifier = Modifier.height(16.dp))
-        Divider()
-        Column(
-            verticalArrangement = Arrangement.spacedBy(24.dp),
-            modifier = Modifier.fillMaxWidth()
-                .padding(horizontal = 6.dp, vertical = 13.dp)
-        ) {
-            BedDetails(
-                beds = beds,
-                due_date = due_date,
-                filled = filled,
-                rent_due = rent_due
-            )
-            Tenants(
-                tenants = tenants,
-                onTenant = {
-                    onTenant(it)
-                },
-                onTenantDelete = {
-                    onTenantDelete(it)
-                },
-                onTenantRentUpdate = {
-                    onTenantRentUpdate(it)
-                },
-                onTenantMessage = {
-                    onTenantMessage(it)
-                },
-                onTenantNotice = {
-                    onTenantNotice(it)
-                }
-            )
-            PriceDetails(
-                deposit = deposit,
-                current_rent_due = rent_due,
-                room_rent = rent
-            )
-            FeaturesPreview(
-                features = features
-            )
-        }
-    }
-}
-
-@Composable
 fun Divider(){
     HorizontalDivider(
         modifier = Modifier.background(Brush.horizontalGradient(colors = listOf(Color.Transparent,Color(0xFFF1F1F1),Color.Transparent))),
@@ -561,8 +497,8 @@ fun Divider(){
 }
 
 @Composable
-fun BedDetails(
-    beds:String,
+fun RoomBriefDetail(
+    beds:Int,
     filled:Int,
     due_date:String,
     rent_due:Int
@@ -582,13 +518,13 @@ fun BedDetails(
             DetailCard(
                 vector_icon = drawable.due_icon,
                 title = "Due Date",
-                total = "${due_date}"
+                total = "${currentMonth()} ${due_date}"
             )
         }
         Column(
             verticalArrangement = Arrangement.spacedBy(13.dp)
         ) {
-            if((beds.toIntOrNull() ?: 0) <= 4) {
+            if(beds <= 4) {
                 DetailCard(
                     icon = TenantIcon,
                     title = "Tenants",
@@ -616,7 +552,7 @@ fun BedDetails(
             }
             DetailCard(
                 vector_icon = drawable.due_icon,
-                title = "Rent Due",
+                title = "Due Count",
                 rent_due_price = rent_due,
                 width = 1f
             )
@@ -704,9 +640,8 @@ fun PriceDetails(
         Column(
             verticalArrangement = Arrangement.spacedBy(13.dp)
         ) {
-            PriceLabel(name = "Room Rent", price = room_rent, per_moth = "/mo")
+            PriceLabel(name = "Room Rent", price = room_rent, per_moth = "/month")
             PriceLabel(name = "Security Deposit", price = deposit)
-            PriceLabel(name = "Current Rent Due", price = current_rent_due)
         }
     }
 }
@@ -765,9 +700,9 @@ fun FeatureLabel(
 
 @Composable
 fun Tenants(
-    tenants: List<TenantRentRecord>,
+    tenants: List<RoomDao.RoomTenantDetails>,
     onTenant:(String) -> Unit,
-    onTenantRentUpdate: (TenantRentRecord) -> Unit,
+    onTenantRentUpdate: (RoomDao.RoomTenantDetails) -> Unit,
     onTenantMessage: (String) -> Unit,
     onTenantNotice: (String) -> Unit,
     onTenantDelete: (String) -> Unit
@@ -777,31 +712,49 @@ fun Tenants(
         verticalArrangement = Arrangement.spacedBy(24.dp)
     ) {
         Text("Tenants", fontWeight = FontWeight.SemiBold, fontSize = 16.sp)
-        ROw {
-            Column (
-                verticalArrangement = Arrangement.spacedBy(6.dp)
-            ){
-                tenants.forEach {
-                    tenant ->
-                    Tenant(
-                        tenant = tenant,
-                        onTenant = {
-                            onTenant(tenant.id)
-                        },
-                        onTenantRentUpdate = {
-                            onTenantRentUpdate(tenant)
-                        },
-                        onTenantMessage = {
-                            onTenantMessage(tenant.id)
-                        },
-                        onTenantNotice = {
-                            onTenantNotice(tenant.name)
-                        },
-                        onTenantDelete = {
-                            onTenantDelete(tenant.id)
-                        }
-                    )
+        if(tenants.size > 0) {
+            ROw {
+                Column (
+                    verticalArrangement = Arrangement.spacedBy(6.dp)
+                ){
+                    tenants.forEach {
+                            tenant ->
+                        Tenant(
+                            tenant = tenant,
+                            onTenant = {
+                                onTenant(tenant.id)
+                            },
+                            onTenantRentUpdate = {
+                                onTenantRentUpdate(tenant)
+                            },
+                            onTenantMessage = {
+                                onTenantMessage(tenant.id)
+                            },
+                            onTenantNotice = {
+                                onTenantNotice(tenant.name)
+                            },
+                            onTenantDelete = {
+                                onTenantDelete(tenant.id)
+                            }
+                        )
+                    }
                 }
+            }
+        }
+        else {
+            Column(
+                modifier = Modifier.fillMaxWidth()
+                    .border(1.dp, color = Color.Black.copy(0.1f), shape = RoundedCornerShape(13.dp))
+                    .padding(13.dp),
+                verticalArrangement = Arrangement.spacedBy(6.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ){
+                Icon(
+                    painter = painterResource(R.drawable.no_user),
+                    contentDescription = "",
+                    modifier = Modifier.size(130.dp)
+                )
+                Text("No Tenants Found")
             }
         }
     }
@@ -814,13 +767,14 @@ data class OptionModal(
 
 @Composable
 fun Tenant(
-    tenant: TenantRentRecord,
+    tenant: RoomDao.RoomTenantDetails,
     onTenant:() -> Unit,
     onTenantRentUpdate: () -> Unit,
     onTenantMessage: () -> Unit,
     onTenantNotice: () -> Unit,
     onTenantDelete: () -> Unit
 ){
+    val isPaid = if(tenant.paymentStatus == 1) true else false
     val is_notice_applied = false
     val expanded = remember { mutableStateOf<Boolean>(false) }
     val is_delete_dialog = remember { mutableStateOf<Boolean>(false) }
@@ -854,17 +808,17 @@ fun Tenant(
                         horizontalArrangement = Arrangement.spacedBy(6.dp)
                     ) {
                         Badge(
-                            modifier = Modifier.border(1.dp, color = if(tenant.isPaid) Color.Unspecified else Color(0xFFF75270), shape = CircleShape),
-                            containerColor = if(tenant.isPaid) Color(0xFF59AC77) else Color(0xFFF7CAC9),
+                            modifier = Modifier.border(1.dp, color = if(isPaid) Color.Unspecified else Color(0xFFF75270), shape = CircleShape),
+                            containerColor = if(isPaid) Color(0xFF59AC77) else Color(0xFFF7CAC9),
                             contentColor = Color.White
                         ) {
                             Box(
                                 modifier = Modifier.padding(horizontal = 6.dp, vertical = 3.dp)
                             ){
                                 Text(
-                                    if(tenant.isPaid) "Paid" else "Not Paid",
+                                    if(isPaid) "Paid" else "Not Paid",
                                     fontSize = 12.sp,
-                                    color =  if(tenant.isPaid) Color.White else Color(0xFFDC143C)
+                                    color =  if(isPaid) Color.White else Color(0xFFDC143C)
                                 )
                             }
                         }

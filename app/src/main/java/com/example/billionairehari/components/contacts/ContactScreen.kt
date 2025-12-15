@@ -25,6 +25,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Search
@@ -111,7 +112,7 @@ fun ContactScreen(navCotroller: NavController,modifier:Modifier = Modifier){
                     IconButton(
                         onClick = {},
                     ) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "arrow_back_icon", tint =  Color.Black)
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "arrow_back_icon", tint =  Color.Black)
                     }
                     Text("Contacts" , fontSize = 16.sp,fontWeight = FontWeight.Medium)
                 }

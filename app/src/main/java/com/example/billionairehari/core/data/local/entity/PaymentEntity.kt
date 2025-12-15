@@ -35,12 +35,12 @@ enum class PaymentType {
 )
 data class Payment(
     @PrimaryKey val id:String,
-    @ColumnInfo(name = "tenant_id") val tenantId:String,
-    @ColumnInfo(name = "room_id") val roomId:String,
+    @ColumnInfo(name = "tenant_id", index = true) val tenantId:String,
+    @ColumnInfo(name = "room_id", index = true) val roomId:String,
     @ColumnInfo(name = "amount") val amount:Int,
     @ColumnInfo(name = "payment_date") val paymentDate:Long,
     @ColumnInfo(name = "due_date") val dueDate:String,
     @ColumnInfo(name = "is_paid") val isPaid:Boolean,
     @ColumnInfo(name = "payment_type") val paymentType: PaymentType,
-    @ColumnInfo(name = "owner_id") val ownerId:String
+    @ColumnInfo(name = "owner_id", index = true) val ownerId:String
 )

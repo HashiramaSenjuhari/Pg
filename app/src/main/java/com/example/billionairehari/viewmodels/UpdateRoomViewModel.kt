@@ -1,54 +1,46 @@
 package com.example.billionairehari.viewmodels
 
+import android.util.Log
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
+import com.example.billionairehari.core.data.local.entity.Room
 import com.example.billionairehari.core.data.repository.RoomRepository
-import com.example.billionairehari.model.Room
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedFactory
+import dagger.assisted.AssistedInject
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-data class RoomUpdateData(
-    val name:String,
-    val images:List<String>,
-    val count:String,
-    val rent:String,
-    val deposit:String,
-    val features:List<String>,
-    val isLoading: Boolean = false,
-    val nameError:String? = null,
-    val countError:String? = null,
-    val rentError:String? = null,
-    val depositError:String? = null
-)
+fun Room.toDefault() : RoomData {
+    RoomData(
+        name = name,
+        location = location,
+        dueDay = dueDate,
+        images = images,
+        deposit = deposit,
+        rent_price = rentPrice,
+        features = features
+    )
+}
 
 @HiltViewModel
-class UpdateRoomViewModel @Inject constructor(
+class UpdateRoomViewModel @AssistedInject constructor(
     private val repository: RoomRepository,
+    @Assisted private val id:String
 ) : ViewModel() {
-    /**
-     *  architecture
-     *
-     *  collect data from room
-     *  and pass it to data class
-     *
-     * **/
-    private val _room = mutableStateOf<RoomUpdateData>(
-        RoomUpdateData(
-            name = "",
-            count = "",
-            features = emptyList(),
-            images = emptyList(),
-            deposit = "",
-            rent = ""
-        )
-    )
 
-    val room: State<RoomUpdateData> = _room
+    @AssistedFactory
+    interface UpdateRoomViewModelFactory {
+        fun create(id:String): UpdateRoomViewModel
+    }
+
+    private val room_values = repository.getRoom(roomId = id, ownerId = "1").toDefault()
+    val room = mutableStateOf<RoomData>(room_values)
 
     /** update **/
 

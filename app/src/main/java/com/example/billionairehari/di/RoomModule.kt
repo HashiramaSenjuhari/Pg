@@ -28,7 +28,7 @@ object RoomModule {
     fun provideDatabase(@ApplicationContext context: Context) : AppDatabase = Room
         .databaseBuilder(
             context = context,
-            name = "test_billionaire5",
+            name = "test_billionaire6",
             klass = AppDatabase::class.java
         )
         .addCallback(object: RoomDatabase.Callback() {
@@ -37,7 +37,6 @@ object RoomModule {
                 Log.d("BillionaireHariGreat","Room Opened")
             }
         })
-        .fallbackToDestructiveMigration()
         .build()
 
     /** DAO bind **/

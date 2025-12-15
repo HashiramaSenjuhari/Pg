@@ -25,6 +25,6 @@ data class RecentSearch(
     @PrimaryKey val id:String,
     @ColumnInfo(name = "search_type") val searchType:String,
     val text:String,
-    @ColumnInfo(name = "owner_id") val ownerId:String,
+    @ColumnInfo(name = "owner_id", index = true) val ownerId:String,
     @ColumnInfo(name = "created_at") val createdAt:String
 )

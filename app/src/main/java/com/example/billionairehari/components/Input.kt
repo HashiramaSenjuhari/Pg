@@ -178,7 +178,7 @@ val AadharNumberTransformation = VisualTransformation { text ->
     val aadhar = buildString {
         for(i in trimmed.indices){
             append(trimmed[i])
-            if((i + 1) % 4 === 0 && i !== trimmed.lastIndex){
+            if((i + 1) % 4 == 0 && i != trimmed.lastIndex){
                 append(" ")
             }
         }

@@ -65,6 +65,7 @@ interface TenantDao {
         val joining_date:Long,
         val automatic_rent_remainder:Boolean,
         val is_active:Boolean,
+        val created_at:String,
 
         /** Room details **/
         val room_id:String,
@@ -85,7 +86,7 @@ interface TenantDao {
         SELECT
         t.*,
         r.name AS tenantRoomName,
-        r.due_date AS dueDate,
+        r.due_day AS dueDate,
         CASE WHEN strftime('%Y-%m',p.paymentDate) = strftime('%Y-%m','now') THEN 1 ELSE 0 END AS currentPaid,
         p.*
         FROM tenants t

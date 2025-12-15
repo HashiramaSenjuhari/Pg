@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.selection.TextSelectionColors
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.Icon
@@ -69,7 +70,7 @@ fun SearchInput(
             IconButton(
                 onClick = onClickBack
             ) {
-                Icon(Icons.Default.ArrowBack, contentDescription = "")
+                Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "")
             }
         },
         trailingIcon = {

@@ -66,7 +66,7 @@ fun TenantSearchComponentScreen(
         when(state){
             is SearchUiState.Data<TenantData> -> {
                 val size = state.data.size
-                if(size === 0){
+                if(size == 0){
                     Column(
                         modifier = Modifier.fillMaxSize(),
                         verticalArrangement = Arrangement.Center,

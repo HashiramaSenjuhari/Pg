@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Close
@@ -82,7 +83,7 @@ sealed class MODAL_TYPE {
     object NONE: MODAL_TYPE()
     data class ADD_TENANT(val room:String? = null): MODAL_TYPE()
     data class UPDATE_TENANT(val tenant: Tenant): MODAL_TYPE()
-    data class UPDATE_ROOM(val room: Room): MODAL_TYPE()
+    data class UPDATE_ROOM(val id: String): MODAL_TYPE()
     data class UPDATE_TENANT_RENT(val tenant: TenantRentRecord): MODAL_TYPE()
     data class ANNOUNCE(val reveivers:List<SelectedType>? = null): MODAL_TYPE()
 }
@@ -153,7 +154,7 @@ fun MainLayout(
 //            )
 //        },
         bottomBar = {
-            if(route_size === 1 && !listOf("auth","room_search","tenant_search").contains(path)){
+            if(route_size == 1 && !listOf("auth","room_search","tenant_search").contains(path)){
                 BottomBar(
                     route = destination?.route ?: "dashboard",
                     navigation = navigation
@@ -220,7 +221,7 @@ fun HeaderBar(name:String,onNavigate:() -> Unit){
             IconButton(
                 onClick = {}
             ) {
-                Icon(Icons.Default.ArrowBack, contentDescription = "")
+                Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "")
             }
         },
         title = {
@@ -385,8 +386,8 @@ fun ModalUi(
             )
             is MODAL_TYPE.UPDATE_ROOM -> {
                 UpdateRoomSheet(
+                    id = value.id,
                     scrollState = scrollState,
-                    room = value.room
                 )
             }
             is MODAL_TYPE.UPDATE_TENANT -> {

@@ -379,7 +379,7 @@ private fun TenantDetailCard(
                 verticalArrangement = Arrangement.spacedBy(3.dp)
             ) {
                 Text(
-                    title.toUpperCase(),
+                    title.uppercase(),
                     color =  Color.Black.copy(alpha = 0.4f),
                     fontSize = 12.sp
                 )
@@ -471,7 +471,7 @@ fun TableRow(
 ){
     val remaning_amount = (amount.toIntOrNull() ?: 0) - (amount_paid.toIntOrNull() ?: 0)
     val paid_status = when {
-        remaning_amount === 0 -> "paid"
+        remaning_amount == 0 -> "paid"
         remaning_amount < (amount.toIntOrNull() ?: 0) -> "partially paid"
         else -> "not paid"
     }

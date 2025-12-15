@@ -125,6 +125,7 @@ fun RoomSheet(
     AddRoomSheet(
         room_name = room.name,
         location = room.location,
+        dueDay = room.dueDay,
         bed_count = room.no_of_beds,
         rent = room.rent_price,
         deposit = room.deposit,
@@ -137,6 +138,9 @@ fun RoomSheet(
         },
         onLocationChange = {
             viewmodel.update_location(it)
+        },
+        onDueDayChange = {
+            viewmodel.update_due_day(it)
         },
         onRentChange = {
             viewmodel.update_rent(it)
@@ -166,6 +170,7 @@ fun RoomSheet(
         images_error = null,
         room_name_error = room.nameError,
         beds_error = room.bedError,
+        dueDayError = room.dueDayError,
         rent_error = room.rentPriceError,
         deposit_error = room.depositError,
         features_error = null,
@@ -184,70 +189,81 @@ fun RoomSheet(
 
 @Composable
 fun UpdateRoomSheet(
-    room: Room,
+    id: String,
     scrollState: ScrollState,
 ){
-    val owner = LocalViewModelStoreOwner.current
-
     /** viewmodelStoreOwner refers the activity
      *  the viewmodel lives as long as the compose is living
      * **/
 
-    Log.d("RoomViewModel",room.toString())
-    val viewmodel: UpdateRoomViewModel = hiltViewModel()
+    val viewmodel: UpdateRoomViewModel = hiltViewModel(
+        creationCallback = { factory: UpdateRoomViewModel.UpdateRoomViewModelFactory ->
+            factory.create(id)
+        }
+    )
+    Log.d("GREATID",viewmodel.)
 
     val room = viewmodel.room.value
 
-//    AddRoomSheet(
-//        room_name = room.name,
-//        bed_count = room.count.toString(),
-//        rent = room.rent,
-//        deposit = room.deposit,
-//        features = room.features,
-//        images = emptyList(),
-//        isLoading = false,
-//
-//        onRoomNameChange = {
-//            viewmodel.update_name(it)
-//        },
-//        onRentChange = {
-//            viewmodel.update_rent(it)
-//        },
-//        onDepositChange = {
-//            viewmodel.update_deposit(it)
-//        },
-//        onNoOfBedChange = {
-//            viewmodel.update_beds(it)
-//        },
-//        onImageAdd = {
-//        },
-//        onImageRemove = {
-//        },
-//        onImageError = {
-//
-//        },
-//        onFeatureAdd = {
-//            viewmodel.update_features(it)
-//        },
-//        onFeatureRemove = {
-//            viewmodel.remove_features(it)
-//        },
-//
-//        images_error = null,
-//        room_name_error = room.nameError,
-//        beds_error = room.countError,
-//        rent_error = room.rentError,
-//        deposit_error = room.depositError,
-//        features_error = null,
-//
-//        scrollState = scrollState,
-//        onSubmit = {
-//            viewmodel.submit()
-//        },
-//        onReset = {
-////            viewmodel.reset()
-//        }
-//    )
+    AddRoomSheet(
+        room_name = room.name,
+        bed_count = room.count.toString(),
+        rent = room.rent,
+        deposit = room.deposit,
+        features = room.features,
+        images = emptyList(),
+        isLoading = false,
+
+        onRoomNameChange = {
+            viewmodel.update_name(it)
+        },
+        onRentChange = {
+            viewmodel.update_rent(it)
+        },
+        onDepositChange = {
+            viewmodel.update_deposit(it)
+        },
+        onNoOfBedChange = {
+            viewmodel.update_beds(it)
+        },
+        onImageAdd = {
+        },
+        onImageRemove = {
+        },
+        onImageError = {
+
+        },
+        onFeatureAdd = {
+            viewmodel.update_features(it)
+        },
+        onFeatureRemove = {
+            viewmodel.remove_features(it)
+        },
+
+        images_error = null,
+        room_name_error = room.nameError,
+        beds_error = room.countError,
+        rent_error = room.rentError,
+        deposit_error = room.depositError,
+        features_error = null,
+
+        scrollState = scrollState,
+        onSubmit = {
+            viewmodel.submit()
+        },
+        onReset = {
+//            viewmodel.reset()
+        },
+        dueDayError = room.dueDayError,
+        location = room.location,
+        onDueDayChange = {
+        },
+        dueDay = room.dueDay,
+        locationError = room.locationError,
+        onLocationChange = {
+
+        }
+    )
 }
 
 private fun ValidateRoom(

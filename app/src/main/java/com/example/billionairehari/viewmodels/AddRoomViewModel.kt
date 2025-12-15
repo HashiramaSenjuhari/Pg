@@ -24,6 +24,8 @@ data class RoomData(
     val name:String = "",
     val nameError:String? = null,
     val location:String = "",
+    val dueDay:String = "",
+    val dueDayError:String? = null,
     val locationError:String? = null,
     val no_of_beds:String = "",
     val bedError:String? = null,
@@ -56,6 +58,13 @@ class AddRoomViewModel @Inject constructor(
         _room.value = _room.value.copy(
             location = location,
             locationError = null
+        )
+    }
+
+    fun update_due_day(dueDay:String){
+        _room.value = _room.value.copy(
+            dueDay = dueDay,
+            dueDayError = null
         )
     }
 
@@ -120,13 +129,15 @@ class AddRoomViewModel @Inject constructor(
             bedError = validateBeds(_room.value.no_of_beds),
             rentPriceError = validateRent(_room.value.rent_price),
             depositError = validateDeposit(_room.value.deposit),
-            locationError = if(_room.value.location.length < 1) "Please Enter the Valid location" else null
+            locationError = if(_room.value.location.length < 1) "Please Enter the Valid location" else null,
+            dueDayError = if((_room.value.dueDay.toIntOrNull() ?: 0) <= 0) "Please Enter Valid Day" else null
         )
         if(_room.value.nameError != null
             || _room.value.bedError != null
             || _room.value.rentPriceError != null
             || _room.value.depositError != null
-            || _room.value.locationError != null){
+            || _room.value.locationError != null
+            || _room.value.dueDayError != null){
             return
         }
         _room.value = _room.value.copy(
@@ -136,21 +147,21 @@ class AddRoomViewModel @Inject constructor(
             val data = _room.value
             val id = UUID.randomUUID().toString()
             try {
-                val owner = Owner(
-                    id = "1",
-                    name = "hari",
-                    phone = "8668072363",
-                    isVerified = true,
-                    pgName = "BillionaireHari",
-                    createdAt = currentDateTime()
-                )
-                ownerDao.createOwner(owner)
+//                val owner = Owner(
+//                    id = "1",
+//                    name = "hari",
+//                    phone = "8668072363",
+//                    isVerified = true,
+//                    pgName = "BillionaireHari",
+//                    createdAt = currentDateTime()
+//                )
+//                ownerDao.createOwner(owner)
                 val room = Room(
                     id = id,
                     name = data.name,
                     ownerId = "1",
                     rentPrice = data.rent_price.toInt(),
-                    dueDate = currentDateTime(),
+                    dueDate = data.dueDay.toInt(),
                     bedCount = data.no_of_beds.toInt(),
                     deposit = data.deposit.toInt(),
                     features = data.features,
@@ -158,8 +169,8 @@ class AddRoomViewModel @Inject constructor(
                     location = data.location
                 )
                 repository.insertRoom(room)
-                val great = repository.getRoom(roomId = id, ownerId = "1")
-                Log.d("RoomCreated", great.toString())
+//                val great = repository.getRoom(roomId = id, ownerId = "1")
+//                Log.d("RoomCreated", great.toString())
 //                delay(1000)
             }catch(error: Exception){
 

@@ -21,38 +21,33 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import javax.inject.Inject
 
-sealed class UiLoadingState<out T>{
-    object Loading: UiLoadingState<Nothing>()
-    data class Data<T>(val data:T): UiLoadingState<T>()
-}
 
-@AssistedFactory
-interface RoomViewModelFactory {
-    fun create(roomId:String): RoomViewModel
-}
-
-@HiltViewModel
-@AssistedInject
+@HiltViewModel(assistedFactory = RoomViewModel.RoomViewModelFactory::class)
 class RoomViewModel @AssistedInject constructor(
     private val repository: RoomRepository,
-    @Assisted private val roomId:String
+    @Assisted private val id:String
 ): ViewModel() {
-    val room_detail: StateFlow<UiLoadingState<RoomDao.RoomWithTenantAndDueCount>> = repository.getRoomDetail(ownerId = "1", roomId = room ?: "3ed26834-c210-4e97-b26f-a3eeafcbf669")
+    @AssistedFactory
+    interface RoomViewModelFactory {
+        fun create(id:String): RoomViewModel
+    }
+
+    val room_detail: StateFlow<RoomDao.RoomWithTenantAndDueCount> = repository.getRoomDetail(ownerId = "1", roomId = id)
         .map { value ->
-            UiLoadingState.Data(value)
+            value
         }.stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5000),
-            initialValue = UiLoadingState.Loading
+            initialValue = RoomDao.RoomWithTenantAndDueCount()
         )
-//    val tenants: StateFlow<UiLoadingState<List<RoomDao.RoomTenantDetails>>> = repository
-//        .getRoomTenants(ownerId = "1", roomId = _room_id ?: "")
-//        .map {
-//            value ->
-//            UiLoadingState.Data(value)
-//        }.stateIn(
-//            scope = viewModelScope,
-//            started = SharingStarted.WhileSubscribed(5000),
-//            initialValue = UiLoadingState.Loading
-//        )
+    val tenants: StateFlow<List<RoomDao.RoomTenantDetails>> = repository
+        .getRoomTenants(ownerId = "1", roomId = id)
+        .map {
+            value ->
+            value
+        }.stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = emptyList()
+        )
 }

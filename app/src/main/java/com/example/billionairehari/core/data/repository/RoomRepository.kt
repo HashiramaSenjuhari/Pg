@@ -35,13 +35,13 @@ class RoomRepository @Inject constructor(
     override fun getRoomNameAndAvailability(ownerId: String): Flow<List<RoomDao.RoomNameAndTenantCount>> = roomDao
         .getRoomNameAndTenantCount(ownerId)
 
+    override fun getRoomTenants(
+        ownerId: String,
+        roomId: String
+    ): Flow<List<RoomDao.RoomTenantDetails>> = roomDao.getRoomTenantDetails(roomId = roomId, ownerId = ownerId)
+
     override fun getRoomDetail(
         ownerId: String,
         roomId: String
     ): Flow<RoomDao.RoomWithTenantAndDueCount> = roomDao.getRoomFlow(ownerId = ownerId, roomId = roomId)
-
-//    override fun getRoomTenants(
-//        ownerId: String,
-//        roomId: String
-//    ): Flow<List<RoomDao.RoomTenantDetails>> = roomDao.getRoomTenantDetails(ownerId = ownerId, roomId = roomId)
 }

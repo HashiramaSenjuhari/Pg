@@ -48,7 +48,7 @@ fun SelectOption(onValueChange:(Boolean) -> Unit,selectedOption:Boolean){
     ) {
         rent_paid.forEach {
                 value ->
-            val is_selected = selectedOption === value.value
+            val is_selected = selectedOption == value.value
             Box(
                 modifier = Modifier.width(80.dp)
                     .selectable(

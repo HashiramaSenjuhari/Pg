@@ -122,7 +122,7 @@ fun DateFilterSheet(
                     FilterOption(
                         selected = selectedOptionIndex.value == index,
                         onClick = {
-                            if(index !== selectedOptionIndex.value){
+                            if(index != selectedOptionIndex.value){
                                 selectedOptionIndex.value = index
                                 selected.value = option.name
                             }
@@ -143,7 +143,7 @@ fun DateFilterSheet(
                         }
                     )
                     /** open if custom date button is selected **/
-                    if(selectedOptionIndex.value === 5){
+                    if(selectedOptionIndex.value == 5){
                         CustomDatePicker(
                             is_open = is_open,
                             startDateInMilli = startDateInMilli,

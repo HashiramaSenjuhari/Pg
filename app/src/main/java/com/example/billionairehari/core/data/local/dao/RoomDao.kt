@@ -5,6 +5,7 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.PrimaryKey
 import androidx.room.Query
+import androidx.room.Upsert
 import com.example.billionairehari.core.data.local.entity.Room
 import com.example.billionairehari.model.TenantRentRecord
 import com.example.billionairehari.screens.TenantRentDetail
@@ -16,10 +17,18 @@ interface RoomDao {
     @Query("SELECT name FROM sqlite_master WHERE type='table'")
     suspend fun getAllTables(): List<String>
 
-    @Query("SELECT name FROM rooms WHERE owner_id = :ownerId")
-    fun getRoomNames(ownerId:String): Flow<List<String>>
-    @Insert()
+    data class RoomIdAndName(
+        val id:String,
+        val name:String
+    )
+    @Query("SELECT id,name FROM rooms WHERE owner_id = :ownerId")
+    fun getRoomNames(ownerId:String): Flow<List<RoomIdAndName>>
+
+    @Upsert()
     suspend fun insertRoom(room: Room)
+
+    @Query("SELECT * FROM rooms WHERE owner_id = :ownerId AND id = :roomId")
+    suspend fun getRoom(ownerId:String,roomId:String): Room
 
     data class RoomWithTenantAndDueCount(
         val id:String = "",
@@ -145,12 +154,14 @@ interface RoomDao {
     suspend fun deleteRooms()
 
     data class RoomNameAndTenantCount(
+        val id:String,
         val name:String,
         val available_beds:Int
     )
 
     @Query("""
         SELECT
+        r.id,
         r.name,
         r.bed_count - COALESCE(COUNT(t.id),0) as available_beds
         FROM rooms r

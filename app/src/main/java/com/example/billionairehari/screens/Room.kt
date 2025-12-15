@@ -275,7 +275,8 @@ fun RoomScreen(
                 room_rent = data.rent_price
             )
             val features = data.features.split(",").toList()
-            if(features.size > 0 && features[0] != "") {
+                .filter { it -> it.isNotEmpty() }
+            if(features.size > 0) {
                 FeaturesPreview(
                     features = features
                 )
@@ -344,12 +345,6 @@ data class DropDownParams(
     val onClick:() -> Unit
 )
 
-val dropdowns = listOf<DropDownParams>(
-    DropDownParams(name = "Edit Room", icon = IconType.Vector(EditIcon), onClick = {}),
-    DropDownParams(name = "Message", icon = IconType.Vector(ChatIcon), onClick = {}),
-    DropDownParams(name = "Share", icon = IconType.Vector(ShareIcon), onClick = {}),
-    DropDownParams(name = "Delete", icon = IconType.Vector(DeleteIcon), onClick = {}),
-)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -361,6 +356,13 @@ fun StaticBar(
     onRoomShare:() -> Unit,
     onRoomDelete:() -> Unit
 ){
+
+    val dropdowns = listOf<DropDownParams>(
+        DropDownParams(name = "Edit Room", icon = IconType.Vector(EditIcon), onClick = onRoomEdit),
+        DropDownParams(name = "Message", icon = IconType.Vector(ChatIcon), onClick = {}),
+        DropDownParams(name = "Share", icon = IconType.Vector(ShareIcon), onClick = {}),
+        DropDownParams(name = "Delete", icon = IconType.Vector(DeleteIcon), onClick = {}),
+    )
 
     val coroutine = rememberCoroutineScope()
     ROw(

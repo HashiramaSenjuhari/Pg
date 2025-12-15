@@ -26,6 +26,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableStateOf
@@ -191,24 +192,23 @@ fun RoomSheet(
 fun UpdateRoomSheet(
     id: String,
     scrollState: ScrollState,
+    current_action: MutableState<MODAL_TYPE>,
+    viewmodel: UpdateRoomViewModel = hiltViewModel()
 ){
     /** viewmodelStoreOwner refers the activity
      *  the viewmodel lives as long as the compose is living
      * **/
 
-    val viewmodel: UpdateRoomViewModel = hiltViewModel(
-        creationCallback = { factory: UpdateRoomViewModel.UpdateRoomViewModelFactory ->
-            factory.create(id)
-        }
-    )
-    Log.d("GREATID",viewmodel.)
+    LaunchedEffect(Unit) {
+        viewmodel.loadRoom(id)
+    }
 
     val room = viewmodel.room.value
 
     AddRoomSheet(
         room_name = room.name,
-        bed_count = room.count.toString(),
-        rent = room.rent,
+        bed_count = room.bedCount.toString(),
+        rent = room.rentPrice,
         deposit = room.deposit,
         features = room.features,
         images = emptyList(),
@@ -242,14 +242,15 @@ fun UpdateRoomSheet(
 
         images_error = null,
         room_name_error = room.nameError,
-        beds_error = room.countError,
-        rent_error = room.rentError,
+        beds_error = room.bedCountError,
+        rent_error = room.rentPriceError,
         deposit_error = room.depositError,
         features_error = null,
 
         scrollState = scrollState,
         onSubmit = {
             viewmodel.submit()
+            current_action.value = MODAL_TYPE.NONE
         },
         onReset = {
 //            viewmodel.reset()
@@ -257,11 +258,12 @@ fun UpdateRoomSheet(
         dueDayError = room.dueDayError,
         location = room.location,
         onDueDayChange = {
+            viewmodel.update_due_day(it)
         },
         dueDay = room.dueDay,
         locationError = room.locationError,
         onLocationChange = {
-
+            viewmodel.update_location(it)
         }
     )
 }

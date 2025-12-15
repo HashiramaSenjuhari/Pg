@@ -388,6 +388,7 @@ fun ModalUi(
                 UpdateRoomSheet(
                     id = value.id,
                     scrollState = scrollState,
+                    current_action = current_action
                 )
             }
             is MODAL_TYPE.UPDATE_TENANT -> {

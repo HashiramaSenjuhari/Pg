@@ -7,10 +7,12 @@ import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import com.example.billionairehari.R
+import com.example.billionairehari.core.data.local.dao.RoomDao
 import com.example.billionairehari.core.data.local.entity.Tenant
 import com.example.billionairehari.core.data.repository.RoomRepository
 import com.example.billionairehari.core.data.repository.TenantRepository
 import com.example.billionairehari.utils.currentDateTime
+import com.example.billionairehari.utils.generateUUID
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.SharingStarted
@@ -56,19 +58,12 @@ class AddTenantViewModel @Inject constructor (
     private val _room = MutableStateFlow<String>("")
     val room = _room.asStateFlow()
 
-    private val rooms_values = room_repository.getRoomNames(ownerId = "1")
-
-
-//    val rooms: StateFlow<List<String>> = combine(
-//        _room,
-//        rooms_values
-//    ){
-//        emptyList()
-//    }.stateIn(
-//        scope = viewModelScope,
-//        started = SharingStarted.WhileSubscribed(5000),
-//        initialValue = emptyList()
-//    )
+    private val rooms_values: StateFlow<List<RoomDao.RoomIdAndName>> = room_repository.getRoomNames(ownerId = "1")
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = emptyList()
+        )
 
 
     var tenant = mutableStateOf(TenantData(room = ""?: ""))
@@ -104,9 +99,10 @@ class AddTenantViewModel @Inject constructor (
         }
         tenant.value = tenant.value.copy(isSendingOtp = true, aadharError = null)
         viewModelScope.launch {
+            val id = generateUUID()
             try {
                 repository.insertTenant(Tenant(
-                    id = "billioonairegreat",
+                    id = id,
                     name = "Billionaire",
                     image = "",
                     alternateNumber = "8668072363",
@@ -115,7 +111,7 @@ class AddTenantViewModel @Inject constructor (
                     joiningDate = currentDateTime(),
                     createdAt = currentDateTime(),
                     phoneNumber = "8668072363",
-                    roomId = "billionaire"
+                    roomId =
                 ))
                 delay(4000)
                 /** CALL SEND OTP FUNCTION **/

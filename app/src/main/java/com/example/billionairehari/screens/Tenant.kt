@@ -60,6 +60,7 @@ import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.AbsoluteAlignment
@@ -90,6 +91,7 @@ import com.example.billionairehari.icons.CalendarIcon
 import com.example.billionairehari.icons.TenantIcon
 import com.example.billionairehari.layout.ChildLayout
 import com.example.billionairehari.layout.component.ROw
+import com.example.billionairehari.utils.currentMonth
 import com.example.billionairehari.viewmodels.TenantViewModel
 import com.google.android.material.chip.Chip
 
@@ -105,7 +107,12 @@ fun TenantScreen(
     context:Context,
     onNavigateToHistory:() -> Unit
 ) {
-    val state_id = hiltViewModel<TenantViewModel>()
+    val viewmodel: TenantViewModel = hiltViewModel(
+        creationCallback = { factory: TenantViewModel.TenantViewModelFactory ->
+            factory.create(id)
+        }
+    )
+    val tenant = viewmodel.tenant_basic.collectAsState()
     val scrollState = rememberScrollState()
 
     ChildLayout(
@@ -126,9 +133,16 @@ fun TenantScreen(
         Column(
             modifier = Modifier.padding(top = 13.dp)
         ) {
-            TenantProfileBar()
+            TenantProfileBar(
+                name = tenant.value.name,
+                isActive = tenant.value.is_active,
+                roomName = tenant.value.tenantRoomName
+            )
         }
-        TenantRentDetail()
+        TenantRentDetail(
+            is_paid = tenant.value.currentPaid == 1,
+            dueDate = tenant.value.dueDate
+        )
         CompleteTenantInfo()
         TenantDetailShowcase(
             title = "Personal",
@@ -216,7 +230,11 @@ fun CompleteTenantInfo(){
 }
 
 @Composable
-fun TenantProfileBar(){
+fun TenantProfileBar(
+    name:String,
+    roomName:String,
+    isActive:Boolean
+){
     val expanded = rememberSaveable { mutableStateOf<Boolean>(false) }
     Box(
         modifier = Modifier.clip(RoundedCornerShape(24.dp))
@@ -242,7 +260,7 @@ fun TenantProfileBar(){
                 verticalArrangement = Arrangement.spacedBy(6.dp)
             ) {
                 Text(
-                    "Billionaire Hari",
+                    name,
                     color = Color.White,
                     fontSize = 24.sp
                 )
@@ -250,7 +268,7 @@ fun TenantProfileBar(){
                     horizontalArrangement = Arrangement.spacedBy(13.dp)
                 ) {
                     Text(
-                        "Room 101",
+                        roomName,
                         color = Color.White,
                         fontSize = 12.sp,
                         modifier = Modifier.clip(CircleShape)
@@ -262,7 +280,7 @@ fun TenantProfileBar(){
                     ) {
                         Box(modifier = Modifier.clip(CircleShape)
                             .size(13.dp).background(Color(0xFF5fdba7)))
-                        Text("Active",color = Color.White, fontSize = 12.sp)
+                        Text(if(isActive)"Active" else "Not Active",color = Color.White, fontSize = 12.sp)
                     }
                 }
             }
@@ -271,7 +289,10 @@ fun TenantProfileBar(){
 }
 
 @Composable
-fun TenantRentDetail(){
+fun TenantRentDetail(
+    is_paid:Boolean,
+    dueDate:String
+){
     Column(
         verticalArrangement = Arrangement.spacedBy(13.dp)
     ) {
@@ -282,12 +303,12 @@ fun TenantRentDetail(){
                 title = "Rent Paid (current month)",
                 icon = CalendarIcon,
                 rent_due_price = 0,
-                paid_text = "Paid"
+                paid_text = if(is_paid) "Paid" else "Not Paid"
             )
             DetailCard(
                 title = "Rent Due Date",
                 icon = CalendarIcon,
-                total = "23 Oct",
+                total = "${dueDate} ${currentMonth()}",
                 width = 1f
             )
         }

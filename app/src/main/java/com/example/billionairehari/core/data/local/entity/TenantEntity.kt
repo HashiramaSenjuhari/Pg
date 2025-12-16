@@ -21,7 +21,6 @@ data class Tenant(
     @ColumnInfo(index = true) val name:String,
     val image:String,
     @ColumnInfo(name = "phone_number") val phoneNumber:String,
-    @ColumnInfo(name = "alternate_number") val alternateNumber:String,
     @ColumnInfo(name = "joining_date") val joiningDate:String,
     @ColumnInfo(name = "automatic_rent_remainder") val automaticRentRemainder:Boolean,
     @ColumnInfo(name = "is_active") val isActive: Boolean,

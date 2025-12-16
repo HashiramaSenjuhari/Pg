@@ -13,6 +13,7 @@ import com.example.billionairehari.utils.TENANTS
 import com.example.billionairehari.utils.currentDateTime
 import com.example.billionairehari.utils.generateUUID
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -32,6 +33,7 @@ data class TenantSearchCard(
 )
 
 
+@OptIn(FlowPreview::class)
 @HiltViewModel
 class TenantSearchViewModel @Inject constructor (
     private val repository: RecentSearchRepository,

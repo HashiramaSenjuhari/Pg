@@ -15,6 +15,7 @@ import com.example.billionairehari.core.data.local.dao.RoomDao
 import com.example.billionairehari.core.data.repository.RoomRepository
 import com.example.billionairehari.model.Room
 import com.example.billionairehari.model.RoomCardDetails
+import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -38,6 +39,8 @@ enum class FILTER {
     DEFAULT
 }
 
+
+@OptIn(FlowPreview::class)
 @HiltViewModel
 class RoomsViewModel @Inject constructor(
     private val repository: RoomRepository,

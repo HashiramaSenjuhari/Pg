@@ -8,6 +8,7 @@ import androidx.lifecycle.viewModelScope
 import com.example.billionairehari.core.data.local.dao.RoomDao
 import com.example.billionairehari.core.data.repository.RoomRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -21,6 +22,8 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 
+
+@OptIn(FlowPreview::class)
 @HiltViewModel
 class BottomDialogRoomSearchViewModel @Inject constructor(
     private val room_repository: RoomRepository

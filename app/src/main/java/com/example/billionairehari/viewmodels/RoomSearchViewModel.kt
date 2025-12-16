@@ -17,6 +17,7 @@ import com.example.billionairehari.utils.ROOMS
 import com.example.billionairehari.utils.currentDateTime
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -109,6 +110,7 @@ sealed class SearchUiState<out T> {
     object Loading: SearchUiState<Nothing>()
 }
 
+@OptIn(FlowPreview::class)
 @HiltViewModel
 class RoomSearchViewModel @Inject constructor(
     private val recent_search: RecentSearchRepository,

@@ -24,14 +24,9 @@ data class Tenant(
 class TenantsViewModel @Inject constructor(
     private val repository: TenantRepository
 ): ViewModel() {
-    private val _tenants = MutableStateFlow<List<Tenant>>(emptyList())
-    val tenants = _tenants.asStateFlow().stateIn(
+    val tenants = repository.getTenantsCardFlow(ownerId = "1").stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5000),
         initialValue = emptyList()
     )
-
-    init {
-        /** Load from the repository **/
-    }
 }

@@ -103,6 +103,7 @@ import com.example.billionairehari.viewmodels.TenantViewModel
 import com.example.billionairehari.viewmodels.TenantsViewModel
 import kotlin.math.min
 import com.example.billionairehari.R
+import com.example.billionairehari.core.data.local.dao.TenantDao
 import com.example.billionairehari.layout.DynamicShowcaseScreen
 
 
@@ -141,6 +142,15 @@ data class TenantData(
     val phone:String = "8668072363"
 )
 
+fun TenantDao.TenantCardDetails.toData() :TenantData = TenantData(
+    id = id,
+    name = name,
+    image = "",
+    phone = phone_number,
+    is_paid = current_paid == 1,
+    is_noticed = false,
+    room_name = roomName
+)
 
 val tenants = listOf<TenantData>(
     TenantData(
@@ -215,8 +225,9 @@ fun TenantCards(
     scrollState: ScrollState,
     context: Context,
     navController: NavController,
-    viewmodel: TenantViewModel= hiltViewModel()
+    viewmodel: TenantsViewModel = hiltViewModel()
 ){
+    val tenants = viewmodel.tenants.collectAsState()
     Column(
         modifier = Modifier
             .clip(RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp))
@@ -224,16 +235,16 @@ fun TenantCards(
             .verticalScroll(state = scrollState)
             .padding(bottom = 240.dp)
     ) {
-        tenants.sortedBy { it -> it.name.first().uppercase() }.forEach {
+        tenants.value.sortedBy { it -> it.name.first().uppercase() }.forEach {
             it ->
                     TenantCard(
-                        tenant = it,
+                        tenant = it.toData(),
                         onClick = {
                             navController.navigate("tenants/${it.id}")
                         },
                         onClickCall = {
                             val callIntent = Intent(Intent.ACTION_DIAL).apply {
-                                val uri = Uri.parse("tel:${it.phone}")
+                                val uri = Uri.parse("tel:${it.phone_number}")
                                 setData(uri)
                             }
                             context.startActivity(callIntent)
@@ -241,7 +252,7 @@ fun TenantCards(
                         onCLickMessage = {
                             val sendMessage = Intent(Intent.ACTION_VIEW).apply {
                                 type = "text/plain"
-                                data = Uri.parse("https://api.whatsapp.com/send?phone=${it.phone}")
+                                data = Uri.parse("https://api.whatsapp.com/send?phone=${it.phone_number}")
                                 setPackage("com.whatsapp")
                             }
                             context.startActivity(sendMessage)
@@ -253,7 +264,7 @@ fun TenantCards(
 
 @Composable
 fun TenantCard(
-    tenant:TenantData,
+    tenant: TenantData,
     onClick:() -> Unit,
     onClickCall:() -> Unit,
     onCLickMessage:() -> Unit

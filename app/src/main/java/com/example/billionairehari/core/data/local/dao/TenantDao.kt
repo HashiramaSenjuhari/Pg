@@ -57,29 +57,20 @@ interface TenantDao {
     data class PaymentDetailCard(val id:String,val payment_date:String,val due_date:String,val is_paid:Boolean,val amount:Boolean)
     data class TenantDetails(
         /** Tenant detail **/
-        val id:String,
-        val name:String,
-        val image:String,
-        val phone_number:String,
-        val alternate_number:String,
-        val joining_date:Long,
-        val automatic_rent_remainder:Boolean,
-        val is_active:Boolean,
-        val created_at:String,
+        val id:String = "",
+        val name:String = "",
+        val image:String = "",
+        val phone_number:String = "",
+        val joining_date:String = "",
+        val automatic_rent_remainder:Boolean = true,
+        val is_active:Boolean = true,
+        val created_at:String = "",
 
         /** Room details **/
-        val room_id:String,
-        val tenantRoomName:String,
-        val dueDate: Long,
-        val currentPaid:Int,
-
-        /** payment detail **/
-        val paymentId:String,
-        val paymentDueDate:Long,
-        val paymentDate:Long,
-        val paymentPaid:Boolean,
-        val paymentAmount:Int,
-        val paymentTenantId:String
+        val room_id:String = "",
+        val tenantRoomName:String = "",
+        val dueDate: String = "",
+        val currentPaid:Int = 0,
     )
 
     @Query("""
@@ -87,21 +78,13 @@ interface TenantDao {
         t.*,
         r.name AS tenantRoomName,
         r.due_day AS dueDate,
-        CASE WHEN strftime('%Y-%m',p.paymentDate) = strftime('%Y-%m','now') THEN 1 ELSE 0 END AS currentPaid,
-        p.*
+        CASE WHEN strftime('%Y-%m',p.payment_date) = strftime('%Y-%m','now') THEN 1 ELSE 0 END AS currentPaid
         FROM tenants t
         INNER JOIN rooms r ON t.room_id = r.id
         LEFT JOIN (
-            SELECT id AS paymentId,
-            due_date AS paymentDueDate,
-            payment_date AS paymentDate,
-            is_paid AS paymentPaid,
-            amount AS paymentAmount,
-            tenant_id AS paymentTenantId
-            FROM payments
-        ) AS p ON p.paymentTenantId = t.id
+            SELECT id,tenant_id, payment_date FROM payments
+        ) AS p ON p.tenant_id = t.id
         WHERE r.owner_id = :ownerId AND t.id = :tenantId
-        ORDER BY t.id,COALESCE(p.paymentDate,'0000-00-00') DESC
     """)
     fun getTenant(ownerId:String,tenantId:String) : Flow<TenantDetails>
 

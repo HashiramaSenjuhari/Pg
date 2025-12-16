@@ -1,5 +1,6 @@
 package com.example.billionairehari.viewmodels
 
+import android.util.Log
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
@@ -25,8 +26,11 @@ import javax.inject.Inject
 data class TenantData (
     val image: ByteArray? = null,
     val imageError:String? = null,
+    val name:String = "",
+    val nameError:String? = null,
     val phone:String = "",
     val phoneNumberError:String? = null,
+    val roomId:String = "",
     val room:String = "",
     val roomError:String? = null,
     val date:Long = 0L,
@@ -36,18 +40,19 @@ data class TenantData (
     val security_deposit: Boolean = false,
     val automatic_remainder:Boolean = false,
 
-    val isLoading:Boolean = false,
+    val isLoading:Boolean = false
+)
 
-    /** KYC **/
-    val aadhar:String = "",
-    val aadharError:String? = null,
-
-    val isSendingOtp:Boolean = false,
-    val sendingOtpError:String? = null,
-    val isOptSent:Boolean = false,
-
-    val isVerfyingOtp:Boolean = false,
-    val otpError:String? = null,
+fun TenantData.toRoom(id:String,createdAt:String) : Tenant = Tenant(
+    id = id,
+    name = name,
+    roomId = roomId,
+    phoneNumber = phone,
+    image = "",
+    createdAt = createdAt,
+    joiningDate = "",
+    isActive = true,
+    automaticRentRemainder = automatic_remainder
 )
 
 @HiltViewModel
@@ -73,11 +78,17 @@ class AddTenantViewModel @Inject constructor (
     fun update_image(image: ByteArray?) {
         tenant.value = tenant.value.copy(image = image, imageError = null)
     }
+    fun update_name(name:String){
+        tenant.value = tenant.value.copy(name = name, nameError = null)
+    }
     fun update_phone(phone:String){
         tenant.value = tenant.value.copy(phone = phone, phoneNumberError = null)
     }
     fun update_room(room:String){
         tenant.value = tenant.value.copy(room = room, roomError = null)
+    }
+    fun update_roomId(id:String){
+        tenant.value = tenant.value.copy(roomId = id)
     }
     fun update_date(date:Long){
         tenant.value = tenant.value.copy(date = date, dateError = null)
@@ -92,53 +103,19 @@ class AddTenantViewModel @Inject constructor (
         tenant.value = tenant.value.copy(automatic_remainder = remainder)
     }
 
-    fun verify_aadhar(aadhar:String){
-        if(aadhar.trim().length < 12){
-            tenant.value = tenant.value.copy(aadharError = "Please enter valid aadhar number")
-            return
-        }
-        tenant.value = tenant.value.copy(isSendingOtp = true, aadharError = null)
-        viewModelScope.launch {
-            val id = generateUUID()
-            try {
-                repository.insertTenant(Tenant(
-                    id = id,
-                    name = "Billionaire",
-                    image = "",
-                    alternateNumber = "8668072363",
-                    automaticRentRemainder = true,
-                    isActive = true,
-                    joiningDate = currentDateTime(),
-                    createdAt = currentDateTime(),
-                    phoneNumber = "8668072363",
-                    roomId =
-                ))
-                delay(4000)
-                /** CALL SEND OTP FUNCTION **/
-                tenant.value = tenant.value.copy(sendingOtpError = null, isOptSent = true)
-            }catch (error: Exception){
-                tenant.value = tenant.value.copy(sendingOtpError = error.toString())
-            }finally{
-                tenant.value = tenant.value.copy(isSendingOtp = false)
-            }
-        }
-    }
-
-    fun verify_opt(otp:String): Boolean {
-        return true
-    }
-
     fun remove_image(){
         tenant.value = tenant.value.copy(image = null)
     }
     /** upload to repository **/
     fun submit(){
         tenant.value = tenant.value.copy(
+            nameError = validateName(tenant.value.name),
             phoneNumberError = validatePhoneNumber(tenant.value.phone),
             roomError = validateRoom(tenant.value.room),
             dateError = validateDate(tenant.value.date)
         )
-        if(tenant.value.phoneNumberError != null
+        if(tenant.value.nameError != null
+            || tenant.value.phoneNumberError != null
             || tenant.value.roomError != null
             || tenant.value.dateError != null){
             return
@@ -148,8 +125,14 @@ class AddTenantViewModel @Inject constructor (
         )
         viewModelScope.launch {
             try {
-//                repository.insertTenant()
-                delay(4000)
+                val id = generateUUID()
+                val createdAt = currentDateTime()
+                val tenant = tenant.value.toRoom(
+                    id = id,
+                    createdAt = createdAt
+                )
+                Log.d("TENANTGREAT",tenant.toString())
+                repository.insertTenant(tenant = tenant)
             }catch(error: Exception){
 
             }finally {

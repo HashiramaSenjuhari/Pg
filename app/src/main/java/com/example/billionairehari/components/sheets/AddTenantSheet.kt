@@ -161,26 +161,30 @@ fun TenantSheet(
 
     Mannual(
         rooms = emptyList(),
+        roomId = tenant.roomId,
         room = tenant.room,
+        name = tenant.name,
         phone = tenant.phone,
         image = tenant.image,
-        aadhar = aadhar.value,
-        otp = otp.value,
+//        aadhar = aadhar.value,
+//        otp = otp.value,
         joining_date = tenant.date,
         rent_paid = tenant.first_month_rent,
         deposit_paid = tenant.security_deposit,
         auto_remainder = tenant.automatic_remainder,
         update_room = { viewmodel.update_room(it) },
+        update_name = { viewmodel.update_name(it) },
+        update_roomId = { viewmodel.update_roomId(it) },
         update_phone = { viewmodel.update_phone(it) },
         update_image = { viewmodel.update_image(it) },
         update_rent_paid = { viewmodel.update_first_month_rent_paid(it) },
         update_deposit_paid = { viewmodel.update_security_deposit(it) },
         update_joining_date = { viewmodel.update_date(it) },
         update_auto_remainder = { viewmodel.update_automatic_remainder(it) },
-        update_aadhar = { aadhar.value = it },
-        update_otp = { otp.value = it },
+//        update_aadhar = { aadhar.value = it },
+//        update_otp = { otp.value = it },
 
-        aadhar_error = errors.aadharError,
+//        aadhar_error = errors.aadharError,
         phone_error = errors.phoneNumberError,
         room_error = errors.roomError,
         joining_date_error = errors.dateError,
@@ -190,21 +194,21 @@ fun TenantSheet(
         onDial = { dial(tenant.phone, context = context) },
         onSubmit = { viewmodel.submit() },
         scrollState = scrollState,
-
-        SendOtp = {
-            viewmodel.verify_aadhar(aadhar = aadhar.value)
-        },
-        VerifyOtp = {
-            viewmodel.verify_opt(otp = otp.value)
-        },
+//
+//        SendOtp = {
+//            viewmodel.verify_aadhar(aadhar = aadhar.value)
+//        },
+//        VerifyOtp = {
+//            viewmodel.verify_opt(otp = otp.value)
+//        },
 
         /** loading **/
-        isLoading = tenant.isLoading,
-        loadingOtp = tenant.isSendingOtp,
-        verifyingOtp = tenant.isVerfyingOtp,
-
-        /** open **/
-        isOtpSent = tenant.isOptSent
+        isLoading = tenant.isLoading
+//        loadingOtp = tenant.isSendingOtp,
+//        verifyingOtp = tenant.isVerfyingOtp,
+//
+//        /** open **/
+//        isOtpSent = tenant.isOptSent
     )
 }
 
@@ -220,15 +224,19 @@ val fakeItems = listOf(
 
 @Composable
 fun Mannual(
+    name:String,
+    update_name:(String) -> Unit,
+    name_error:String? = null,
 
     phone:String,
     update_phone:(String) -> Unit,
     phone_error:String? = null,
 
+    roomId:String,
     room:String,
+    update_roomId:(String) -> Unit,
     update_room:(String) -> Unit,
     room_error:String? = null,
-
 
     rooms:List<String>,
 
@@ -246,23 +254,23 @@ fun Mannual(
     update_image:(ByteArray) -> Unit,
     remove_image:() -> Unit,
 
-    aadhar:String,
-    update_aadhar:(String) -> Unit,
-    aadhar_error:String?,
+//    aadhar:String,
+//    update_aadhar:(String) -> Unit,
+//    aadhar_error:String?,
+//
+//    otp:String,
+//    update_otp:(String) -> Unit,
 
-    otp:String,
-    update_otp:(String) -> Unit,
-
-    /** loading **/
-    loadingOtp:Boolean,
-    verifyingOtp:Boolean,
-    isOtpSent:Boolean,
-
+//    /** loading **/
+//    loadingOtp:Boolean,
+//    verifyingOtp:Boolean,
+//    isOtpSent:Boolean,
+//
     auto_remainder:Boolean,
     update_auto_remainder:(Boolean) -> Unit,
 
-    SendOtp:() -> Unit,
-    VerifyOtp:() -> Unit,
+//    SendOtp:() -> Unit,
+//    VerifyOtp:() -> Unit,
 
     onReset:() -> Unit,
     onSubmit:() -> Unit,
@@ -311,83 +319,14 @@ fun Mannual(
                     verticalArrangement = Arrangement.spacedBy(13.dp)
                 ) {
                     OutlinedInput(
-                        leadingIcon = Icons.Outlined.Person,
-                        label = "Aadhar Number",
-                        value = aadhar,
+                        value = name,
                         onValueChange = {
-                            update_aadhar(it)
+                            update_name(it)
                         },
-                        maxLength = 12,
-                        type = InputType.NUMBER,
-                        keyBoardType = KeyboardType.Number,
-                        tranformation = AadharNumberTransformation,
-                        modifier = Modifier.fillMaxWidth(),
-                        trailingIcon = {
-                            AppButton(
-                                padding = PaddingValues(horizontal = 13.dp),
-                                onClick = SendOtp,
-                            ) {
-                                if(loadingOtp){
-                                    CircularProgressIndicator(modifier = Modifier.size(24.dp), strokeWidth = 1.dp)
-                                }else {
-                                    Text("Send OTP", fontSize = 12.sp)
-                                }
-                            }
-                        },
-                        readOnly = loadingOtp,
-                        error = aadhar_error
+                        leadingIcon = Icons.Outlined.Person,
+                        label = "Name",
+                        modifier = Modifier.fillMaxWidth()
                     )
-                    if(isOtpSent){
-                        val time = remember { mutableStateOf(10) }
-                        LaunchedEffect(
-                            time.value
-                        ) {
-                            if(time.value > 0){
-                                delay(1000)
-                                time.value -= 1
-                            }
-                        }
-                        Column(
-                            horizontalAlignment = Alignment.End,
-                            verticalArrangement = Arrangement.spacedBy(6.dp)
-                        ) {
-                            OutlinedInput(
-                                leadingIcon = Icons.Default.Person,
-                                label = "OTP",
-                                value = otp,
-                                onValueChange = {
-                                    update_otp(it)
-                                },
-                                maxLength = 12,
-                                type = InputType.NUMBER,
-                                keyBoardType = KeyboardType.Number,
-                                tranformation = AadharNumberTransformation,
-                                modifier = Modifier.fillMaxWidth(),
-                                trailingIcon = {
-                                    AppButton(
-                                        padding = PaddingValues(horizontal = 13.dp),
-                                        onClick = VerifyOtp,
-                                    ) {
-                                        Text("Verify OTP", fontSize = 12.sp)
-                                    }
-                                }
-                            )
-                            if(time.value > 0){
-                                Text("Reset password in 0:${time.value.toString().padStart(2,'0')}", fontSize = 13.sp,color = Color.Red)
-                            }else {
-                                Text(
-                                    "Resend OTP",
-                                    textDecoration = TextDecoration.Underline,
-                                    modifier =  Modifier.clickable(
-                                        onClick = {
-                                            Toast.makeText(context,"Resent OTP to phone number",Toast.LENGTH_SHORT).show()
-                                            time.value = 10
-                                        }
-                                    )
-                                )
-                            }
-                        }
-                    }
                     /* phone number */
                     OutlinedInput(
                         label = "Phone Number",
@@ -525,6 +464,7 @@ fun Mannual(
                     available = it.available_beds,
                     onClick = {
                         update_room(it.name)
+                        update_roomId(it.id)
                         isOpen.value = false
                         viewmodel.update_query("")
                     }

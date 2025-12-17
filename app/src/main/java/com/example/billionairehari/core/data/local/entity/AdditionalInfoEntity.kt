@@ -21,6 +21,6 @@ data class AdditionalInfo(
     val dob:String,
     val state:String,
     @ColumnInfo(name = "alternate_phone") val alternatePhone:String,
-    val identityDocument:String,
-    val tenant_id:String
+    @ColumnInfo(name = "identity_document") val identityDocument:String,
+    @ColumnInfo(index = true) val tenant_id:String
 )

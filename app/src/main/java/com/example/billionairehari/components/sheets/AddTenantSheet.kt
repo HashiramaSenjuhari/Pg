@@ -126,6 +126,7 @@ import com.example.billionairehari.components.PhotoPick
 import com.example.billionairehari.components.SelectOption
 import com.example.billionairehari.components.contacts.dial
 import com.example.billionairehari.icons.Phone
+import com.example.billionairehari.icons.RoomIcon
 import com.example.billionairehari.icons.TenantIcon
 import com.example.billionairehari.layout.BottomDialogSearchScreen
 import com.example.billionairehari.model.Tenant
@@ -166,9 +167,6 @@ fun TenantSheet(
         name = tenant.name,
         phone = tenant.phone,
         image = tenant.image,
-//        aadhar = aadhar.value,
-//        otp = otp.value,
-        joining_date = tenant.date,
         rent_paid = tenant.first_month_rent,
         deposit_paid = tenant.security_deposit,
         auto_remainder = tenant.automatic_remainder,
@@ -179,36 +177,19 @@ fun TenantSheet(
         update_image = { viewmodel.update_image(it) },
         update_rent_paid = { viewmodel.update_first_month_rent_paid(it) },
         update_deposit_paid = { viewmodel.update_security_deposit(it) },
-        update_joining_date = { viewmodel.update_date(it) },
         update_auto_remainder = { viewmodel.update_automatic_remainder(it) },
-//        update_aadhar = { aadhar.value = it },
-//        update_otp = { otp.value = it },
 
-//        aadhar_error = errors.aadharError,
         phone_error = errors.phoneNumberError,
         room_error = errors.roomError,
-        joining_date_error = errors.dateError,
 
         remove_image = { viewmodel.remove_image() },
         onReset = {},
         onDial = { dial(tenant.phone, context = context) },
         onSubmit = { viewmodel.submit() },
         scrollState = scrollState,
-//
-//        SendOtp = {
-//            viewmodel.verify_aadhar(aadhar = aadhar.value)
-//        },
-//        VerifyOtp = {
-//            viewmodel.verify_opt(otp = otp.value)
-//        },
 
         /** loading **/
         isLoading = tenant.isLoading
-//        loadingOtp = tenant.isSendingOtp,
-//        verifyingOtp = tenant.isVerfyingOtp,
-//
-//        /** open **/
-//        isOtpSent = tenant.isOptSent
     )
 }
 
@@ -240,10 +221,6 @@ fun Mannual(
 
     rooms:List<String>,
 
-    joining_date:Long,
-    update_joining_date:(Long) -> Unit,
-    joining_date_error:String? = null,
-
     rent_paid:Boolean,
     update_rent_paid:(Boolean) -> Unit,
 
@@ -254,23 +231,8 @@ fun Mannual(
     update_image:(ByteArray) -> Unit,
     remove_image:() -> Unit,
 
-//    aadhar:String,
-//    update_aadhar:(String) -> Unit,
-//    aadhar_error:String?,
-//
-//    otp:String,
-//    update_otp:(String) -> Unit,
-
-//    /** loading **/
-//    loadingOtp:Boolean,
-//    verifyingOtp:Boolean,
-//    isOtpSent:Boolean,
-//
     auto_remainder:Boolean,
     update_auto_remainder:(Boolean) -> Unit,
-
-//    SendOtp:() -> Unit,
-//    VerifyOtp:() -> Unit,
 
     onReset:() -> Unit,
     onSubmit:() -> Unit,
@@ -377,15 +339,8 @@ fun Mannual(
                         },
                         readOnly = true,
                         label = "Select Rooms",
-                        modifier = Modifier.fillMaxWidth(0.5f)
-                    )
-                    DateInput(
-                        label = "Joining Date",
-                        onDate = {
-                            update_joining_date(it) },
-                        modifier = Modifier.fillMaxWidth(),
-                        date = joining_date,
-                        error = joining_date_error
+                        modifier = Modifier.fillMaxWidth(1f),
+                        leadingIcon = RoomIcon
                     )
                 }
 
@@ -394,29 +349,12 @@ fun Mannual(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(24.dp)
                 ) {
-                    Column(
-                        modifier = Modifier.weight(0.5f)
+                    ROw (
+                        modifier = Modifier.weight(1f)
                     ) {
                         Label(
-                            name = "Rent  (First Month)",
-                            fontSize =13.sp
-                        )
-                        Spacer(
-                            modifier = Modifier.height(13.dp)
-                        )
-                        SelectOption(
-                            selectedOption = rent_paid,
-                            onValueChange = {
-                                update_rent_paid(it)
-                            }
-                        )
-                    }
-                    Column(
-                        modifier = Modifier.weight(0.5f)
-                    ) {
-                        Label(
-                            name = "Security Deposit",
-                            fontSize =13.sp
+                            name = "Deposit Amount",
+                            fontSize =16.sp
                         )
                         Spacer(
                             modifier = Modifier.height(13.dp)

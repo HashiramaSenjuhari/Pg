@@ -66,6 +66,12 @@ interface TenantDao {
         val is_active:Boolean = true,
         val created_at:String = "",
 
+        /** Additional Info **/
+        val dob:String? = null,
+        val state:String? = null,
+        val alternatePhone:String? =  null,
+        val identityDocument:String? = null,
+
         /** Room details **/
         val room_id:String = "",
         val tenantRoomName:String = "",
@@ -78,9 +84,14 @@ interface TenantDao {
         t.*,
         r.name AS tenantRoomName,
         r.due_day AS dueDate,
-        CASE WHEN strftime('%Y-%m',p.payment_date) = strftime('%Y-%m','now') THEN 1 ELSE 0 END AS currentPaid
+        CASE WHEN strftime('%Y-%m',p.payment_date) = strftime('%Y-%m','now') THEN 1 ELSE 0 END AS currentPaid,
+        a.dob as dob,
+        a.state as state,
+        a.alternate_phone as alternatePhone,
+        a.identity_document as identityDocument
         FROM tenants t
         INNER JOIN rooms r ON t.room_id = r.id
+        LEFT JOIN additional_info a ON a.tenant_id = t.id
         LEFT JOIN (
             SELECT id,tenant_id, payment_date FROM payments
         ) AS p ON p.tenant_id = t.id

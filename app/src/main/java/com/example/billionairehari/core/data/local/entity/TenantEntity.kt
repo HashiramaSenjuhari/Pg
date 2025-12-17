@@ -13,6 +13,11 @@ import com.example.billionairehari.core.data.local.entity.Room
             entity = Room::class,
             parentColumns = ["id"],
             childColumns = ["room_id"]
+        ),
+        ForeignKey(
+            entity = Owner::class,
+            parentColumns = ["id"],
+            childColumns = ["owner_id"]
         )
     ]
 )
@@ -24,6 +29,7 @@ data class Tenant(
     @ColumnInfo(name = "joining_date") val joiningDate:String,
     @ColumnInfo(name = "automatic_rent_remainder") val automaticRentRemainder:Boolean,
     @ColumnInfo(name = "is_active") val isActive: Boolean,
+    @ColumnInfo(name = "owner_id") val ownerId:String,
     @ColumnInfo(name = "room_id", index = true) val roomId:String,
     @ColumnInfo(name = "created_at") val createdAt:String
 )

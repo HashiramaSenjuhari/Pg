@@ -57,11 +57,11 @@ fun SelectOption(onValueChange:(Boolean) -> Unit,selectedOption:Boolean){
                               },
                     selected = selectedOption == value.value,
                     role = Role.RadioButton
-                ).background(if(is_selected) Color(0xFFB2B0E8) else Color.White)
+                ).background(if(is_selected) Color(0xFF9487E8) else Color.White)
                     .padding(horizontal = 6.dp, vertical = 13.dp),
                 contentAlignment = Alignment.Center
             ) {
-                Text(value.key, fontSize = 12.sp,fontWeight = FontWeight.Medium,color = if(is_selected) Color.White else Color.Black)
+                Text(value.key, fontSize = 12.sp,fontWeight = FontWeight.Medium,color = if(is_selected) Color.White else Color.Black.copy(0.6f))
             }
         }
     }

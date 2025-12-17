@@ -1,6 +1,7 @@
 package com.example.billionairehari.components
 
 import android.Manifest
+import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.ImageDecoder
 import android.net.Uri
@@ -8,10 +9,12 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -23,6 +26,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CardElevation
@@ -46,8 +50,12 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import androidx.compose.ui.zIndex
 import coil.compose.AsyncImage
 import com.example.billionairehari.components.sheets.BottomModalLayout
@@ -75,7 +83,18 @@ fun PhotoPick(
         verticalArrangement = Arrangement.spacedBy(6.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        PreviewImage(image = image, onRemoveImage = onRemoveImage)
+        PreviewImage(
+            image = image,
+            onRemoveImage = onRemoveImage,
+            modifier = Modifier.clickable(
+                role = Role.Button,
+                onClick = {
+                    if(image != null){
+                        is_open.value = true
+                    }
+                }
+            )
+        )
         ROw(
             horizontalArrangement = Arrangement.spacedBy(6.dp)
         ) {
@@ -92,6 +111,77 @@ fun PhotoPick(
                     onImageChange(it)
                 }
             )
+        }
+    }
+    if(is_open.value){
+        ImagePreview(
+            is_open = is_open,
+            image = image,
+            onRemoveImage = onRemoveImage
+        )
+    }
+}
+
+@Composable
+fun ImagePreview(
+    is_open: MutableState<Boolean>,
+    image: ByteArray? = null,
+    onRemoveImage: () -> Unit
+){
+    Dialog(
+        onDismissRequest = {
+            is_open.value = false
+        },
+        properties = DialogProperties(dismissOnBackPress = true)
+    ) {
+        Column(
+            modifier = Modifier.fillMaxSize()
+                .background(Color.Black)
+        ) {
+            ROw(
+                modifier = Modifier.fillMaxWidth()
+                    .padding(13.dp),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Text(
+                    "Image Preview",
+                    fontSize = 19.sp,
+                    color = Color.White.copy(0.6f)
+                )
+                ROw(
+                    horizontalArrangement = Arrangement.spacedBy(24.dp)
+                ) {
+                    Icon(
+                        Icons.Outlined.Delete,
+                        contentDescription = "",
+                        tint = Color.Red,
+                        modifier = Modifier.clickable(
+                            role = Role.Button,
+                            onClick = {
+                                is_open.value = false
+                                onRemoveImage()
+                            }
+                        )
+                    )
+                    Icon(
+                        Icons.Default.Close,
+                        contentDescription = "",
+                        tint = Color.White,
+                        modifier = Modifier.clickable{ is_open.value = false}
+                    )
+                }
+            }
+            Column(
+                modifier = Modifier.fillMaxSize(),
+                verticalArrangement = Arrangement.Center
+            ){
+                AsyncImage(
+                    model = image,
+                    contentDescription = "",
+                    modifier = Modifier.fillMaxWidth().fillMaxHeight(0.5f),
+                    contentScale = ContentScale.Crop
+                )
+            }
         }
     }
 }
@@ -212,8 +302,8 @@ fun PreviewImage(
             modifier =  Modifier.clip(CircleShape)
                 .size(100.dp)
                 .border(1.dp,color = Color.Black.copy(alpha = 0.1f), shape = CircleShape)
-                .then(modifier)
-                .scale(3f),
+                .scale(if(image != null) 1f else 3f)
+                .then(modifier),
             contentScale = if(image !== null) ContentScale.Crop else ContentScale.None
         )
     }

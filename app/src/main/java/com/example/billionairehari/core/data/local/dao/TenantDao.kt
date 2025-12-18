@@ -3,10 +3,12 @@ package com.example.billionairehari.core.data.local.dao
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.Query
+import androidx.room.RewriteQueriesToDropUnusedColumns
 import com.example.billionairehari.core.data.local.entity.Payment
 import com.example.billionairehari.core.data.local.entity.Tenant
 import kotlinx.coroutines.flow.Flow
 
+@RewriteQueriesToDropUnusedColumns
 @Dao
 interface TenantDao {
     @Insert
@@ -26,7 +28,7 @@ interface TenantDao {
         LEFT JOIN rooms r ON t.room_id = r.id
         LEFT JOIN payments p ON p.tenant_id = t.id
             AND strftime('%Y-%m',p.payment_date) = strftime('%Y-%m','now')
-        WHERE r.owner_id = :ownerId
+        WHERE t.owner_id = :ownerId
     """)
     fun getTenantsCardFlow(ownerId:String) : Flow<List<TenantCardDetails>>
 
@@ -40,7 +42,7 @@ interface TenantDao {
         LEFT JOIN rooms r ON t.room_id = r.id
         LEFT JOIN payments p ON p.tenant_id = t.id
             AND strftime('%Y-%m',p.payment_date) = strftime('%Y-%m','now')
-        WHERE r.owner_id = :ownerId
+        WHERE t.owner_id = :ownerId
     """)
     suspend fun getTenantsCard(ownerId:String) :List<TenantCardDetails>
     // ###############################################################################################
@@ -90,14 +92,59 @@ interface TenantDao {
         a.alternate_phone as alternatePhone,
         a.identity_document as identityDocument
         FROM tenants t
-        INNER JOIN rooms r ON t.room_id = r.id
+        LEFT JOIN rooms r ON t.room_id = r.id
         LEFT JOIN additional_info a ON a.tenant_id = t.id
         LEFT JOIN (
             SELECT id,tenant_id, payment_date FROM payments
         ) AS p ON p.tenant_id = t.id
-        WHERE r.owner_id = :ownerId AND t.id = :tenantId
+        WHERE t.owner_id = :ownerId AND t.id = :tenantId
     """)
     fun getTenant(ownerId:String,tenantId:String) : Flow<TenantDetails>
+
+    data class PaymentCard(
+        val tenantId:String,
+        val paymentDate:String,
+        val dueDate:String,
+        val amount:Int
+    )
+
+    @Query("""
+        SELECT
+        p.*
+        FROM tenants t
+        INNER JOIN (
+            SELECT
+                p.id AS tenantId,
+                p.payment_date AS paymentDate,
+                p.due_date AS dueDate,
+                p.amount AS amount,
+                p.tenant_id
+            FROM payments p
+        ) AS p ON p.tenant_id = t.id
+        WHERE t.owner_id = :ownerId AND t.id = :tenantId
+        ORDER BY strftime('%Y-%m-%d',p.paymentDate) ASC
+        LIMIT 3
+    """)
+    fun getTenantRecentPaymentsDetail(ownerId:String,tenantId:String): Flow<List<PaymentCard>>
+
+
+    @Query("""
+        SELECT
+        p.*
+        FROM tenants t
+        INNER JOIN (
+            SELECT
+                p.id AS tenantId,
+                p.payment_date AS paymentDate,
+                p.due_date AS dueDate,
+                p.amount AS amount,
+                p.tenant_id
+            FROM payments p
+        ) AS p ON p.tenant_id = t.id
+        WHERE t.owner_id = :ownerId AND t.id = :tenantId
+        ORDER BY strftime('%Y-%m-%d',p.paymentDate) ASC
+    """)
+    fun getTenantPaymentDetails(ownerId:String,tenantId:String): Flow<List<PaymentCard>>
 
     // ###############################################################################################
 
@@ -133,4 +180,27 @@ interface TenantDao {
     fun getRentPaidFlow(ownerId:String) : Flow<RentPaid>
 
     // ###############################################################################################
+
+    data class TenantWithRoomRentCard(
+        val id:String = "",
+        val tenantName:String = "",
+        val roomId:String = "",
+        val roomName:String = "",
+        val dueDay:String = "",
+        val rentPrice: Int = 0
+    )
+
+    @Query("""
+        SELECT
+        t.id,
+        t.name AS tenantName,
+        r.id AS roomId,
+        r.name AS roomName,
+        r.due_day AS dueDay,
+        r.rent_price AS rentPrice
+        FROM tenants t
+        INNER JOIN rooms r ON r.id = t.room_id AND r.owner_id = t.owner_id
+        WHERE t.owner_id = :ownerId
+    """)
+    fun getTenantSearchCards(ownerId:String): Flow<List<TenantWithRoomRentCard>>
 }

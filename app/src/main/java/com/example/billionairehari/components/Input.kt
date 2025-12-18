@@ -142,12 +142,16 @@ fun Input(
             keyboardOptions = KeyboardOptions(keyboardType = keyBoardType, imeAction = ImeAction.Next),
             enabled = enabled
         )
-        if(error != null){
-            Text(error, fontSize = 12.sp, color = Color.Red)
-        }
+        ErrorText(error = error)
     }
 }
 
+@Composable
+fun ErrorText(error:String? = null){
+    if(error != null){
+        Text(error, fontSize = 12.sp, color = Color.Red)
+    }
+}
 val PhoneNumberTransformation = VisualTransformation { text ->
     val trimmed = text.text.take(10)
     val b = buildString {

@@ -1,18 +1,29 @@
 package com.example.billionairehari.core.data.local.typeconverter
 
 import androidx.room.TypeConverter
+import com.example.billionairehari.core.data.local.entity.PaymentStatus
 import com.example.billionairehari.core.data.local.entity.PaymentType
 
 
-class PaymentTypeConverter{
+class PaymentTypeConverter {
     @TypeConverter
-    fun fromString(json:String?) : PaymentType? {
-        return json?.let { PaymentType.valueOf(it) }
+    fun fromTypeString(string:String?) : PaymentType? {
+        return string?.let { PaymentType.valueOf(it) }
     }
 
     @TypeConverter
-    fun toString(type: PaymentType?): String? {
+    fun toTypeString(type: PaymentType?): String? {
         return type?.let { it.name }
+    }
+
+    @TypeConverter
+    fun fromStatusString(string:String?) : PaymentStatus? {
+        return string?.let { PaymentStatus.valueOf(it) }
+    }
+
+    @TypeConverter
+    fun toStatusString(status: PaymentStatus?): String? {
+        return status?.let { it.name }
     }
 }
 

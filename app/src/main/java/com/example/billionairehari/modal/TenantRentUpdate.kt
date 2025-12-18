@@ -63,13 +63,16 @@ import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.pointer.pointerInput
@@ -105,9 +108,12 @@ import kotlin.math.exp
 import kotlin.system.exitProcess
 import com.example.billionairehari.R
 import com.example.billionairehari.components.AppButton
+import com.example.billionairehari.core.data.local.dao.TenantDao
+import com.example.billionairehari.core.data.local.entity.PaymentType
+import com.example.billionairehari.layout.BottomDialogSearchScreen
 import com.example.billionairehari.model.TenantRentRecord
 import com.example.billionairehari.screens.StaticSearchBar
-import com.example.billionairehari.viewmodels.PaymentMethod
+import com.example.billionairehari.utils.currentMonth
 import com.example.billionairehari.viewmodels.RecordRentViewModel
 import com.example.billionairehari.viewmodels.TenantSearchCard
 
@@ -115,14 +121,16 @@ import com.example.billionairehari.viewmodels.TenantSearchCard
 @Composable
 fun RecordRentPriceModal(
     is_open: MutableState<Boolean>,
-    tenant: TenantRentRecord = TenantRentRecord()
+    id: String? = null,
+    viewmodel: RecordRentViewModel = hiltViewModel()
 ){
-    val owner = LocalViewModelStoreOwner.current
-
-    val viewmodel: RecordRentViewModel = hiltViewModel()
+    val query = viewmodel.query.collectAsState()
+    val search_results = viewmodel.search_result.collectAsState()
 
     val scrollState = rememberScrollState()
-    val expanded = remember { mutableStateOf<Boolean>(false) }
+    val is_search_open = remember { mutableStateOf<Boolean>(false) }
+    val selectedTenantCard = remember { mutableStateOf<TenantDao.TenantWithRoomRentCard?>(null) }
+
     val data = viewmodel.record.value
 
     Column(
@@ -135,14 +143,14 @@ fun RecordRentPriceModal(
             StaticSearchBar(
                 placeholder = "Search Tenant",
                 onClick = {
-                    expanded.value = true
+                    is_search_open.value = true
                 },
+                filter = false,
                 onClickFilter = {
-                    expanded.value = true
                 }
             )
             TenantCard(
-                name = data.tenant.name
+                details = data.tenantAndRent
             )
             Input(
                 modifier = Modifier.fillMaxWidth(),
@@ -154,7 +162,7 @@ fun RecordRentPriceModal(
                 trailingIcon = {
                     Text("")
                 },
-                value = data.paying_amount,
+                value = data.amount,
                 onValueChange = {
                     viewmodel.update_paying_amount(it)
                 },
@@ -178,14 +186,14 @@ fun RecordRentPriceModal(
                                 viewmodel.update_payment_date(it)
                             }
                         },
-                        date = data.date
+                        date = data.paymentDate
                     )
                     if(data.dateError != null){
                         Text(data.dateError, fontSize = 12.sp, color = Color.Red)
                     }
                 }
                 PaymentMethod(
-                    current_option = data.payment_method,
+                    current_option = data.paymentType,
                     onChangeOption = {
                         if(!data.isLoading){
                             viewmodel.update_payment_method(it)
@@ -215,30 +223,103 @@ fun RecordRentPriceModal(
             }
         }
     }
-    SearchDialog(
-        expanded = expanded,
-        scrollState = scrollState,
-        onSelectTenant = {
-            viewmodel.update_tenant(it)
+    if(is_search_open.value){
+        TenantWithRoomRentSearch(
+            query = query.value,
+            onChangeQuery = {
+                viewmodel.update_query(it)
+            },
+            onClick = {
+                viewmodel.update_tenant(it)
+                is_search_open.value = false
+            },
+            is_search_open = is_search_open,
+            search_results = search_results.value,
+            selectedTenantCard = selectedTenantCard
+        )
+    }
+}
+
+@Composable
+fun TenantWithRoomRentSearch(
+    is_search_open: MutableState<Boolean>,
+    selectedTenantCard: MutableState<TenantDao.TenantWithRoomRentCard?>,
+    query:String,
+    onChangeQuery:(String) -> Unit,
+    onClick:(TenantDao.TenantWithRoomRentCard) -> Unit,
+    search_results: List<TenantDao.TenantWithRoomRentCard>,
+){
+    BottomDialogSearchScreen(
+        is_open = is_search_open,
+        value = query,
+        onChangeValue = {
+            onChangeQuery(it)
+        },
+        search_label = "Search Tenant"
+    ) {
+        Column(
+            verticalArrangement = Arrangement.spacedBy(6.dp)
+        ) {
+            search_results.forEach {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable(
+                            onClick = {
+                                onClick(it)
+                            }
+                        )
+                        .drawBehind(
+                            onDraw = {
+                                drawLine(
+                                    start = Offset(x = 0f, y = size.height),
+                                    end = Offset(x = size.width, y = size.height),
+                                    color = Color.Black.copy(0.3f),
+                                    strokeWidth = 1f
+                                )
+                            }
+                        ).padding(6.dp)
+                ) {
+                    Row(
+                        verticalAlignment = Alignment.Top,
+                        horizontalArrangement = Arrangement.spacedBy(13.dp)
+                    ) {
+                        AsyncImage(
+                            model = "https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Ftse2.mm.bing.net%2Fth%2Fid%2FOIP.Z1yKFPWjHLgvy4O3Hh3-oQHaFj%3Fpid%3DApi&f=1&ipt=c1abd002efe0a166727ee32168bb29f447e6c7a120fd5a7e9014fafc240c0a3f&ipo=images",
+                            contentDescription = "",
+                            modifier = Modifier
+                                .clip(CircleShape)
+                                .size(40.dp),
+                            contentScale = ContentScale.Crop
+                        )
+                        Column(
+                            verticalArrangement = Arrangement.spacedBy(6.dp)
+                        ) {
+                            Text(it.tenantName, fontSize = 16.sp, fontWeight = FontWeight.Medium)
+                            Text(it.roomName, color = Color.Black.copy(0.4f))
+                        }
+                    }
+                }
+            }
         }
-    )
+    }
 }
 
 data class PaymentMethodData (
     val icon:Int,
     val name:String,
-    val type: PaymentMethod
+    val type: PaymentType
 )
 
 val payment_method = listOf<PaymentMethodData>(
-    PaymentMethodData(icon = R.drawable.outline_payments_24, name = PaymentMethod.CASH.toString(), type = PaymentMethod.CASH),
-    PaymentMethodData(icon = R.drawable.outline_upi_pay_24, name = PaymentMethod.UPI.toString(), type = PaymentMethod.UPI),
+    PaymentMethodData(icon = R.drawable.outline_payments_24, name = PaymentType.CASH.name, type = PaymentType.CASH),
+    PaymentMethodData(icon = R.drawable.outline_upi_pay_24, name = PaymentType.UPI.name, type = PaymentType.UPI),
 )
 
 @Composable
 fun PaymentMethod(
-    current_option: PaymentMethod,
-    onChangeOption:(PaymentMethod) -> Unit
+    current_option: PaymentType,
+    onChangeOption:(PaymentType) -> Unit
 ){
     val expanded = remember { mutableStateOf<Boolean>(false) }
     val dropboxSize = remember { mutableIntStateOf(0) }
@@ -297,17 +378,13 @@ fun PaymentMethod(
 
 @Composable
 fun TenantCard(
-    image:String? = null,
-    name:String? = "",
-    room:String? = null,
-    rent:String? = null,
-    due_date:String? = null
+    details: TenantDao.TenantWithRoomRentCard?= null
 ){
-    if(name == null){
+    if(details == null){
         NoTenantPreview()
     }else{
         TenantPreview(
-            name = name
+            details = details
         )
     }
 }
@@ -340,7 +417,7 @@ fun NoTenantPreview(){
 
 @Composable
 fun TenantPreview(
-    name:String
+    details: TenantDao.TenantWithRoomRentCard
 ){
     Card(
         shape = RoundedCornerShape(24.dp),
@@ -368,7 +445,7 @@ fun TenantPreview(
                     verticalArrangement = Arrangement.spacedBy(3.dp)
                 ) {
                     Text(
-                        name,
+                        details.tenantName,
                         fontSize = 17.sp,
                         fontWeight = FontWeight.Bold
                     )
@@ -376,12 +453,12 @@ fun TenantPreview(
                         horizontalArrangement = Arrangement.spacedBy(6.dp)
                     ) {
                         Text(
-                            "Room 112",
+                            details.roomName,
                             fontSize = 13.sp,
                             color = Color.Black.copy(0.3f)
                         )
                         Text(
-                            " Due on May 01",
+                            " Due on ${currentMonth()} ${details.dueDay}",
                             fontSize = 13.sp,
                             color = Color.Black.copy(0.3f),
                         )
@@ -394,7 +471,7 @@ fun TenantPreview(
                 modifier = Modifier.height(40.dp)
             ) {
                 Text(
-                    "₹2000",
+                    "₹${details.rentPrice}",
                     fontSize = 17.sp,
                     fontWeight = FontWeight.Bold
                 )
@@ -404,164 +481,6 @@ fun TenantPreview(
                     color = Color.Black.copy(0.4f)
                 )
             }
-        }
-    }
-}
-
-@Composable
-fun SearchDialog(
-    expanded: MutableState<Boolean>,
-    onSelectTenant: (TenantSearchCard) -> Unit,
-    scrollState: ScrollState,
-){
-
-    if(expanded.value){
-        Dialog(
-            onDismissRequest = {
-                expanded.value = false
-            },
-            properties = DialogProperties(dismissOnBackPress = true)
-        ) {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .wrapContentHeight(),
-                contentAlignment = Alignment.Center
-            ){
-                SearchTenants(
-                    expanded = expanded,
-                    scrollState = scrollState,
-                    onSelectTenant = {
-                       onSelectTenant(it)
-                    }
-                )
-            }
-        }
-    }
-}
-
-@Composable
-fun SearchTenants(
-    expanded: MutableState<Boolean>,
-    scrollState: ScrollState,
-    onSelectTenant:(TenantSearchCard) -> Unit,
-){
-//    val search = viewmodel.query.collectAsState()
-//    val result = viewmodel.result.collectAsState()
-
-    Column(
-        modifier = Modifier.clip(RoundedCornerShape(24.dp))
-            .fillMaxWidth(0.96f)
-            .background(Color.White)
-            .padding(24.dp),
-        verticalArrangement = Arrangement.spacedBy(13.dp)
-    ) {
-        SearchBar(
-            expanded = expanded,
-            query = "",
-//            query = search.value,
-            onChangeQuery = {
-//                viewmodel.update_query(it)
-            },
-            readOnly = false
-        )
-//        TenantsContainer(
-//            onSelectTenant = {
-//                onSelectTenant(it)
-//            },
-//            scrollState = scrollState,
-//            expanded = expanded,
-//            onResetSearch = {
-//                viewmodel.reset_query()
-//            },
-//            result = result.value
-//        )
-    }
-}
-
-@Composable
-fun TenantsContainer(
-    onResetSearch:() -> Unit,
-    onSelectTenant:(TenantSearchCard) -> Unit,
-    scrollState: ScrollState,
-    result:List<TenantSearchCard>,
-    expanded: MutableState<Boolean>
-){
-    Column(
-        modifier = Modifier
-            .zIndex(2f)
-            .clip(RoundedCornerShape(24.dp))
-            .fillMaxWidth()
-            .heightIn(min = 60.dp, max = 340.dp)
-            .background(Color.White)
-            .border(
-                1.dp,
-                color = Color.Black.copy(alpha = 0.1f),
-                shape = RoundedCornerShape(24.dp)
-            )
-    ) {
-        Text(
-            "Select the tenant to update rent",
-            fontSize = 12.sp,
-            color = Color.Black.copy(alpha = 0.6f),
-            modifier = Modifier.padding(horizontal = 13.dp, vertical = 6.dp)
-        )
-        Column(
-            modifier = Modifier
-                .verticalScroll(scrollState),
-        ) {
-            HorizontalDivider()
-            result.forEach {
-                TenantCard(
-                    tenant = it,
-                    onResetSearch = onResetSearch,
-                    expanded = expanded,
-                    onSelectTenant = {
-                        onSelectTenant(it)
-                    }
-                )
-                HorizontalDivider()
-            }
-        }
-    }
-}
-
-@Composable
-fun TenantCard(
-    tenant: TenantSearchCard,
-    onResetSearch:() -> Unit,
-    onSelectTenant:(TenantSearchCard) -> Unit,
-    expanded: MutableState<Boolean>
-){
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable(
-                enabled = true,
-                onClick = {
-                    onSelectTenant(tenant)
-                    expanded.value = false
-                    onResetSearch()
-                }
-            )
-            .background(Color.White)
-            .padding(11.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(13.dp)
-    ) {
-        AsyncImage(
-            model = "https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fi.pinimg.com%2Foriginals%2Fed%2F7c%2Fb0%2Fed7cb0a40619f5f710325b71e6b411e3.jpg&f=1&nofb=1&ipt=06a432166eb12e9a037390617c2d300e9d154349494e45fe3e2e0e25d0d10592",
-            contentDescription = "",
-            contentScale = ContentScale.Crop,
-            modifier = Modifier.clip(CircleShape).size(40.dp)
-        )
-        Column {
-            Text(
-                tenant.name,
-                fontSize = 14.sp,
-                fontWeight = FontWeight.Medium
-            )
-            Text("Room 121", color = Color.Black.copy(alpha = 0.4f))
         }
     }
 }

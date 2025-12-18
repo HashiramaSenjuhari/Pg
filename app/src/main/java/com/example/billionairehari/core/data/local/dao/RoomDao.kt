@@ -57,10 +57,10 @@ interface RoomDao {
         COALESCE(r.due_day,'') AS due_day,
         COALESCE(r.location,'No Location') AS location,
         COALESCE(r.owner_id,'Unknown') AS owner_id,
-        COALESCE(COUNT(p.id),0) AS dueCount,
-        COALESCE(COUNT(t.id),0) AS tenantCount
+        COALESCE(COUNT(DISTINCT p.id),0) AS dueCount,
+        COALESCE(COUNT(DISTINCT t.id),0) AS tenantCount
         FROM rooms r
-        LEFT JOIN payments p ON p.room_id = r.id
+        LEFT JOIN payments p ON p.room_id = r.id AND strftime('%Y-%m',p.payment_date) = strftime('%Y-%m','now')
         LEFT JOIN tenants t ON t.room_id = r.id
         WHERE r.id = :roomId AND r.owner_id = :ownerId
     """)

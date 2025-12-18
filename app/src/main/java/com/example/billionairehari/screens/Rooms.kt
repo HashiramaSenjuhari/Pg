@@ -348,13 +348,14 @@ fun RoomCards(
 fun StaticSearchBar(
     placeholder:String,
     onClick: () -> Unit,
+    filter:Boolean = true,
     onClickFilter:() -> Unit
 ){
     Box(
         modifier = Modifier
             .fillMaxWidth()
             .border(1.dp, color = Color.Black.copy(0.1f), shape = CircleShape)
-            .padding(vertical = 3.dp, horizontal = 13.dp)
+            .padding(vertical = if(filter) 3.dp else 13.dp, horizontal = 13.dp)
             .clickable(
                 enabled = true,
                 onClick = onClick,
@@ -376,13 +377,15 @@ fun StaticSearchBar(
                 )
                 Text(placeholder, fontSize = 16.sp, color = Color.Black.copy(0.6f))
             }
-            IconButton(
-                onClick = onClickFilter
-            ){
-                Icon(
-                    FilterIcon,
-                    contentDescription = ""
-                )
+            if(filter){
+                IconButton(
+                    onClick = onClickFilter
+                ){
+                    Icon(
+                        FilterIcon,
+                        contentDescription = ""
+                    )
+                }
             }
         }
     }

@@ -26,7 +26,10 @@ data class Room(
     @ColumnInfo(name = "rent_price") var rentPrice: Int,
     var deposit:Int,
     var features: List<String>,
-    @ColumnInfo(name = "due_day") var dueDate:Int,
+    @ColumnInfo(name = "due_day") var dueDate:Int, // DD
     var location:String,
-    @ColumnInfo(name = "owner_id", index = true) val ownerId:String
+    @ColumnInfo(name = "owner_id", index = true) val ownerId:String,
+
+    @ColumnInfo(name = "updated_at") val updatedAt:String, // YYYY-MM-DD HH:mm
+    @ColumnInfo(name = "created_at") val createdAt:String // YYYY-MM-DD HH:mm
 )

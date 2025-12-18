@@ -13,5 +13,8 @@ data class Owner(
     val phone:String,
     @ColumnInfo(name = "pg_name") val pgName:String,
     @ColumnInfo(name = "is_verified") val isVerified:Boolean,
-    @ColumnInfo(name = "created_at") val createdAt:String
+
+    @ColumnInfo(name = "updated_at") val updatedAt:String, // YYYY-MM-DD HH:mm
+    @ColumnInfo(name = "last_visit") val lastVisit:String, // YYYY-MM-DD HH:mm
+    @ColumnInfo(name = "created_at") val createdAt:String // YYYY-MM-DD HH:mm
 )

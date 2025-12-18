@@ -22,5 +22,7 @@ data class AdditionalInfo(
     val state:String,
     @ColumnInfo(name = "alternate_phone") val alternatePhone:String,
     @ColumnInfo(name = "identity_document") val identityDocument:String,
-    @ColumnInfo(index = true) val tenant_id:String
+    @ColumnInfo(index = true) val tenant_id:String,
+    @ColumnInfo(name = "updated_at") val updatedAt:String,
+    @ColumnInfo(name = "created_at") val createdAt:String
 )

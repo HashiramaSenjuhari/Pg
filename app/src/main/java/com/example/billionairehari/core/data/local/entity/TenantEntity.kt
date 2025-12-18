@@ -26,10 +26,13 @@ data class Tenant(
     @ColumnInfo(index = true) val name:String,
     val image:String,
     @ColumnInfo(name = "phone_number") val phoneNumber:String,
-    @ColumnInfo(name = "joining_date") val joiningDate:String,
+    @ColumnInfo(name = "joining_date") val joiningDate:String, // YYYY-MM-DD
     @ColumnInfo(name = "automatic_rent_remainder") val automaticRentRemainder:Boolean,
     @ColumnInfo(name = "is_active") val isActive: Boolean,
-    @ColumnInfo(name = "owner_id") val ownerId:String,
-    @ColumnInfo(name = "room_id", index = true) val roomId:String,
-    @ColumnInfo(name = "created_at") val createdAt:String
+
+    @ColumnInfo(name = "updated_at") val updatedAt:String, // YYYY-MM-DD HH:mm
+    @ColumnInfo(name = "created_at") val createdAt:String, // YYYY-MM-DD HH:mm
+
+    @ColumnInfo(name = "owner_id", index = true) val ownerId:String,
+    @ColumnInfo(name = "room_id", index = true) val roomId:String
 )

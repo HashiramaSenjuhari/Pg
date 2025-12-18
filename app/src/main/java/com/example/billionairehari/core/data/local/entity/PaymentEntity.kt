@@ -12,7 +12,9 @@ enum class PaymentType {
     UPI
 }
 
-@TypeConverters(PaymentTypeConverter::class)
+
+enum class PaymentStatus { NOT_PAID,PARTIAL,PAID }
+
 @Entity(
     tableName = "payments",
     foreignKeys = [
@@ -33,14 +35,21 @@ enum class PaymentType {
         )
     ]
 )
+@TypeConverters(PaymentTypeConverter::class)
 data class Payment(
     @PrimaryKey val id:String,
     @ColumnInfo(name = "tenant_id", index = true) val tenantId:String,
     @ColumnInfo(name = "room_id", index = true) val roomId:String,
+    @ColumnInfo(name = "owner_id", index = true) val ownerId:String,
+
     @ColumnInfo(name = "amount") val amount:Int,
-    @ColumnInfo(name = "payment_date") val paymentDate:Long,
-    @ColumnInfo(name = "due_date") val dueDate:String,
-    @ColumnInfo(name = "is_paid") val isPaid:Boolean,
-    @ColumnInfo(name = "payment_type") val paymentType: PaymentType,
-    @ColumnInfo(name = "owner_id", index = true) val ownerId:String
+    @ColumnInfo(name = "payment_status") val paymentStatus: PaymentStatus, // { NOT_PAID, PARTIAL,PAID }
+    @ColumnInfo(name = "payment_type") val paymentType: PaymentType, // { UPI,CASH }
+
+    @ColumnInfo(name = "payment_date") val paymentDate:String, // YYYY-MM-DD
+    @ColumnInfo(name = "due_date") val dueDate:String, // YYYY-MM-DD
+
+
+    @ColumnInfo(name = "updated_at") val updatedAt:String, // YYYY-MM-DD HH:mm
+    @ColumnInfo(name = "created_at") val createdAt:String  // YYYY-MM-DD HH:mm
 )

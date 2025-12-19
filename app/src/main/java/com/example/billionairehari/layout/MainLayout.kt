@@ -75,6 +75,7 @@ import com.example.billionairehari.viewmodels.GetRoomTenantCountViewModel
 import com.google.android.material.snackbar.Snackbar
 import kotlinx.coroutines.CoroutineScope
 import com.example.billionairehari.R
+import com.example.billionairehari.core.data.local.dao.TenantDao
 import com.example.billionairehari.icons.AddRoom
 import com.example.billionairehari.icons.AddTenantIcon
 
@@ -84,7 +85,7 @@ sealed class MODAL_TYPE {
     data class ADD_TENANT(val room:String? = null): MODAL_TYPE()
     data class UPDATE_TENANT(val tenant: Tenant): MODAL_TYPE()
     data class UPDATE_ROOM(val id: String): MODAL_TYPE()
-    data class UPDATE_TENANT_RENT(val tenant: TenantRentRecord): MODAL_TYPE()
+    data class UPDATE_TENANT_RENT(val tenantRentDetails: TenantDao.TenantWithRoomRentCard? = null): MODAL_TYPE()
     data class ANNOUNCE(val reveivers:List<SelectedType>? = null): MODAL_TYPE()
 }
 
@@ -398,9 +399,9 @@ fun ModalUi(
                 )
             }
             is MODAL_TYPE.UPDATE_TENANT_RENT -> {
-                val tenant = value.tenant
+                val tenant = value.tenantRentDetails
                 RecordRentPriceModal(
-                    tenant = tenant!!,
+                    tenantWithRentCard = tenant,
                     is_open = is_open
                 )
             }

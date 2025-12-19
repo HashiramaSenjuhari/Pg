@@ -1,6 +1,5 @@
 package com.example.billionairehari.components.dashboard
 
-import android.util.Log
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -16,51 +15,35 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.ripple.RippleAlpha
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalRippleConfiguration
 import androidx.compose.material3.Text
-import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.viewmodel.compose.LocalViewModelStoreOwner
-import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.navigation.NavController
-import com.example.billionairehari.Destinations
 import com.example.billionairehari.NavigationAction
 import com.example.billionairehari.components.sheets.AddRoomSheet
-import com.example.billionairehari.components.sheets.AnnounceSheet
-import com.example.billionairehari.components.sheets.BottomModalLayout
 import com.example.billionairehari.icons.AnnounceIcon
 import com.example.billionairehari.icons.ContactIcon
 import com.example.billionairehari.icons.RoomIcon
 import com.example.billionairehari.icons.TenantIcon
 import com.example.billionairehari.layout.MODAL_TYPE
 import com.example.billionairehari.model.Room
-import com.example.billionairehari.model.TenantRentRecord
 import com.example.billionairehari.viewmodels.AddRoomViewModel
-import com.example.billionairehari.viewmodels.RoomsViewModel
 import com.example.billionairehari.viewmodels.UpdateRoomViewModel
-import dagger.hilt.android.lifecycle.HiltViewModel
 
 data class Action(
     val name:String,
@@ -90,7 +73,7 @@ fun ActionBar(
         }),
         Action(name = "Add Rent", icon = ContactIcon, action = {
             is_open.value = true
-            current_action.value = MODAL_TYPE.UPDATE_TENANT_RENT(tenant = TenantRentRecord())
+            current_action.value = MODAL_TYPE.UPDATE_TENANT_RENT()
         })
     )
     Column(

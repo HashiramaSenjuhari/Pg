@@ -49,6 +49,7 @@ import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Warning
+import androidx.compose.material.icons.outlined.AccountCircle
 import androidx.compose.material.icons.outlined.MoreVert
 import androidx.compose.material3.Badge
 import androidx.compose.material3.Button
@@ -150,6 +151,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 import com.example.billionairehari.R
+import com.example.billionairehari.core.data.local.dao.TenantDao
 import com.example.billionairehari.utils.currentMonth
 import java.time.LocalDate
 import java.time.ZoneId
@@ -185,7 +187,7 @@ fun RoomScreen(
     onRoomDelete:(String) -> Unit,
 
     onTenant:(String) -> Unit,
-    onTenantRentUpdate:(TenantRentRecord) -> Unit,
+    onTenantRentUpdate:() -> Unit,
     onTenantDelete:(String) -> Unit,
     onTenantMessage:(String) -> Unit,
     onTenantShare:(String) -> Unit,
@@ -200,6 +202,7 @@ fun RoomScreen(
     val room_details = viewmodel.room_detail.collectAsState()
     val tenants = viewmodel.tenants.collectAsState()
     val data = room_details.value
+    val is_open = remember { mutableStateOf(false) }
 
     val pagerState = rememberPagerState(initialPage = 0, pageCount = {
         photos.size
@@ -260,7 +263,15 @@ fun RoomScreen(
 //                    onTenantDelete(it)
                 },
                 onTenantRentUpdate = {
-//                    onTenantRentUpdate(it)
+                    val details = TenantDao.TenantWithRoomRentCard(
+                        id = it.id,
+                        roomId = data.id,
+                        rentPrice = data.rent_price,
+                        dueDay = data.due_day,
+                        roomName = data.name,
+                        tenantName = it.name
+                    )
+                    current_action.value = MODAL_TYPE.UPDATE_TENANT_RENT(tenantRentDetails = details)
                 },
                 onTenantMessage = {
 //                    onTenantMessage(it)
@@ -334,14 +345,9 @@ fun RoomHeader(
     }
 }
 
-sealed class IconType {
-    data class IntType(val int: Int) : IconType()
-    data class Vector(val imageVector: ImageVector) : IconType()
-}
-
 data class DropDownParams(
     val name:String,
-    val icon: IconType? = null,
+    val icon: ImageVector? = null,
     val onClick:() -> Unit
 )
 
@@ -358,10 +364,10 @@ fun StaticBar(
 ){
 
     val dropdowns = listOf<DropDownParams>(
-        DropDownParams(name = "Edit Room", icon = IconType.Vector(EditIcon), onClick = onRoomEdit),
-        DropDownParams(name = "Message", icon = IconType.Vector(ChatIcon), onClick = {}),
-        DropDownParams(name = "Share", icon = IconType.Vector(ShareIcon), onClick = {}),
-        DropDownParams(name = "Delete", icon = IconType.Vector(DeleteIcon), onClick = {}),
+        DropDownParams(name = "Edit Room", icon = EditIcon, onClick = onRoomEdit),
+        DropDownParams(name = "Message", icon = ChatIcon, onClick = {}),
+        DropDownParams(name = "Share", icon = ShareIcon, onClick = {}),
+        DropDownParams(name = "Delete", icon = DeleteIcon, onClick = {}),
     )
 
     val coroutine = rememberCoroutineScope()
@@ -425,7 +431,7 @@ fun DropDownButton(
 @Composable
 fun DropDownButton(
     name:String,
-    icon: IconType? = null,
+    icon: ImageVector? = null,
     contentColor:Color = Color.Black,
     onClick:() -> Unit,
 ){
@@ -435,12 +441,7 @@ fun DropDownButton(
                 horizontalArrangement = Arrangement.spacedBy(6.dp)
             ) {
                 if(icon != null){
-                    when(icon){
-                        is IconType.IntType ->
-                            Icon(painter = painterResource(icon.int), contentDescription = name, tint = contentColor)
-                        is IconType.Vector ->
-                            Icon(icon.imageVector, contentDescription = name, tint = contentColor)
-                    }
+                    Icon(icon, contentDescription = name, tint = contentColor)
                 }
                 Text(name, color = contentColor, fontWeight = FontWeight.Normal)
             }
@@ -505,6 +506,7 @@ fun RoomBriefDetail(
     due_date:String,
     rent_due:Int
 ){
+    Log.d("BEDCOUNT",filled.toString())
     ROw(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.spacedBy(13.dp)
@@ -515,47 +517,26 @@ fun RoomBriefDetail(
             DetailCard(
                 icon = BedIcon,
                 title = "Beds",
-                total = "${beds}"
+                text = "${beds}"
             )
             DetailCard(
-                vector_icon = drawable.due_icon,
+                icon = BedIcon,
                 title = "Due Date",
-                total = "${currentMonth()} ${due_date}"
+                text = "${currentMonth()} ${due_date}"
             )
         }
         Column(
             verticalArrangement = Arrangement.spacedBy(13.dp)
         ) {
-            if(beds <= 4) {
-                DetailCard(
-                    icon = TenantIcon,
-                    title = "Tenants",
-                    content = {
-                        ROw (
-                            modifier = Modifier
-                                .clip(RoundedCornerShape(13.dp))
-                                .padding(vertical = 6.dp),
-                        ) {
-                            Icon(PersonIcon, contentDescription = "", tint = Color(0xFFB0B0B0),modifier = Modifier.size(19.dp))
-                            Icon(PersonIcon, contentDescription = "",tint = Color(0xFFB0B0B0),modifier = Modifier.size(19.dp))
-                            Icon(PersonIcon, contentDescription = "",modifier = Modifier.size(19.dp))
-                            Icon(PersonIcon, contentDescription = "",modifier = Modifier.size(19.dp))
-                        }
-                    },
-                    width = 1f
-                )
-            } else {
-                DetailCard(
-                    icon = TenantIcon,
-                    title = "Tenants",
-                    total = "${filled}/${beds}",
-                    width = 1f
-                )
-            }
             DetailCard(
-                vector_icon = drawable.due_icon,
+                icon = Icons.Outlined.AccountCircle,
+                title = "Count",
+                text = "${filled}/${beds}",
+                width = 1f
+            )
+            DetailCard(
+                icon = BedIcon,
                 title = "Due Count",
-                rent_due_price = rent_due,
                 width = 1f
             )
         }
@@ -565,13 +546,9 @@ fun RoomBriefDetail(
 @Composable
 fun DetailCard(
     icon: ImageVector? = null,
-    vector_icon: Int? = null,
     title:String,
+    text:String = "All paid",
     width: Float = .5f,
-    total:String? = null,
-    rent_due_price:Int? = null,
-    paid_text:String = "All paid",
-    content:(@Composable () -> Unit)? = null,
     textColor:Long = 0xFFB2B0E8
 ){
     ROw(
@@ -587,37 +564,19 @@ fun DetailCard(
             ROw(
                 horizontalArrangement =  Arrangement.spacedBy(13.dp)
             ) {
-                if(icon != null){
-                    Icon(icon,
-                        contentDescription = "beds",
-                        modifier = Modifier.clip(CircleShape)
-                            .size(30.dp)
-                            .background(Color(0xFFB2B0E8).copy(alpha = 0.6f))
-                            .padding(6.dp)
-                    )
+                Box{
+                    if(icon != null){
+                        Icon(icon,
+                            contentDescription = "beds",
+                            modifier = Modifier.clip(CircleShape)
+                                .size(30.dp)
+                                .background(Color(0xFFB2B0E8).copy(alpha = 0.6f))
+                                .padding(6.dp)
+                        )
+                    }
                 }
-                if(vector_icon != null && icon == null){
-                    Icon(
-                        painter = painterResource(vector_icon),
-                        contentDescription = title,
-                        modifier = Modifier.clip(CircleShape)
-                            .size(30.dp)
-                            .background(Color(textColor))
-                            .padding(6.dp)
-                    )
-                }
-                if(total != null) {
-                    Text(total,fontSize = 16.sp,color = Color(0xFF3B38A0))
-                }
-                if(rent_due_price != null) {
-                    Text(
-                        if(rent_due_price == 0) paid_text else "₹ ${formatIndianRupee(number = "$rent_due_price")}",
-                        fontSize = 16.sp,
-                        color = if(rent_due_price== 0) Color(0xFF3B38A0) else Color(0xFFE4004B)
-                    )
-                }
-                if(content != null){
-                    content()
+                Box {
+                    Text(text,fontSize = 16.sp,color = Color(0xFF3B38A0))
                 }
             }
             Text(title, fontSize = 13.sp,color = Color.Black.copy(alpha = 0.6f))
@@ -777,10 +736,12 @@ fun Tenant(
     onTenantDelete: () -> Unit
 ){
     val isPaid = if(tenant.paymentStatus == 1) true else false
+    val isPartial = if(tenant.paymentStatus == 2) true else false
     val is_notice_applied = false
     val expanded = remember { mutableStateOf<Boolean>(false) }
     val is_delete_dialog = remember { mutableStateOf<Boolean>(false) }
     val is_rent_dialog_open = remember { mutableStateOf<Boolean>(false) }
+
     Card(
         colors = CardDefaults.cardColors(
             containerColor = Color.Transparent
@@ -810,17 +771,17 @@ fun Tenant(
                         horizontalArrangement = Arrangement.spacedBy(6.dp)
                     ) {
                         Badge(
-                            modifier = Modifier.border(1.dp, color = if(isPaid) Color.Unspecified else Color(0xFFF75270), shape = CircleShape),
-                            containerColor = if(isPaid) Color(0xFF59AC77) else Color(0xFFF7CAC9),
+                            modifier = Modifier.border(1.dp, color = if(isPaid || isPartial) Color.Unspecified else Color(0xFFF75270), shape = CircleShape),
+                            containerColor = if(isPaid) Color(0xFF59AC77) else if(isPartial) Color(0xFFFFBF00) else Color(0xFFF7CAC9),
                             contentColor = Color.White
                         ) {
                             Box(
                                 modifier = Modifier.padding(horizontal = 6.dp, vertical = 3.dp)
                             ){
                                 Text(
-                                    if(isPaid) "Paid" else "Not Paid",
+                                    if(isPaid) "Paid" else if(isPartial) "Partial" else "Not Paid",
                                     fontSize = 12.sp,
-                                    color =  if(isPaid) Color.White else Color(0xFFDC143C)
+                                    color =  if(isPaid) Color.White else if(isPartial) Color.Black else Color(0xFFDC143C)
                                 )
                             }
                         }

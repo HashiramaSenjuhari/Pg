@@ -808,17 +808,26 @@ fun Tenant(
 
                 val options = listOf<OptionModal>(
                     OptionModal(
-                        onClick = onTenantRentUpdate,
+                        onClick = {
+                            onTenantRentUpdate()
+                            expanded.value = false
+                        },
                         title = "Set Paid",
                         icon = drawable.outline_paid_24
                     ),
                     OptionModal(
-                        onClick = onTenantMessage,
+                        onClick = {
+                            onTenantMessage()
+                            expanded.value = false
+                        },
                         title = "Message",
                         icon = drawable.outline_chat_24
                     ),
                     OptionModal(
-                        onClick = onTenantNotice,
+                        onClick = {
+                            onTenantNotice()
+                            expanded.value = false
+                        },
                         title = "Notice",
                         icon = drawable.outline_warning_24
                     )
@@ -856,7 +865,10 @@ fun Tenant(
                         )
                     }
                     DropdownMenuItem(
-                        onClick = onTenantDelete,
+                        onClick = {
+                            onTenantDelete()
+                            expanded.value = false
+                        },
                         text = {
                             ROw(
                                 horizontalArrangement = Arrangement.spacedBy(6.dp)

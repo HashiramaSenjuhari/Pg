@@ -30,6 +30,7 @@ import com.example.billionairehari.R
 import com.example.billionairehari.Screens
 import com.example.billionairehari.components.RecentSearchBoard
 import com.example.billionairehari.core.data.local.dao.RecentSearchDao
+import com.example.billionairehari.core.data.local.dao.TenantDao
 import com.example.billionairehari.layout.ChildLayout
 import com.example.billionairehari.layout.SearchScreenLayout
 import com.example.billionairehari.screens.RoomCard
@@ -37,6 +38,7 @@ import com.example.billionairehari.screens.TenantCard
 import com.example.billionairehari.screens.TenantData
 import com.example.billionairehari.viewmodels.SearchUiState
 import com.example.billionairehari.viewmodels.TenantSearchViewModel
+import com.example.billionairehari.viewmodels.toTenantData
 
 
 @Composable
@@ -64,7 +66,7 @@ fun TenantSearchComponentScreen(
         }
     ) {
         when(state){
-            is SearchUiState.Data<TenantData> -> {
+            is SearchUiState.Data<TenantDao.TenantCardDetails> -> {
                 val size = state.data.size
                 if(size == 0){
                     Column(
@@ -90,7 +92,7 @@ fun TenantSearchComponentScreen(
                 else {
                     state.data.forEach {
                         TenantCard(
-                            tenant = it,
+                            tenant = it.toTenantData(),
                             onClick = {
                                 viewmodel.save_recent_search()
 //                                navController.navigate("${Screens.TENANTS_SCREEN}/${it}")

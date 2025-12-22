@@ -54,4 +54,7 @@ class TenantRepository @Inject constructor(
 
     override fun getTenantSearchCards(ownerId: String): Flow<List<TenantDao.TenantWithRoomRentCard>> = tenantDao
         .getTenantSearchCards(ownerId = ownerId)
+
+    override suspend fun removeTenant(ownerId:String,tenantId:String) = tenantDao
+        .removeTenant(ownerId = ownerId, tenantId = tenantId)
 }

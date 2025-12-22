@@ -61,7 +61,7 @@ interface RoomDao {
         COALESCE(COUNT(DISTINCT t.id),0) AS tenantCount
         FROM rooms r
         LEFT JOIN payments p ON p.room_id = r.id AND strftime('%Y-%m',p.payment_date) = strftime('%Y-%m','now')
-        LEFT JOIN tenants t ON t.room_id = r.id
+        LEFT JOIN tenants t ON t.room_id = r.id AND t.is_active = false
         WHERE r.id = :roomId AND r.owner_id = :ownerId
     """)
     fun getRoomFlow(roomId:String,ownerId:String): Flow<RoomWithTenantAndDueCount>
@@ -79,9 +79,13 @@ interface RoomDao {
         t.name,
         t.image,
         t.phone_number AS phoneNumber,
-        CASE WHEN p.id IS NOT NULL THEN 1 ELSE 0 END AS paymentStatus
+        CASE 
+            WHEN p.id IS NOT NULL AND SUM(p.amount) >= r.rent_price THEN 1 
+            WHEN p.id IS NOT NULL AND SUM(p.amount) > 0 THEN 2
+            ELSE 0 
+        END AS paymentStatus
         FROM rooms r
-        JOIN tenants t ON t.room_id = r.id
+        JOIN tenants t ON t.room_id = r.id AND t.is_active = true
         LEFT JOIN payments p ON p.tenant_id = t.id
         WHERE r.owner_id = :ownerId AND r.id = :roomId
         GROUP BY t.id
@@ -106,7 +110,7 @@ interface RoomDao {
         COUNT(DISTINCT t.id) AS tenant_count,
         COUNT(DISTINCT CASE WHEN p.id IS NULL THEN t.id END) AS not_paid
         FROM rooms r
-        LEFT JOIN tenants t ON t.room_id = r.id
+        LEFT JOIN tenants t ON t.room_id = r.id AND t.is_active = true
         LEFT JOIN payments p ON p.tenant_id = t.id
             AND strftime('%Y-%m',p.payment_date) = strftime('%Y-%m','now')
         WHERE r.owner_id = :ownerId
@@ -120,7 +124,7 @@ interface RoomDao {
         COUNT(DISTINCT t.id) AS tenant_count,
         COUNT(DISTINCT CASE WHEN p.id IS NULL THEN t.id END) AS not_paid
         FROM rooms r
-        LEFT JOIN tenants t ON t.room_id = r.id
+        LEFT JOIN tenants t ON t.room_id = r.id AND t.is_active = true
         LEFT JOIN payments p ON p.tenant_id = t.id
             AND strftime('%Y-%m',p.payment_date) = strftime('%Y-%m','now')
         WHERE r.owner_id = :ownerId
@@ -134,7 +138,7 @@ interface RoomDao {
         COUNT(DISTINCT t.id) AS tenant_count,
         COUNT(DISTINCT CASE WHEN p.id IS NULL THEN t.id END) AS not_paid
         FROM rooms r
-        LEFT JOIN tenants t ON t.room_id = r.id
+        LEFT JOIN tenants t ON t.room_id = r.id AND t.is_active = true
         LEFT JOIN payments p ON p.payment_date = t.id
             AND strftime('%Y-%m',p.payment_date) = strftime('%Y-%m','now')
         WHERE r.owner_id = :ownerId
@@ -165,7 +169,7 @@ interface RoomDao {
         r.name,
         r.bed_count - COALESCE(COUNT(t.id),0) as available_beds
         FROM rooms r
-        LEFT JOIN tenants t ON t.room_id = r.id
+        LEFT JOIN tenants t ON t.room_id = r.id AND t.is_active = true
         WHERE r.owner_id = :ownerId
         GROUP BY r.id,r.name
         ORDER BY r.name ASC

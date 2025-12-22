@@ -8,24 +8,28 @@ import androidx.lifecycle.viewModelScope
 import com.example.billionairehari.components.ChipType
 import com.example.billionairehari.core.data.local.dao.RoomDao
 import com.example.billionairehari.core.data.repository.RoomRepository
+import com.example.billionairehari.core.data.repository.TenantRepository
 import com.example.billionairehari.model.Room
 import com.example.billionairehari.model.RoomCardDetails
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 
 @HiltViewModel(assistedFactory = RoomViewModel.RoomViewModelFactory::class)
 class RoomViewModel @AssistedInject constructor(
     private val repository: RoomRepository,
-    @Assisted private val id:String
+    @Assisted private val id:String,
+    private val tenant: TenantRepository
 ): ViewModel() {
     @AssistedFactory
     interface RoomViewModelFactory {
@@ -50,4 +54,9 @@ class RoomViewModel @AssistedInject constructor(
             started = SharingStarted.WhileSubscribed(5000),
             initialValue = emptyList()
         )
+    fun removeTenant(id:String){
+        viewModelScope.launch(Dispatchers.IO) {
+            tenant.removeTenant(ownerId = "1", tenantId = id)
+        }
+    }
 }

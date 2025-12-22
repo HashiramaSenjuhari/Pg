@@ -15,4 +15,5 @@ interface TenantRepositoryInterface {
     fun getTenantRecentPayments(ownerId:String,tenantId:String): Flow<List<TenantDao.PaymentCard>>
     fun getTenantPayments(ownerId:String,tenantId:String): Flow<List<TenantDao.PaymentCard>>
     fun getTenantSearchCards(ownerId:String): Flow<List<TenantDao.TenantWithRoomRentCard>>
+    suspend fun removeTenant(ownerId:String,tenantId:String)
 }

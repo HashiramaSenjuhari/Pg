@@ -224,10 +224,6 @@ fun AppLayout(
                 onTenant = {
                     navController.navigate("${Screens.TENANTS_SCREEN}/${it}")
                 },
-                onTenantDelete = {
-                    is_dialog_open.value = true
-                    current_dialog_action.value = DIALOG_TYPE.DELETE_TENANT(id = it)
-                },
                 onTenantNotice = {
                 },
                 onTenantMessage = {
@@ -236,7 +232,7 @@ fun AppLayout(
                 },
                 onTenantRentUpdate = {
                     is_open.value = true
-                    current_action.value = MODAL_TYPE.UPDATE_TENANT_RENT(tenant = it)
+                    current_action.value = MODAL_TYPE.UPDATE_TENANT_RENT()
                 },
                 onTenantShare = {},
                 current_action = current_action

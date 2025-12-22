@@ -143,7 +143,6 @@ import com.example.billionairehari.layout.ChildLayout
 import com.example.billionairehari.layout.MODAL_TYPE
 import com.example.billionairehari.layout.component.ROw
 import com.example.billionairehari.model.Room
-import com.example.billionairehari.model.Tenant
 import com.example.billionairehari.model.TenantRentRecord
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -188,7 +187,6 @@ fun RoomScreen(
 
     onTenant:(String) -> Unit,
     onTenantRentUpdate:() -> Unit,
-    onTenantDelete:(String) -> Unit,
     onTenantMessage:(String) -> Unit,
     onTenantShare:(String) -> Unit,
     onTenantNotice:(String) -> Unit,
@@ -257,10 +255,10 @@ fun RoomScreen(
             Tenants(
                 tenants = tenants.value,
                 onTenant = {
-//                    onTenant(it)
+                    onTenant(it)
                 },
-                onTenantDelete = {
-//                    onTenantDelete(it)
+                onTenantRemove = {
+                    viewmodel.removeTenant(it)
                 },
                 onTenantRentUpdate = {
                     val details = TenantDao.TenantWithRoomRentCard(
@@ -274,7 +272,7 @@ fun RoomScreen(
                     current_action.value = MODAL_TYPE.UPDATE_TENANT_RENT(tenantRentDetails = details)
                 },
                 onTenantMessage = {
-//                    onTenantMessage(it)
+                    onTenantMessage(it)
                 },
                 onTenantNotice = {
 //                    onTenantNotice(it)
@@ -365,7 +363,7 @@ fun StaticBar(
 
     val dropdowns = listOf<DropDownParams>(
         DropDownParams(name = "Edit Room", icon = EditIcon, onClick = onRoomEdit),
-        DropDownParams(name = "Message", icon = ChatIcon, onClick = {}),
+//        DropDownParams(name = "Message", icon = ChatIcon, onClick = {}),
         DropDownParams(name = "Share", icon = ShareIcon, onClick = {}),
         DropDownParams(name = "Delete", icon = DeleteIcon, onClick = {}),
     )
@@ -666,7 +664,7 @@ fun Tenants(
     onTenantRentUpdate: (RoomDao.RoomTenantDetails) -> Unit,
     onTenantMessage: (String) -> Unit,
     onTenantNotice: (String) -> Unit,
-    onTenantDelete: (String) -> Unit
+    onTenantRemove: (String) -> Unit
 ){
     Column(
         modifier = Modifier.fillMaxWidth(),
@@ -694,8 +692,8 @@ fun Tenants(
                             onTenantNotice = {
                                 onTenantNotice(tenant.name)
                             },
-                            onTenantDelete = {
-                                onTenantDelete(tenant.id)
+                            onTenantRemove = {
+                                onTenantRemove(tenant.id)
                             }
                         )
                     }
@@ -733,7 +731,7 @@ fun Tenant(
     onTenantRentUpdate: () -> Unit,
     onTenantMessage: () -> Unit,
     onTenantNotice: () -> Unit,
-    onTenantDelete: () -> Unit
+    onTenantRemove: () -> Unit
 ){
     val isPaid = if(tenant.paymentStatus == 1) true else false
     val isPartial = if(tenant.paymentStatus == 2) true else false
@@ -866,7 +864,7 @@ fun Tenant(
                     }
                     DropdownMenuItem(
                         onClick = {
-                            onTenantDelete()
+                            onTenantRemove()
                             expanded.value = false
                         },
                         text = {
@@ -880,7 +878,7 @@ fun Tenant(
                                     tint =  Color(0xFFff2236)
                                 )
                                 Text(
-                                    "Delete",
+                                    "Remove",
                                     fontSize = 13.sp,
                                     color = Color(0xFFff2236)
                                 )

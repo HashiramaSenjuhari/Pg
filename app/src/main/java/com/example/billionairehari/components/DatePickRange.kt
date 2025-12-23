@@ -70,29 +70,36 @@ import java.util.Locale
 import java.util.TimeZone
 
 data class MonthFilterOption(
-    val name:String
+    val name:String,
+    val value:Int
 )
 
 val options = listOf<MonthFilterOption>(
-    MonthFilterOption(name = "Last 1 month"),
-    MonthFilterOption(name = "Last 3 month"),
-    MonthFilterOption(name = "Last 6 month"),
-    MonthFilterOption(name = "Last 1 year")
+    MonthFilterOption(name = "Default",0),
+    MonthFilterOption(name = "Last 1 month",value = 1),
+    MonthFilterOption(name = "Last 3 month",value = 3),
+    MonthFilterOption(name = "Last 6 month",value = 6),
+    MonthFilterOption(name = "Last 1 year",value = 12)
 )
+
+sealed class DateRangeType{
+    data class Static(val date:Int): DateRangeType()
+    data class Dynamic(val date:String): DateRangeType()
+}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DateFilterSheet(
-    selectedOption:String,
+    selectedOption: DateRangeType,
     selectedOptionIndex: MutableState<Int>,
     startDateInMilli: MutableState<Long>,
     endDateInMilli: MutableState<Long>,
     is_open: MutableState<Boolean>,
     sheetState: SheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
     onDismiss:() -> Unit,
-    onConfirm:(String) -> Unit
+    onConfirm:(DateRangeType) -> Unit
 ){
-    val selected = remember { mutableStateOf<String>(selectedOption) }
+    val selected = remember { mutableStateOf<DateRangeType>(selectedOption) }
 
     ModalBottomSheet(
         sheetState = sheetState,
@@ -116,7 +123,6 @@ fun DateFilterSheet(
                     .padding(vertical = 30.dp),
                 verticalArrangement = Arrangement.spacedBy(24.dp)
             ) {
-
                 /** static radio buttons **/
                 options.forEachIndexed { index,option ->
                     FilterOption(
@@ -124,7 +130,7 @@ fun DateFilterSheet(
                         onClick = {
                             if(index != selectedOptionIndex.value){
                                 selectedOptionIndex.value = index
-                                selected.value = option.name
+                                selected.value = DateRangeType.Static(option.value)
                             }
                         },
                         option = option.name
@@ -142,7 +148,7 @@ fun DateFilterSheet(
                             selectedOptionIndex.value = 5
                         }
                     )
-                    /** open if custom date button is selected **/
+                    /** Date Dialog open if custom date button is selected **/
                     if(selectedOptionIndex.value == 5){
                         CustomDatePicker(
                             is_open = is_open,
@@ -157,7 +163,7 @@ fun DateFilterSheet(
                     if(selectedOptionIndex.value <= 4){
                         onConfirm(selected.value)
                     }else {
-                        selected.value = mergeDates(startDateInMilli.value, endDateInMilli.value)
+                        selected.value = DateRangeType.Dynamic(mergeDates(startDateInMilli.value, endDateInMilli.value))
                         onConfirm(selected.value)
                     }
                 },

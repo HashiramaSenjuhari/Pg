@@ -190,14 +190,13 @@ interface TenantDao {
     data class RentPaid(val rentPaid:Int)
 
     @Query(
-
         """
         SELECT COUNT(DISTINCT t.id) AS notPaid
         FROM tenants t
         INNER JOIN rooms r ON r.id = t.room_id
         LEFT JOIN payments p ON p.tenant_id = t.id
             AND strftime('%Y-%m',p.payment_date) = strftime('%Y-%m','now')
-        WHERE r.owner_id = :ownerId AND p.id IS NULL
+        WHERE r.owner_id = :ownerId AND t.is_active = true AND p.id IS NULL
     """
     )
     fun getRentNotPaidFlow(ownerId: String): Flow<RentNotPaid>

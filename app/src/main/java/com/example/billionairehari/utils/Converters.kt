@@ -19,6 +19,11 @@ fun Long.toDateString(): String {
     return format.format(datetime)
 }
 
+fun Long.toFriendlyDate(): String {
+    val date = Date(this)
+    val format = SimpleDateFormat("dd MMM YYYY")
+    return format.format(date)
+}
 
 /** String to Long Converter **/
 

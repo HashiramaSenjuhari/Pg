@@ -1,6 +1,7 @@
 package com.example.billionairehari.modal
 
 import android.security.keystore.KeyNotYetValidException
+import android.util.Log
 import android.view.RoundedCorner
 import android.widget.SearchView
 import androidx.compose.foundation.BorderStroke
@@ -12,6 +13,7 @@ import androidx.compose.foundation.focusable
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.gestures.rememberScrollableState
 import androidx.compose.foundation.gestures.scrollable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -108,6 +110,9 @@ import kotlin.math.exp
 import kotlin.system.exitProcess
 import com.example.billionairehari.R
 import com.example.billionairehari.components.AppButton
+import com.example.billionairehari.components.ErrorText
+import com.example.billionairehari.components.Label
+import com.example.billionairehari.components.dialogs.BottomTenantSearchCard
 import com.example.billionairehari.core.data.local.dao.TenantDao
 import com.example.billionairehari.core.data.local.entity.PaymentType
 import com.example.billionairehari.layout.BottomDialogSearchScreen
@@ -121,7 +126,7 @@ import com.example.billionairehari.viewmodels.TenantSearchCard
 @Composable
 fun RecordRentPriceModal(
     is_open: MutableState<Boolean>,
-    id: String? = null,
+    tenantWithRentCard: TenantDao.TenantWithRoomRentCard? = null,
     viewmodel: RecordRentViewModel = hiltViewModel()
 ){
     val query = viewmodel.query.collectAsState()
@@ -132,6 +137,16 @@ fun RecordRentPriceModal(
     val selectedTenantCard = remember { mutableStateOf<TenantDao.TenantWithRoomRentCard?>(null) }
 
     val data = viewmodel.record.value
+
+    LaunchedEffect(Unit) {
+        if(tenantWithRentCard != null){
+            selectedTenantCard.value = tenantWithRentCard
+            viewmodel.update_tenant(tenantWithRentCard)
+        }
+        else if(data.tenantAndRent != null){
+            selectedTenantCard.value = data.tenantAndRent
+        }
+    }
 
     Column(
         modifier = Modifier.fillMaxSize(),
@@ -150,8 +165,13 @@ fun RecordRentPriceModal(
                 }
             )
             TenantCard(
-                details = data.tenantAndRent
+                details = selectedTenantCard.value,
+                error = data.tenantError,
+                onClick = {
+                    is_search_open.value = true
+                }
             )
+            Log.d("BILLIONAREGREATHARI",data.amountError ?: "")
             Input(
                 modifier = Modifier.fillMaxWidth(),
                 label = "Paying Now",
@@ -168,7 +188,7 @@ fun RecordRentPriceModal(
                 },
                 type = InputType.NUMBER,
                 keyBoardType = KeyboardType.Number,
-                error = data.payError,
+                error = data.amountError,
                 readOnly = data.isLoading
             )
             Row(
@@ -207,7 +227,7 @@ fun RecordRentPriceModal(
         ){
             AppButton(
                 onClick = {
-                    viewmodel.submit()
+                    viewmodel.submit(is_open = is_open)
                 },
                 containerColor = Color.Black.copy(0.9f),
                 contentColor = Color.White,
@@ -232,10 +252,11 @@ fun RecordRentPriceModal(
             onClick = {
                 viewmodel.update_tenant(it)
                 is_search_open.value = false
+                selectedTenantCard.value = it
             },
             is_search_open = is_search_open,
             search_results = search_results.value,
-            selectedTenantCard = selectedTenantCard
+            selected_tenant = selectedTenantCard.value
         )
     }
 }
@@ -243,11 +264,11 @@ fun RecordRentPriceModal(
 @Composable
 fun TenantWithRoomRentSearch(
     is_search_open: MutableState<Boolean>,
-    selectedTenantCard: MutableState<TenantDao.TenantWithRoomRentCard?>,
     query:String,
     onChangeQuery:(String) -> Unit,
     onClick:(TenantDao.TenantWithRoomRentCard) -> Unit,
     search_results: List<TenantDao.TenantWithRoomRentCard>,
+    selected_tenant: TenantDao.TenantWithRoomRentCard? = null
 ){
     BottomDialogSearchScreen(
         is_open = is_search_open,
@@ -261,45 +282,14 @@ fun TenantWithRoomRentSearch(
             verticalArrangement = Arrangement.spacedBy(6.dp)
         ) {
             search_results.forEach {
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clickable(
-                            onClick = {
-                                onClick(it)
-                            }
-                        )
-                        .drawBehind(
-                            onDraw = {
-                                drawLine(
-                                    start = Offset(x = 0f, y = size.height),
-                                    end = Offset(x = size.width, y = size.height),
-                                    color = Color.Black.copy(0.3f),
-                                    strokeWidth = 1f
-                                )
-                            }
-                        ).padding(6.dp)
-                ) {
-                    Row(
-                        verticalAlignment = Alignment.Top,
-                        horizontalArrangement = Arrangement.spacedBy(13.dp)
-                    ) {
-                        AsyncImage(
-                            model = "https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Ftse2.mm.bing.net%2Fth%2Fid%2FOIP.Z1yKFPWjHLgvy4O3Hh3-oQHaFj%3Fpid%3DApi&f=1&ipt=c1abd002efe0a166727ee32168bb29f447e6c7a120fd5a7e9014fafc240c0a3f&ipo=images",
-                            contentDescription = "",
-                            modifier = Modifier
-                                .clip(CircleShape)
-                                .size(40.dp),
-                            contentScale = ContentScale.Crop
-                        )
-                        Column(
-                            verticalArrangement = Arrangement.spacedBy(6.dp)
-                        ) {
-                            Text(it.tenantName, fontSize = 16.sp, fontWeight = FontWeight.Medium)
-                            Text(it.roomName, color = Color.Black.copy(0.4f))
-                        }
-                    }
-                }
+                BottomTenantSearchCard(
+                    name = it.tenantName,
+                    roomName = it.roomName,
+                    onClick = {
+                        onClick(it)
+                    },
+                    isSelected = if(selected_tenant != null) selected_tenant == it else false
+                )
             }
         }
     }
@@ -378,14 +368,29 @@ fun PaymentMethod(
 
 @Composable
 fun TenantCard(
-    details: TenantDao.TenantWithRoomRentCard?= null
+    details: TenantDao.TenantWithRoomRentCard?= null,
+    error:String? = null,
+    onClick:() -> Unit
 ){
-    if(details == null){
-        NoTenantPreview()
-    }else{
-        TenantPreview(
-            details = details
+    Box(
+        modifier = Modifier.clickable(
+            onClick = onClick,
+            indication = null,
+            interactionSource = MutableInteractionSource()
         )
+    ){
+        if(details == null){
+            Column(
+                verticalArrangement = Arrangement.spacedBy(6.dp)
+            ) {
+                NoTenantPreview()
+                ErrorText(error = error)
+            }
+        }else{
+            TenantPreview(
+                details = details
+            )
+        }
     }
 }
 

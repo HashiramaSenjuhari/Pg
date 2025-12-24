@@ -104,7 +104,9 @@ import com.example.billionairehari.viewmodels.TenantsViewModel
 import kotlin.math.min
 import com.example.billionairehari.R
 import com.example.billionairehari.core.data.local.dao.TenantDao
+import com.example.billionairehari.core.data.local.entity.PaymentStatus
 import com.example.billionairehari.layout.DynamicShowcaseScreen
+import com.example.billionairehari.modal.payment_method
 
 
 @Composable
@@ -137,7 +139,7 @@ data class TenantData(
     val name:String = "",
     val room_name:String = "",
     val image:String = "",
-    val is_paid:Boolean = true,
+    val paymentStatus: Int= 0,
     val is_noticed:Boolean = true,
     val phone:String = "8668072363"
 )
@@ -147,77 +149,9 @@ fun TenantDao.TenantCardDetails.toData() :TenantData = TenantData(
     name = name,
     image = "",
     phone = phone_number,
-    is_paid = current_paid == 1,
+    paymentStatus = paymentStatus,
     is_noticed = false,
     room_name = roomName
-)
-
-val tenants = listOf<TenantData>(
-    TenantData(
-        id = "",
-        name = "Apple",
-        room_name = "Billionaire",
-        image = "",
-        is_noticed = false,
-        is_paid = false
-    ),
-    TenantData(
-        id = "",
-        name = "BillionaireHari",
-        room_name = "Billionaire",
-        image = "",
-        is_noticed = false,
-        is_paid = false
-    ),
-    TenantData(
-        id = "",
-        name = "BillionaireHari",
-        room_name = "Billionaire",
-        image = "",
-        is_noticed = false,
-        is_paid = true
-    ),
-    TenantData(
-        id = "",
-        name = "Great",
-        room_name = "Billionaire",
-        image = "",
-        is_noticed = false,
-        is_paid = true
-    ),
-    TenantData(
-        id = "",
-        name = "Hari",
-        room_name = "Billionaire",
-        image = "",
-        is_noticed = false,
-        is_paid = true
-    ),
-    TenantData(
-        id = "",
-        name = "Mercedez",
-        room_name = "Billionaire",
-        image = "",
-        is_noticed = false,
-        is_paid = true
-    ),
-    TenantData(
-        id = "",
-        name = "BillionaireHari Billionaire",
-        room_name = "Billionaire",
-        image = "",
-        is_noticed = false,
-        is_paid = true
-    ),
-    TenantData(
-        id = "",
-        name = "BillionaireHari",
-        room_name = "Billionaire",
-        image = "",
-        is_noticed = false,
-        is_paid = true
-    )
-
 )
 
 @Composable
@@ -269,7 +203,7 @@ fun TenantCard(
     onClickCall:() -> Unit,
     onCLickMessage:() -> Unit
 ){
-    val color = if(tenant.is_paid)Color.Green else Color.Red
+    val color = if(tenant.paymentStatus == 1)Color.Green else if(tenant.paymentStatus == 2) Color.Yellow else Color.Red
     val name = if(tenant.name.length > 24){
         tenant.name.take(16) + "..."
     }else {
@@ -324,7 +258,7 @@ fun TenantCard(
                             .padding(horizontal = 13.dp),
                         containerColor = Color.Transparent
                     ){
-                        Text(if(tenant.is_paid) "Paid" else "Not Paid", color = if(tenant.is_paid) Color.Black else Color.White)
+                        Text(if(tenant.paymentStatus == 1) "Paid" else if(tenant.paymentStatus == 2) "Partial" else "Not Paid", color = if(tenant.paymentStatus > 0) Color.Black else Color.White)
                     }
                 }
                 Text(

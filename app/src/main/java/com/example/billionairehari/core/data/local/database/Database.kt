@@ -2,6 +2,7 @@ package com.example.billionairehari.core.data.local.database
 
 import androidx.room.Database
 import androidx.room.RoomDatabase
+import androidx.room.TypeConverters
 import com.example.billionairehari.core.data.local.dao.ActivityDao
 import com.example.billionairehari.core.data.local.dao.AdditionalInfoDao
 import com.example.billionairehari.core.data.local.dao.OwnerDao
@@ -16,6 +17,7 @@ import com.example.billionairehari.core.data.local.entity.Room
 import com.example.billionairehari.core.data.local.entity.Activity
 import com.example.billionairehari.core.data.local.entity.AdditionalInfo
 import com.example.billionairehari.core.data.local.entity.RecentSearch
+import com.example.billionairehari.core.data.local.typeconverter.PaymentTypeConverter
 
 /**
  * Abstract class the must have no body and must provide by subclass

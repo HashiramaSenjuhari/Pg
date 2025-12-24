@@ -33,8 +33,6 @@ data class TenantData (
     val roomId:String = "",
     val room:String = "",
     val roomError:String? = null,
-    val date:Long = 0L,
-    val dateError:String? = null,
 
     val first_month_rent:Boolean = false,
     val security_deposit: Boolean = false,
@@ -43,16 +41,18 @@ data class TenantData (
     val isLoading:Boolean = false
 )
 
-fun TenantData.toRoom(id:String,createdAt:String) : Tenant = Tenant(
-    id = id,
+fun TenantData.toRoom(id:String,ownerId:String,createdAt:String,joiningDateTime:String) : Tenant = Tenant(
+    id = generateUUID(),
     name = name,
     roomId = roomId,
     phoneNumber = phone,
     image = "",
-    createdAt = createdAt,
-    joiningDate = "",
+    joiningDate = joiningDateTime,
     isActive = true,
-    automaticRentRemainder = automatic_remainder
+    automaticRentRemainder = automatic_remainder,
+    ownerId = ownerId,
+    updatedAt = currentDateTime(),
+    createdAt = currentDateTime(),
 )
 
 @HiltViewModel
@@ -90,9 +90,6 @@ class AddTenantViewModel @Inject constructor (
     fun update_roomId(id:String){
         tenant.value = tenant.value.copy(roomId = id)
     }
-    fun update_date(date:Long){
-        tenant.value = tenant.value.copy(date = date, dateError = null)
-    }
     fun update_first_month_rent_paid(paid:Boolean) {
         tenant.value = tenant.value.copy(first_month_rent = paid)
     }
@@ -111,13 +108,11 @@ class AddTenantViewModel @Inject constructor (
         tenant.value = tenant.value.copy(
             nameError = validateName(tenant.value.name),
             phoneNumberError = validatePhoneNumber(tenant.value.phone),
-            roomError = validateRoom(tenant.value.room),
-            dateError = validateDate(tenant.value.date)
+            roomError = validateRoom(tenant.value.room)
         )
         if(tenant.value.nameError != null
             || tenant.value.phoneNumberError != null
-            || tenant.value.roomError != null
-            || tenant.value.dateError != null){
+            || tenant.value.roomError != null){
             return
         }
         tenant.value = tenant.value.copy(
@@ -126,10 +121,12 @@ class AddTenantViewModel @Inject constructor (
         viewModelScope.launch {
             try {
                 val id = generateUUID()
-                val createdAt = currentDateTime()
+                val currentDateTime = currentDateTime()
                 val tenant = tenant.value.toRoom(
                     id = id,
-                    createdAt = createdAt
+                    createdAt = currentDateTime,
+                    joiningDateTime = currentDateTime,
+                    ownerId = "1",
                 )
                 Log.d("TENANTGREAT",tenant.toString())
                 repository.insertTenant(tenant = tenant)

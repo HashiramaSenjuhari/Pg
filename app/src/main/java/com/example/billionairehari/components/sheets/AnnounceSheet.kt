@@ -118,7 +118,6 @@ import kotlin.math.roundToInt
 import com.example.billionairehari.R
 import com.example.billionairehari.components.dialogs.SearchAndSelectMultipleTenants
 import com.example.billionairehari.icons.FilterIcon
-import com.example.billionairehari.modal.SearchDialog
 import com.example.billionairehari.viewmodels.AudioRecordViewModel
 import com.example.billionairehari.viewmodels.State
 import com.google.accompanist.permissions.ExperimentalPermissionsApi

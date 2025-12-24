@@ -25,6 +25,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import com.example.billionairehari.components.Input
+import com.example.billionairehari.components.SearchBar
 import com.example.billionairehari.components.SearchInput
 
 
@@ -37,44 +38,45 @@ fun BottomDialogSearchScreen(
     content:@Composable () -> Unit
 ){
     val focusRequester = remember { FocusRequester() }
-
-    LaunchedEffect(Unit) {
-        focusRequester.requestFocus()
-    }
-    Dialog(
-        onDismissRequest = {
-            is_open.value = false
-        },
-        properties = DialogProperties(dismissOnBackPress = true)
-    ) {
-        Surface(
-            modifier = Modifier.fillMaxWidth(0.9f)
-                .fillMaxHeight(0.6f),
-            shape = RoundedCornerShape(24.dp),
-            color = Color.White
+    if(is_open.value){
+        LaunchedEffect(Unit) {
+            focusRequester.requestFocus()
+        }
+        Dialog(
+            onDismissRequest = {
+                is_open.value = false
+            },
+            properties = DialogProperties(dismissOnBackPress = true)
         ) {
-            Column(
-                modifier = Modifier.fillMaxSize()
-                    .padding(13.dp)
+            Surface(
+                modifier = Modifier.fillMaxWidth(0.9f)
+                    .fillMaxHeight(0.6f),
+                shape = RoundedCornerShape(24.dp),
+                color = Color.White
             ) {
-                SearchInput(
-                    query = value,
-                    onChangeValue = {
-                        onChangeValue(it)
-                    },
-                    label = "Search Room",
-                    onClickBack = {
-                        is_open.value = false
-                    },
-                    focus = focusRequester
-                )
                 Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(top = 13.dp)
-                        .verticalScroll(state = rememberScrollState())
+                    modifier = Modifier.fillMaxSize()
+                        .padding(13.dp)
                 ) {
-                    content.invoke()
+                    SearchBar(
+                        value = value,
+                        onValueChange = {
+                            onChangeValue(it)
+                        },
+                        trailingIcon = {
+
+                        },
+                        placeholder = "Search Room",
+                        modifier = Modifier.focusRequester(focusRequester = focusRequester)
+                    )
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(top = 13.dp)
+                            .verticalScroll(state = rememberScrollState())
+                    ) {
+                        content.invoke()
+                    }
                 }
             }
         }

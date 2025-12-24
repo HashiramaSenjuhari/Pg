@@ -75,6 +75,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.toUpperCase
@@ -87,6 +88,7 @@ import androidx.room.util.copy
 import coil.compose.AsyncImage
 import com.example.billionairehari.components.AppButton
 import com.example.billionairehari.components.contacts.dial
+import com.example.billionairehari.core.data.local.dao.TenantDao
 import com.example.billionairehari.icons.CalendarIcon
 import com.example.billionairehari.icons.TenantIcon
 import com.example.billionairehari.layout.ChildLayout
@@ -94,10 +96,12 @@ import com.example.billionairehari.layout.component.ROw
 import com.example.billionairehari.utils.currentMonth
 import com.example.billionairehari.viewmodels.TenantViewModel
 import com.google.android.material.chip.Chip
+import com.example.billionairehari.R
+import com.example.billionairehari.viewmodels.UiState
 
 val tenantDropDowns = listOf<DropDownParams>(
-    DropDownParams(name = "Update Tenant", icon = IconType.Vector(Icons.Outlined.Edit), onClick = {}),
-    DropDownParams(name = "Delete", icon = IconType.Vector(Icons.Outlined.Delete), onClick = {})
+    DropDownParams(name = "Update Tenant", icon = Icons.Outlined.Edit, onClick = {}),
+    DropDownParams(name = "Delete", icon = Icons.Outlined.Delete, onClick = {})
 )
 
 @Composable
@@ -113,6 +117,7 @@ fun TenantScreen(
         }
     )
     val tenant = viewmodel.tenant_basic.collectAsState()
+    val payment_history = viewmodel.recent_payment_history.collectAsState()
     val scrollState = rememberScrollState()
 
     ChildLayout(
@@ -130,75 +135,84 @@ fun TenantScreen(
             )
         }
     ) {
-        Column(
-            modifier = Modifier.padding(top = 13.dp)
-        ) {
-            TenantProfileBar(
-                name = tenant.value.name,
-                isActive = tenant.value.is_active,
-                roomName = tenant.value.tenantRoomName
-            )
+        when(val data = tenant.value){
+            is UiState.Data<TenantDao.TenantDetails> -> {
+                val tenant = data.data
+                Column(
+                    modifier = Modifier.padding(top = 13.dp)
+                ) {
+                    TenantProfileBar(
+                        name = tenant.name,
+                        isActive = tenant.is_active,
+                        roomName = tenant.tenantRoomName
+                    )
+                }
+                TenantRentDetail(
+                    paymentStatus = tenant.paymentStatus,
+                    dueDate = tenant.dueDate
+                )
+                CompleteTenantInfo()
+                TenantDetailShowcase(
+                    title = "Personal",
+                    details = listOf(
+                        DetailModal(
+                            icon = Icons.Outlined.Person,
+                            title = "Age",
+                            value = tenant.dob ?: "NULL",
+                        ),
+                        DetailModal(
+                            icon = Icons.Outlined.LocationOn,
+                            title = "State",
+                            value = tenant.state ?: "NULL",
+                        ),
+                        DetailModal(
+                            icon = Icons.Outlined.DateRange,
+                            title = "Joined At",
+                            value = tenant.joining_date,
+                        )
+                    )
+                )
+                TenantDetailShowcase(
+                    title = "Contact Detail",
+                    details = listOf(
+                        DetailModal(
+                            icon = Icons.Outlined.Call,
+                            title = "Phone Number",
+                            value = PhoneNumberUtils.formatNumber("8668072364","IN"),
+                            button = CardAction(
+                                onClick = {
+                                    dial(context = context, number = "8668072363")
+                                },
+                                icon = Icons.Default.Call
+                            )
+                        ),
+                        DetailModal(
+                            icon = Icons.Outlined.Call,
+                            title = "alternate number",
+                            value = PhoneNumberUtils.formatNumber("8668072364","IN"),
+                            button = CardAction(
+                                onClick = {
+                                    dial(context = context, number = "8668072363")
+                                },
+                                icon = Icons.Default.Call
+                            )
+                        )
+                    )
+                )
+                RentHistory(
+                    payment_details = payment_history.value,
+                    onNavigateToHistory = onNavigateToHistory
+                )
+                Box(
+                    modifier = Modifier
+                        .background(Color.Blue)
+                        .padding(vertical = 24.dp)
+                )
+            }
+            UiState.Loading -> {
+                Text("Loading")
+            }
         }
-        TenantRentDetail(
-            is_paid = tenant.value.currentPaid == 1,
-            dueDate = tenant.value.dueDate
-        )
-        CompleteTenantInfo()
-        TenantDetailShowcase(
-            title = "Personal",
-            details = listOf(
-                DetailModal(
-                    icon = Icons.Outlined.Person,
-                    title = "Age",
-                    value = "18 year",
-                ),
-                DetailModal(
-                    icon = Icons.Outlined.LocationOn,
-                    title = "State",
-                    value = "Puducherry",
-                ),
-                DetailModal(
-                    icon = Icons.Outlined.DateRange,
-                    title = "Joined At",
-                    value = "Jul 24,2024",
-                )
-            )
-        )
-        TenantDetailShowcase(
-            title = "Contact Detail",
-            details = listOf(
-                DetailModal(
-                    icon = Icons.Outlined.Call,
-                    title = "Phone Number",
-                    value = PhoneNumberUtils.formatNumber("8668072364","IN"),
-                    button = CardAction(
-                        onClick = {
-                            dial(context = context, number = "8668072363")
-                        },
-                        icon = Icons.Default.Call
-                    )
-                ),
-                DetailModal(
-                    icon = Icons.Outlined.Call,
-                    title = "alternate number",
-                    value = PhoneNumberUtils.formatNumber("8668072364","IN"),
-                    button = CardAction(
-                        onClick = {
-                            dial(context = context, number = "8668072363")
-                        },
-                        icon = Icons.Default.Call
-                    )
-                )
-            )
-        )
-        RentHistory(
-            onNavigateToHistory = onNavigateToHistory
-        )
-        Box(
-            modifier = Modifier
-                .background(Color.Blue)
-                .padding(vertical = 24.dp)
-        )
     }
 }
 
@@ -288,11 +302,37 @@ fun TenantProfileBar(
     }
 }
 
+data class TenantRentCardUi(
+    val status:String,
+    val color: Color
+)
+
 @Composable
 fun TenantRentDetail(
-    is_paid:Boolean,
+    paymentStatus:Int,
     dueDate:String
 ){
+    // 0 - not paid
+    // 1 - paid
+    // 2 - partial
+
+    val tenantRentCardUi = if(paymentStatus == 0){
+        TenantRentCardUi(
+            status = "Not Paid",
+            color = Color.Red
+        )
+    }else if(paymentStatus == 1) {
+        TenantRentCardUi(
+            status = "Paid",
+            color = Color.Green
+        )
+    }else {
+        TenantRentCardUi(
+            status = "Partial",
+            color = Color.Yellow
+        )
+    }
+
     Column(
         verticalArrangement = Arrangement.spacedBy(13.dp)
     ) {
@@ -302,13 +342,13 @@ fun TenantRentDetail(
             DetailCard(
                 title = "Rent Paid (current month)",
                 icon = CalendarIcon,
-                rent_due_price = 0,
-                paid_text = if(is_paid) "Paid" else "Not Paid"
+                text = tenantRentCardUi.status,
+                textColor = tenantRentCardUi.color.value.toLong()
             )
             DetailCard(
                 title = "Rent Due Date",
                 icon = CalendarIcon,
-                total = "${dueDate} ${currentMonth()}",
+                text = "${dueDate} ${currentMonth()}",
                 width = 1f
             )
         }
@@ -447,6 +487,7 @@ val history = listOf<RentHistory>(
 
 @Composable
 fun RentHistory(
+    payment_details:List<TenantDao.PaymentCard>,
     onNavigateToHistory: () -> Unit
 ){
     Column(
@@ -464,20 +505,36 @@ fun RentHistory(
                 Text("View All >")
             }
         }
-        Text("Last 3 month")
-        Column(
-            modifier = Modifier.clip(RoundedCornerShape(13.dp))
-                .padding(vertical = 6.dp),
-            verticalArrangement = Arrangement.spacedBy(13.dp)
-        ) {
-            history.slice(0..2).forEach {
-                rent ->
-                TableRow(
-                    month = rent.month,
-                    amount = rent.amount,
-                    paid_date = rent.paid_date,
-                    amount_paid = rent.paid_amount
+        if(payment_details.size > 0){
+            Text("Recent Payments")
+            Column(
+                modifier = Modifier.clip(RoundedCornerShape(13.dp))
+                    .padding(vertical = 6.dp),
+                verticalArrangement = Arrangement.spacedBy(13.dp)
+            ) {
+                payment_details.forEach {
+                        rent ->
+                    TableRow(
+                        month = rent.paymentDate,
+                        amount = rent.amountPaid.toString(),
+                        paid_date = rent.paymentDate,
+                        amount_paid = rent.amountPaid.toString(),
+                        due_date = rent.dueDate
+                    )
+                }
+            }
+        }else{
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                verticalArrangement = Arrangement.spacedBy(6.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Icon(
+                    painter = painterResource(R.drawable.empty_tenants),
+                    contentDescription = "",
+                    modifier = Modifier.size(160.dp)
                 )
+                Text("No Payment History Found")
             }
         }
     }
@@ -488,7 +545,8 @@ fun TableRow(
     month:String,
     amount:String,
     amount_paid:String,
-    paid_date:String
+    paid_date:String,
+    due_date:String
 ){
     val remaning_amount = (amount.toIntOrNull() ?: 0) - (amount_paid.toIntOrNull() ?: 0)
     val paid_status = when {
@@ -549,7 +607,7 @@ fun TableRow(
                 modifier = Modifier.fillMaxWidth(),
             ) {
                 Text(
-                    "Due date: ${paid_date}",
+                    "Due date: ${due_date}",
                     fontSize = 13.sp,
                     color = Color.Black.copy(alpha = 0.4f),)
                 Text(

@@ -11,9 +11,16 @@ import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import javax.inject.Inject
 
+
+sealed class UiState<out T> {
+    data class Data<T>(val data:T): UiState<T>()
+    object Loading :UiState<Nothing>()
+}
 
 @HiltViewModel(assistedFactory = TenantViewModel.TenantViewModelFactory::class)
 class TenantViewModel @AssistedInject constructor(
@@ -25,11 +32,21 @@ class TenantViewModel @AssistedInject constructor(
         fun create(id:String): TenantViewModel
     }
 
-    val tenant_basic = repository.getTenant(ownerId = "1", tenantId = id)
+    val tenant_basic: StateFlow<UiState<TenantDao.TenantDetails>> = repository.getTenant(ownerId = "1", tenantId = id)
+        .map {
+            UiState.Data<TenantDao.TenantDetails>(it)
+        }
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5000),
-            initialValue = TenantDao.TenantDetails()
+            initialValue = UiState.Loading
+        )
+
+    val recent_payment_history: StateFlow<List<TenantDao.PaymentCard>> = repository.getTenantRecentPayments(ownerId = "1", tenantId = id)
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = emptyList()
         )
 
 }

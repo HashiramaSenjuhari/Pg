@@ -95,7 +95,7 @@ fun TenantSearchComponentScreen(
                             tenant = it.toTenantData(),
                             onClick = {
                                 viewmodel.save_recent_search()
-//                                navController.navigate("${Screens.TENANTS_SCREEN}/${it}")
+                                navController.navigate("${Screens.TENANTS_SCREEN}/${it.id}")
                             },
                             onCLickMessage = {},
                             onClickCall = {}

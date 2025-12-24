@@ -35,17 +35,19 @@ import kotlin.coroutines.CoroutineContext
 
 
 data class RecordDataUiState(
-    val tenantAndRent: TenantDao.TenantWithRoomRentCard,
+    val tenantAndRent: TenantDao.TenantWithRoomRentCard? = null,
     val amount:String = "",
     val paymentDate:Long = 0L,
     val paymentType: PaymentType = PaymentType.CASH,
 
     val isLoading:Boolean = false,
-    val payError:String? = null,
-    val dateError:String? = null
+
+    val tenantError:String? = null,
+    val dateError:String? = null,
+    val amountError:String? = null
 ){
     val paymentStatus: PaymentStatus
-        get() = if(this.amount.toIntOrNull()!! < tenantAndRent.rentPrice){
+        get() = if(this.amount.toIntOrNull()!! < tenantAndRent?.rentPrice!!){
         PaymentStatus.PARTIAL
     }else {
         PaymentStatus.PAID
@@ -55,13 +57,13 @@ data class RecordDataUiState(
 fun RecordDataUiState.toRoom(ownerId:String) : Payment = Payment(
     id = generateUUID(),
     ownerId = ownerId,
-    tenantId = tenantAndRent.id,
-    roomId = tenantAndRent.roomId,
+    tenantId = tenantAndRent?.id!!,
+    roomId = tenantAndRent?.roomId!!,
 
     amount = amount.toInt(),
     paymentType = paymentType,
     paymentStatus = paymentStatus,
-    dueDate = combineDaytoCurrentDate(tenantAndRent.dueDay),
+    dueDate = combineDaytoCurrentDate(tenantAndRent?.dueDay!!),
     paymentDate = paymentDate.toDateString(),
     updatedAt = currentDateTime(),
     createdAt = currentDateTime()
@@ -103,21 +105,20 @@ class RecordRentViewModel @Inject constructor(
     /** SEARCH PART - END **/
 
     /** RECORD DATA - START **/
-    private val _record: MutableState<RecordDataUiState> = mutableStateOf(RecordDataUiState(
-        tenantAndRent = TenantDao.TenantWithRoomRentCard()
-    ))
+    private val _record: MutableState<RecordDataUiState> = mutableStateOf(RecordDataUiState())
     val record: State<RecordDataUiState> get() = _record
 
     fun update_tenant(tenant: TenantDao.TenantWithRoomRentCard){
         _record.value = _record.value.copy(
-            tenantAndRent = tenant
+            tenantAndRent = tenant,
+            tenantError = null
         )
     }
 
     fun update_paying_amount(price:String){
         _record.value = _record.value.copy(
             amount = price,
-            payError = null
+            amountError = null
         )
     }
 
@@ -134,14 +135,25 @@ class RecordRentViewModel @Inject constructor(
         )
     }
 
-    fun submit(){
+    fun submit(is_open: MutableState<Boolean>){
+        val current_value = _record.value
+        Log.d("CLICKED",current_value.toString())
+
+        /** Error handling **/
         _record.value = _record.value.copy(
-            payError = validateRent(_record.value.amount),
-            dateError = validateDate(_record.value.paymentDate)
+            dateError = validateDate(current_value.paymentDate),
+            tenantError = validateTenant(tenant = current_value.tenantAndRent),
+            amountError = validateAmount(current_value.amount)
         )
-        if(_record.value.dateError !== null || _record.value.payError !== null){
+        val current_error = _record.value
+        Log.d("ERRORSGREAT",current_error.toString())
+        if(current_error.dateError != null
+            || current_error.tenantError != null
+            || current_error.amountError != null){
             return
         }
+
+        /** Saving to room **/
         viewModelScope.launch(Dispatchers.IO) {
             try {
                 val current_data = _record.value
@@ -154,15 +166,32 @@ class RecordRentViewModel @Inject constructor(
                     ownerId = "1"
                 )
                 repository.insertPayment(payment = payment_data)
+                is_open.value = false
             }catch(error: Exception){
 
             }finally {
-                _record.value = _record.value.copy(
-                    isLoading = false
-                )
-//                _record.value = RecordData()
+                _record.value = RecordDataUiState()
             }
         }
     }
     /** RECORD PART - END **/
+}
+
+fun validateTenant(tenant: TenantDao.TenantWithRoomRentCard? = null):String?{
+    if(tenant == null){
+        return "Please Choose the Tenant to Proceed With furthur"
+    }
+    return null
+}
+
+fun validateAmount(amount:String):String? {
+    val price = amount.toIntOrNull() ?: 0
+    Log.d("MAXHARI",price.toString())
+    if(price > 999999){
+        return "Max of 6 digit allowed"
+    }
+    else if(price < 1){
+        return "Please Enter Valid amount"
+    }
+    return null
 }

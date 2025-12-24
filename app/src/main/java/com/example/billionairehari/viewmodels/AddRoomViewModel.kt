@@ -1,6 +1,5 @@
 package com.example.billionairehari.viewmodels
 
-import android.util.Log
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
@@ -11,14 +10,9 @@ import com.example.billionairehari.core.data.repository.OwnerRepository
 import com.example.billionairehari.core.data.repository.RoomRepository
 import com.example.billionairehari.utils.currentDateTime
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
-import okhttp3.Dispatcher
 import java.util.UUID
 import javax.inject.Inject
-import kotlin.uuid.Uuid
 
 data class RoomData(
     val name:String = "",
@@ -153,7 +147,9 @@ class AddRoomViewModel @Inject constructor(
 //                    phone = "8668072363",
 //                    isVerified = true,
 //                    pgName = "BillionaireHari",
-//                    createdAt = currentDateTime()
+//                    createdAt = currentDateTime(),
+//                    lastVisit = currentDateTime(),
+//                    updatedAt = currentDateTime()
 //                )
 //                ownerDao.createOwner(owner)
                 val room = Room(
@@ -166,7 +162,9 @@ class AddRoomViewModel @Inject constructor(
                     deposit = data.deposit.toInt(),
                     features = data.features,
                     images = emptyList(),
-                    location = data.location
+                    location = data.location,
+                    updatedAt = currentDateTime(),
+                    createdAt = currentDateTime()
                 )
                 repository.insertRoom(room)
 //                val great = repository.getRoom(roomId = id, ownerId = "1")

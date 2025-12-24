@@ -17,6 +17,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.style.TextMotion
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.billionairehari.icons.FilterIcon
@@ -36,7 +38,7 @@ fun SearchBar(
             onValueChange(it)
         },
         leadingIcon = {
-            Icon(Icons.Default.Search, tint = Color.Black,contentDescription = "")
+            Icon(Icons.Default.Search, tint = Color.Black,contentDescription = "",modifier = Modifier.padding(end = 16.dp))
         },
         trailingIcon = trailingIcon,
         colors = TextFieldDefaults.colors(
@@ -55,6 +57,7 @@ fun SearchBar(
             .clip(RoundedCornerShape(24.dp))
             .background(Color.White)
             .border(1.dp, color = Color.Black.copy(alpha = 0.1f), shape = RoundedCornerShape(24.dp))
-            .padding(horizontal = 13.dp)
+            .padding(horizontal = 13.dp),
+        textStyle = TextStyle(textMotion = TextMotion.Animated)
     )
 }

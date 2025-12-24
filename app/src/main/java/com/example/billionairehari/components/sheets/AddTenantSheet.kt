@@ -125,6 +125,7 @@ import com.example.billionairehari.components.PhoneNumberTransformation
 import com.example.billionairehari.components.PhotoPick
 import com.example.billionairehari.components.SelectOption
 import com.example.billionairehari.components.contacts.dial
+import com.example.billionairehari.components.dialogs.BottomTenantSearchCard
 import com.example.billionairehari.icons.Phone
 import com.example.billionairehari.icons.RoomIcon
 import com.example.billionairehari.icons.TenantIcon
@@ -386,7 +387,6 @@ fun Mannual(
             onSubmit = onSubmit
         )
     }
-    if(isOpen.value){
         BottomDialogSearchScreen(
             value = query.value,
             onChangeValue = {
@@ -409,7 +409,6 @@ fun Mannual(
                 )
             }
         }
-    }
 }
 
 @Composable

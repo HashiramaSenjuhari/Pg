@@ -1,18 +1,13 @@
 package com.example.billionairehari.viewmodels
 
-import android.util.Log
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.example.billionairehari.core.data.local.entity.Room
 import com.example.billionairehari.core.data.repository.RoomRepository
-import dagger.assisted.Assisted
-import dagger.assisted.AssistedFactory
-import dagger.assisted.AssistedInject
+import com.example.billionairehari.utils.currentDateTime
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -60,7 +55,9 @@ fun RoomUpdateData.toRoom(): Room = Room(
     images = images,
     bedCount = bedCount.toInt(),
     dueDate = dueDay.toInt(),
-    rentPrice = rentPrice.toInt()
+    rentPrice = rentPrice.toInt(),
+    updatedAt = currentDateTime(),
+    createdAt = currentDateTime()
 )
 
 @HiltViewModel

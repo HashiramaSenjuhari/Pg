@@ -51,6 +51,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.billionairehari.components.DateFilterSheet
+import com.example.billionairehari.components.DateRangeType
 import com.example.billionairehari.components.convertLocalToLong
 import com.example.billionairehari.components.convertMilliToDate
 import com.example.billionairehari.components.mergeDates
@@ -115,15 +116,15 @@ fun DashboardBoard(
         val lastTime = localDate.withDayOfMonth(localDate.lengthOfMonth())
 
         val startDateInMilli = remember { mutableStateOf<Long>(
-            convertLocalToLong(currentTime)
+                convertLocalToLong(currentTime)
             )
         }
         val endDateInMilli = remember { mutableStateOf<Long>(
-            convertLocalToLong(lastTime)
+                convertLocalToLong(lastTime)
             )
         }
 
-        val date_range = remember { mutableStateOf(mergeDates(startDateInMilli.value,endDateInMilli.value)) }
+        val date_range = remember { mutableStateOf<DateRangeType>(DateRangeType.Dynamic(mergeDates(startDateInMilli.value,endDateInMilli.value))) }
         val selectedOptionIndex = remember { mutableStateOf<Int>(5) }
 
         Box(
@@ -149,7 +150,7 @@ fun DashboardBoard(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    date_range.value,
+                    date_range.value.toString(),
                     fontSize = 12.sp,
                     fontWeight = FontWeight.Bold,
                     color = Color(0xFF1B1B1B)

@@ -41,8 +41,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
@@ -123,80 +125,7 @@ fun SearchAndSelectMultipleTenants(
                             ) {
                                 HorizontalDivider()
                                 tenants.forEach {
-                                    Row(
-                                        modifier = Modifier
-                                            .fillMaxWidth()
-                                            .clickable(
-                                                enabled = true,
-                                                onClick = {
-                                                    search.value = ""
-                                                    if(selected.value.contains(it)){
-//                                                        selected.value = selected.value.toMutableSet().apply {
-//                                                            remove(it)
-//                                                        }
-                                                    }else{
-//                                                        selected.value = selected.value.toMutableSet().apply {
-//                                                            add(it)
-//                                                        }
-                                                    }
-                                                }
-                                            )
-                                            .background(Color.White)
-                                            .padding(11.dp),
-                                        verticalAlignment = Alignment.CenterVertically,
-                                        horizontalArrangement = Arrangement.SpaceBetween
-                                    ) {
-                                        val isSelected = selected.value.contains(it)
-                                        ROw(
-                                            horizontalArrangement = Arrangement.spacedBy(13.dp)
-                                        ) {
-                                            AsyncImage(
-                                                model = "https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fi.pinimg.com%2Foriginals%2Fed%2F7c%2Fb0%2Fed7cb0a40619f5f710325b71e6b411e3.jpg&f=1&nofb=1&ipt=06a432166eb12e9a037390617c2d300e9d154349494e45fe3e2e0e25d0d10592",
-                                                contentDescription = "",
-                                                contentScale = ContentScale.Crop,
-                                                modifier = Modifier.clip(CircleShape).size(40.dp)
-                                            )
-                                            Column {
-                                                Text(
-                                                    it,
-                                                    fontSize = 14.sp,
-                                                    fontWeight = FontWeight.Medium
-                                                )
-                                                Text("Room 121", color = Color.Black.copy(alpha = 0.4f))
-                                            }
-                                        }
-                                        ROw(
-                                            modifier = Modifier
-                                                .clip(CircleShape)
-                                                .size(24.dp)
-                                                .background(if(isSelected) Color(0xFF21c063) else Color.White)
-                                                .border(1.dp, shape = CircleShape, color = Color.Black.copy(0.1f))
-                                                .clickable(
-                                                    enabled = true,
-                                                    onClick = {
-                                                         if(selected.value.contains(it)){
-//                                                            selected.value = selected.value.toMutableSet().apply {
-//                                                                remove(it)
-//                                                            }
-                                                         }else{
-//                                                            selected.value = selected.value.toMutableSet().apply {
-//                                                                add(it)
-//                                                            }
-                                                        }
-                                                    }
-                                                ),
-                                            horizontalArrangement = Arrangement.Center
-                                        ) {
-                                            if(isSelected){
-                                                Icon(
-                                                    imageVector = Icons.Default.Check,
-                                                    contentDescription = "",
-                                                    modifier = Modifier.size(16.dp)
-                                                )
-                                            }
-                                        }
 
-                                    }
                                     HorizontalDivider()
                                 }
                             }
@@ -234,4 +163,69 @@ fun SearchAndSelectMultipleTenants(
         }
     }
 
+}
+
+@Composable
+fun BottomTenantSearchCard(
+    name:String,
+    roomName:String,
+    isSelected:Boolean,
+    onClick:() -> Unit
+){
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(
+                enabled = true,
+                onClick = onClick
+            )
+            .background(Color.White)
+            .drawBehind{
+                drawLine(
+                    start = Offset(x = 0f, y = size.height),
+                    end = Offset(x = size.width,y = size.height),
+                    strokeWidth = 1f,
+                    color = Color.Black.copy(0.6f)
+                )
+            }
+            .padding(11.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween
+    ) {
+        ROw(
+            horizontalArrangement = Arrangement.spacedBy(13.dp)
+        ) {
+            AsyncImage(
+                model = "https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fi.pinimg.com%2Foriginals%2Fed%2F7c%2Fb0%2Fed7cb0a40619f5f710325b71e6b411e3.jpg&f=1&nofb=1&ipt=06a432166eb12e9a037390617c2d300e9d154349494e45fe3e2e0e25d0d10592",
+                contentDescription = "",
+                contentScale = ContentScale.Crop,
+                modifier = Modifier.clip(CircleShape).size(40.dp)
+            )
+            Column {
+                Text(
+                    name,
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.Medium
+                )
+                Text(roomName, color = Color.Black.copy(alpha = 0.4f))
+            }
+        }
+
+        if(isSelected){
+            ROw(
+                modifier = Modifier
+                    .clip(CircleShape)
+                    .size(24.dp)
+                    .background(if(isSelected) Color(0xFF21c063) else Color.White)
+                    .border(1.dp, shape = CircleShape, color = Color.Black.copy(0.1f)),
+                horizontalArrangement = Arrangement.Center
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Check,
+                    contentDescription = "",
+                    modifier = Modifier.size(16.dp)
+                )
+            }
+        }
+    }
 }

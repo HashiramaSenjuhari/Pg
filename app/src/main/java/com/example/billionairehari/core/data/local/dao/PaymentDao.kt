@@ -19,9 +19,37 @@ interface PaymentDao {
         SELECT SUM(p.amount) AS revenue
         FROM payments p
         WHERE
-            p.owner_id = :ownerId
-            AND strftime('%Y-%m',payment_date) = strftime('%Y-%m','now','localtime')
+            strftime('%Y-%m',payment_date) = strftime('%Y-%m','now')
+            AND p.owner_id = :ownerId
     """)
     fun getTotalRevenue(ownerId:String): Flow<Revenue>
+
+
+    @Query("""
+        SELECT SUM(amount) AS revenue
+         FROM payments
+         WHERE 
+            strftime('%Y-%m',payment_date) >= strftime('%Y-%m','now','-' || :month || ' months') AND strftime('%Y-%m',payment_date) < strftime('%Y-%m','now','start of month')
+            AND owner_id = :ownerId
+    """)
+    fun getLastNTotalRevenue(ownerId:String,month:Int): Revenue
+
+    @Query("""
+        SELECT SUM(amount) AS revenue
+        FROM payments
+        WHERE
+            strftime('%Y-%m',payment_date) = strftime('%Y-%m','now')
+            AND owner_id = :ownerId
+    """)
+    fun getCurrentTotalRevenue(ownerId:String): Revenue
+
+    @Query("""
+        SELECT SUM(amount) AS revenue
+        FROM payments
+        WHERE
+            payment_date >= :startDate AND payment_date <= :endDate
+            AND owner_id = :ownerId
+    """)
+    fun getRangeTotalRevene(ownerId:String,startDate:String,endDate:String): Revenue
     // ###############################################################################################
 }

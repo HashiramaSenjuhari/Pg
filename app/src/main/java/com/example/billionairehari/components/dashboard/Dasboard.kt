@@ -149,12 +149,24 @@ fun DashboardBoard(
                 horizontalArrangement = Arrangement.spacedBy(6.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Text(
-                    date_range.value.toString(),
-                    fontSize = 12.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = Color(0xFF1B1B1B)
-                )
+                when (val date = date_range.value) {
+                    is DateRangeType.Static -> {
+                        Text(
+                            "Last ${date.date.toString()} month",
+                            fontSize = 12.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = Color(0xFF1B1B1B)
+                        )
+                    }
+                    is DateRangeType.Dynamic -> {
+                        Text(
+                            date.date,
+                            fontSize = 12.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = Color(0xFF1B1B1B)
+                        )
+                   }
+                }
             }
         }
         /** Filter Sheet **/
@@ -172,6 +184,7 @@ fun DashboardBoard(
                         date ->
                     date_range.value = date
                     isSheetOpen.value = false
+                    viewModel.update_filter(date_range.value)
                 }
             )
         }

@@ -43,6 +43,7 @@ import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.material3.rememberDateRangePickerState
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -60,6 +61,9 @@ import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import com.example.billionairehari.components.dashboard.DisableRippleEffect
 import com.example.billionairehari.layout.component.ROw
+import com.example.billionairehari.utils.currentMonthStartAndEndInMilli
+import com.example.billionairehari.utils.toFriendlyDate
+import com.example.billionairehari.viewmodels.DateRangeType
 import kotlinx.coroutines.selects.select
 import java.text.SimpleDateFormat
 import java.time.LocalDate
@@ -82,23 +86,27 @@ val options = listOf<MonthFilterOption>(
     MonthFilterOption(name = "Last 1 year",value = 12)
 )
 
-sealed class DateRangeType{
-    data class Static(val date:Int): DateRangeType()
-    data class Dynamic(val date:String): DateRangeType()
-}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DateFilterSheet(
     selectedOption: DateRangeType,
-    selectedOptionIndex: MutableState<Int>,
-    startDateInMilli: MutableState<Long>,
-    endDateInMilli: MutableState<Long>,
     is_open: MutableState<Boolean>,
     sheetState: SheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
     onDismiss:() -> Unit,
     onConfirm:(DateRangeType) -> Unit
 ){
+    val currentMonth = currentMonthStartAndEndInMilli()
+    val startDate = remember { mutableStateOf<Long>(currentMonth.first) }
+    val endDate = remember { mutableStateOf<Long>(currentMonth.second) }
+    LaunchedEffect(Unit) {
+        if(selectedOption is DateRangeType.Dynamic){
+            if(selectedOption.startDate != null && selectedOption.endDate != null){
+                startDate.value = selectedOption.startDate
+                endDate.value = selectedOption.endDate
+            }
+        }
+    }
     val selected = remember { mutableStateOf<DateRangeType>(selectedOption) }
 
     ModalBottomSheet(
@@ -124,12 +132,11 @@ fun DateFilterSheet(
                 verticalArrangement = Arrangement.spacedBy(24.dp)
             ) {
                 /** static radio buttons **/
-                options.forEachIndexed { index,option ->
+                options.forEach { option ->
                     FilterOption(
-                        selected = selectedOptionIndex.value == index,
+                        selected = selected.value == DateRangeType.Static(option.value),
                         onClick = {
-                            if(index != selectedOptionIndex.value){
-                                selectedOptionIndex.value = index
+                            if(selected.value != DateRangeType.Static(option.value)){
                                 selected.value = DateRangeType.Static(option.value)
                             }
                         },
@@ -143,29 +150,33 @@ fun DateFilterSheet(
                 ) {
                     FilterOption(
                         option = "Select Date Range",
-                        selected = selectedOptionIndex.value == 5,
+                        selected = selected.value is DateRangeType.Dynamic,
                         onClick = {
-                            selectedOptionIndex.value = 5
+                            selected.value = DateRangeType.Dynamic()
                         }
                     )
                     /** Date Dialog open if custom date button is selected **/
-                    if(selectedOptionIndex.value == 5){
+                    if(selected.value is DateRangeType.Dynamic){
                         CustomDatePicker(
                             is_open = is_open,
-                            startDateInMilli = startDateInMilli,
-                            endDateInMilli = endDateInMilli
+                            startDateInMilli = startDate.value,
+                            onChangeStart = {
+                                startDate.value = it
+                            },
+                            endDateInMilli = endDate.value,
+                            onChangeEnd = {
+                                endDate.value = it
+                            }
                         )
                     }
                 }
             }
             AppButton(
                 onClick = {
-                    if(selectedOptionIndex.value <= 4){
-                        onConfirm(selected.value)
-                    }else {
-                        selected.value = DateRangeType.Dynamic(mergeDates(startDateInMilli.value, endDateInMilli.value))
-                        onConfirm(selected.value)
+                    if(selected.value is DateRangeType.Dynamic){
+                        selected.value = DateRangeType.Dynamic(startDate = startDate.value, endDate = endDate.value)
                     }
+                    onConfirm(selected.value)
                 },
                 modifier = Modifier.fillMaxWidth(),
                 containerColor = Color.Black,
@@ -224,74 +235,68 @@ fun convertMilliToDate(milli:Long): String{
 
 @Composable
 fun CustomDatePicker(
-    startDateInMilli: MutableState<Long>,
-    endDateInMilli: MutableState<Long>,
+    startDateInMilli: Long,
+    endDateInMilli: Long,
     is_open: MutableState<Boolean>,
+    onChangeStart:(Long) -> Unit,
+    onChangeEnd:(Long) -> Unit
 ){
     // date dialog state
     val firstDateDialog = remember { mutableStateOf<Boolean>(false) }
     val nextDateDialog = remember { mutableStateOf<Boolean>(false) }
 
-
-    val defaultStartDateString = convertMilliToDate(startDateInMilli.value)
-    val defaultEndDateString = convertMilliToDate(endDateInMilli.value)
-
-    val startDate = remember { mutableStateOf<String>(defaultStartDateString) }
-    val endDate = remember { mutableStateOf<String>(defaultEndDateString) }
-
-        ROw(
-            modifier = Modifier
-                .fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(13.dp)
+    ROw(
+        modifier = Modifier
+            .fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(13.dp)
+    ) {
+        Column(
+            horizontalAlignment = Alignment.Start
         ) {
-            Column(
-                horizontalAlignment = Alignment.Start
-            ) {
-                OutlinedInput(
-                    modifier = Modifier.fillMaxWidth(0.5f),
-                    value = startDate.value ?: "",
-                    onValueChange = {},
-                    readOnly = true,
-                    onClick = {
-                        firstDateDialog.value = true
-                    },
-                    label = "Start Date",
-                    trailingIcon = {
-                        Icon(Icons.Default.DateRange, contentDescription = "")
-                    }
-                )
-            }
-            Column(
-                horizontalAlignment = Alignment.Start
-            ) {
-                OutlinedInput(
-                    modifier = Modifier.fillMaxWidth(),
-                    label = "End Date",
-                    value = endDate.value ?: "",
-                    readOnly = true,
-                    onValueChange = {
-
-                    },
-                    onClick = {
-                        nextDateDialog.value = true
-                    },
-                    trailingIcon = {
-                        Icon(Icons.Default.DateRange, contentDescription = "")
-                    }
-                )
-            }
+            OutlinedInput(
+                modifier = Modifier.fillMaxWidth(0.5f),
+                value = startDateInMilli.toFriendlyDate() ?: "",
+                onValueChange = {},
+                readOnly = true,
+                onClick = {
+                    firstDateDialog.value = true
+                },
+                label = "Start Date",
+                trailingIcon = {
+                    Icon(Icons.Default.DateRange, contentDescription = "")
+                }
+            )
         }
+        Column(
+            horizontalAlignment = Alignment.Start
+        ) {
+            OutlinedInput(
+                modifier = Modifier.fillMaxWidth(),
+                label = "End Date",
+                value = endDateInMilli.toFriendlyDate() ?: "",
+                readOnly = true,
+                onValueChange = {
+
+                },
+                onClick = {
+                    nextDateDialog.value = true
+                },
+                trailingIcon = {
+                    Icon(Icons.Default.DateRange, contentDescription = "")
+                }
+            )
+        }
+    }
 
     if(firstDateDialog.value){
         DateDialog(
             is_open = firstDateDialog,
             onConfirm = {
                 it?.let {
-                    startDate.value = convertMilliToDate(it)
-                    startDateInMilli.value = it
+                    onChangeStart(it)
                 }
             },
-            selectedDate = startDateInMilli.value
+            selectedDate = startDateInMilli
         )
     }
     if(nextDateDialog.value){
@@ -299,11 +304,10 @@ fun CustomDatePicker(
             is_open = nextDateDialog,
             onConfirm = {
                 it?.let {
-                    endDate.value = convertMilliToDate(it)
-                    endDateInMilli.value = it
+                    onChangeEnd(it)
                 }
             },
-            selectedDate = endDateInMilli.value
+            selectedDate = endDateInMilli
         )
     }
 }

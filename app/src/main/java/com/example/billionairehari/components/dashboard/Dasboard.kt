@@ -51,11 +51,12 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.billionairehari.components.DateFilterSheet
-import com.example.billionairehari.components.DateRangeType
 import com.example.billionairehari.components.convertLocalToLong
 import com.example.billionairehari.components.convertMilliToDate
 import com.example.billionairehari.components.mergeDates
 import com.example.billionairehari.screens.formatIndianRupee
+import com.example.billionairehari.utils.toFriendlyDate
+import com.example.billionairehari.viewmodels.DateRangeType
 import com.example.billionairehari.viewmodels.GetTotalRevenueAndInfoViewModel
 import java.text.SimpleDateFormat
 import java.time.LocalDate
@@ -112,20 +113,19 @@ fun DashboardBoard(
         /** custom date selection part **/
         val localDate = LocalDate.now()
 
-        val currentTime = localDate.withDayOfMonth(1)
-        val lastTime = localDate.withDayOfMonth(localDate.lengthOfMonth())
+        val startDate = localDate.withDayOfMonth(1)
+        val endDate = localDate.withDayOfMonth(localDate.lengthOfMonth())
 
         val startDateInMilli = remember { mutableStateOf<Long>(
-                convertLocalToLong(currentTime)
+                convertLocalToLong(startDate)
             )
         }
         val endDateInMilli = remember { mutableStateOf<Long>(
-                convertLocalToLong(lastTime)
+                convertLocalToLong(endDate)
             )
         }
 
-        val date_range = remember { mutableStateOf<DateRangeType>(DateRangeType.Dynamic(mergeDates(startDateInMilli.value,endDateInMilli.value))) }
-        val selectedOptionIndex = remember { mutableStateOf<Int>(5) }
+        val date_range = remember { mutableStateOf<DateRangeType>(DateRangeType.Static(date = 0)) }
 
         Box(
             modifier = Modifier
@@ -151,16 +151,25 @@ fun DashboardBoard(
             ) {
                 when (val date = date_range.value) {
                     is DateRangeType.Static -> {
-                        Text(
-                            "Last ${date.date.toString()} month",
-                            fontSize = 12.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = Color(0xFF1B1B1B)
-                        )
+                        if(date.date > 0){
+                            Text(
+                                "Last ${date.date} month",
+                                fontSize = 12.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = Color(0xFF1B1B1B)
+                            )
+                        }else {
+                            Text(
+                                "This Month",
+                                fontSize = 12.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = Color(0xFF1B1B1B)
+                            )
+                        }
                     }
                     is DateRangeType.Dynamic -> {
                         Text(
-                            date.date,
+                            DashboardDateFormate(date.startDate!!, end = date.endDate!!),
                             fontSize = 12.sp,
                             fontWeight = FontWeight.Bold,
                             color = Color(0xFF1B1B1B)
@@ -173,15 +182,13 @@ fun DashboardBoard(
         if(isSheetOpen.value){
             DateFilterSheet(
                 selectedOption = date_range.value,
-                selectedOptionIndex = selectedOptionIndex,
-                startDateInMilli = startDateInMilli,
-                endDateInMilli = endDateInMilli,
                 is_open = isSheetOpen,
                 onDismiss = {
                     isSheetOpen.value = false
                 },
                 onConfirm = {
                         date ->
+                    Log.d("BILLIONAIREHARIGREAT",date.toString())
                     date_range.value = date
                     isSheetOpen.value = false
                     viewModel.update_filter(date_range.value)
@@ -253,4 +260,8 @@ fun getCurrentDate(localDate: LocalDate):String{
 
     val format = "$01 $month $year - $end $month $year"
     return format
+}
+
+fun DashboardDateFormate(start:Long,end:Long):String {
+    return "${start.toFriendlyDate()} - ${end.toFriendlyDate()}"
 }

@@ -1,29 +1,41 @@
 package com.example.billionairehari.utils
 
 import android.icu.text.SimpleDateFormat
+import java.time.Instant
 import java.time.LocalDate
+import java.time.ZoneId
+import java.time.ZonedDateTime
+import java.time.format.DateTimeFormatter
 import java.util.Date
+import java.util.TimeZone
 
 
 /** Long to String Converter **/
 
 fun Long.toDateTimeString() : String {
     val date = Date(this)
-    val format = SimpleDateFormat("yyyy-MM-dd HH:mm")
-    return format.format(date)
+    return dateZoneFormat(date.time)
 }
 
 fun Long.toDateString(): String {
     val datetime = Date(this)
-    val format = SimpleDateFormat("yyyy-MM-dd")
-    return format.format(datetime)
+    return dateZoneFormat(datetime.time)
 }
 
 fun Long.toFriendlyDate(): String {
     val date = Date(this)
-    val format = SimpleDateFormat("dd MMM YYYY")
-    return format.format(date)
+    return dateZoneFormat(date.time)
 }
+
+fun dateZoneFormat(date:Long):String{
+    val format = DateTimeFormatter.ofPattern("dd MMM yyyy")
+        .withZone(ZoneId.of("Asia/Kolkata"))
+    return format.format(ZonedDateTime.ofInstant(
+        Instant.ofEpochMilli(date),
+        ZoneId.of("Asia/Kolkata")
+    ))
+}
+
 
 /** String to Long Converter **/
 
@@ -34,3 +46,4 @@ fun String.fromDateLong() : Long {
 fun combineDaytoCurrentDate(day:String):String {
     return "${currentYear()}-${currentMonthInt()}-${day.padStart(2,'0')}"
 }
+

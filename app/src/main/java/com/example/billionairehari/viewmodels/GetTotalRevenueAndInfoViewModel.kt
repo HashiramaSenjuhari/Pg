@@ -3,8 +3,8 @@ package com.example.billionairehari.viewmodels
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.billionairehari.components.DateRangeType
 import com.example.billionairehari.core.data.local.dao.PaymentDao
+import com.example.billionairehari.utils.toDateString
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -18,6 +18,12 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
+
+
+sealed class DateRangeType{
+    data class Static(val date:Int): DateRangeType()
+    data class Dynamic(val startDate:Long? = null,val endDate:Long? = null): DateRangeType()
+}
 
 @HiltViewModel
 class GetTotalRevenueAndInfoViewModel @Inject constructor(
@@ -40,9 +46,9 @@ class GetTotalRevenueAndInfoViewModel @Inject constructor(
                     }
                 }
                 is DateRangeType.Dynamic -> {
-                    Log.d("BILLIONAIREDATE",value.date.toString())
-//               val revenue = paymentDao.getRangeTotalRevene(ownerId = "1", startDate = value.date)
-                    paymentDao.getLastNTotalRevenue(ownerId = "1", month = 0)
+                    val startDate = value.startDate?.toDateString()
+                    val endDate = value.endDate?.toDateString()
+                    paymentDao.getRangeTotalRevene(ownerId = "1", startDate = startDate!!, endDate = endDate!!)
                 }
             }
         }
@@ -52,6 +58,7 @@ class GetTotalRevenueAndInfoViewModel @Inject constructor(
         initialValue = PaymentDao.Revenue(revenue = 0)
     )
     fun update_filter(filter: DateRangeType){
+        Log.d("VIEWMODEL_DEGUB","FROM TOTAL REVENUE ${filter}")
         _filter.value = filter
     }
 }

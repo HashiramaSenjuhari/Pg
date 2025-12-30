@@ -142,14 +142,16 @@ import kotlinx.coroutines.launch
 
 @Composable
 fun TenantSheet(
-    room:String? = null,
+    room: Pair<String,String>? = null,
     scrollState: ScrollState,
     context: Context,
     viewmodel: AddTenantViewModel = hiltViewModel()
 ) {
 
     LaunchedEffect(Unit) {
-        viewmodel.update_room(room ?: "")
+        if(room != null){
+            viewmodel.update_room(roomId = room.first, room = room.second)
+        }
     }
     val room = viewmodel.room.collectAsState()
     val owner = LocalViewModelStoreOwner.current
@@ -162,7 +164,6 @@ fun TenantSheet(
     val errors = tenant
 
     Mannual(
-        rooms = emptyList(),
         roomId = tenant.roomId,
         room = tenant.room,
         name = tenant.name,
@@ -171,9 +172,8 @@ fun TenantSheet(
         rent_paid = tenant.first_month_rent,
         deposit_paid = tenant.security_deposit,
         auto_remainder = tenant.automatic_remainder,
-        update_room = { viewmodel.update_room(it) },
+        update_room = { viewmodel.update_room(roomId = it.first, room = it.second) },
         update_name = { viewmodel.update_name(it) },
-        update_roomId = { viewmodel.update_roomId(it) },
         update_phone = { viewmodel.update_phone(it) },
         update_image = { viewmodel.update_image(it) },
         update_rent_paid = { viewmodel.update_first_month_rent_paid(it) },
@@ -216,11 +216,8 @@ fun Mannual(
 
     roomId:String,
     room:String,
-    update_roomId:(String) -> Unit,
-    update_room:(String) -> Unit,
+    update_room:(Pair<String,String>) -> Unit,
     room_error:String? = null,
-
-    rooms:List<String>,
 
     rent_paid:Boolean,
     update_rent_paid:(Boolean) -> Unit,
@@ -245,8 +242,6 @@ fun Mannual(
 ){
     val query = viewmodel.query.collectAsState()
     val results = viewmodel.results.collectAsState()
-
-    val sendOtp = remember { mutableStateOf(false) }
     val context = LocalContext.current
     val isOpen = remember { mutableStateOf(false) }
 
@@ -401,8 +396,7 @@ fun Mannual(
                     location = "up",
                     available = it.available_beds,
                     onClick = {
-                        update_room(it.name)
-                        update_roomId(it.id)
+                        update_room(it.id to it.name)
                         isOpen.value = false
                         viewmodel.update_query("")
                     }

@@ -41,16 +41,16 @@ data class TenantData (
     val isLoading:Boolean = false
 )
 
-fun TenantData.toRoom(id:String,ownerId:String,createdAt:String,joiningDateTime:String) : Tenant = Tenant(
+fun TenantData.toRoom(ownerId:String) : Tenant = Tenant(
     id = generateUUID(),
     name = name,
-    roomId = roomId,
     phoneNumber = phone,
     image = "",
-    joiningDate = joiningDateTime,
+    joiningDate = currentDateTime(),
     isActive = true,
     automaticRentRemainder = automatic_remainder,
     ownerId = ownerId,
+    roomId = roomId,
     updatedAt = currentDateTime(),
     createdAt = currentDateTime(),
 )
@@ -84,11 +84,8 @@ class AddTenantViewModel @Inject constructor (
     fun update_phone(phone:String){
         tenant.value = tenant.value.copy(phone = phone, phoneNumberError = null)
     }
-    fun update_room(room:String){
-        tenant.value = tenant.value.copy(room = room, roomError = null)
-    }
-    fun update_roomId(id:String){
-        tenant.value = tenant.value.copy(roomId = id)
+    fun update_room(roomId:String,room:String){
+        tenant.value = tenant.value.copy(roomId = roomId,room = room, roomError = null)
     }
     fun update_first_month_rent_paid(paid:Boolean) {
         tenant.value = tenant.value.copy(first_month_rent = paid)
@@ -120,13 +117,8 @@ class AddTenantViewModel @Inject constructor (
         )
         viewModelScope.launch {
             try {
-                val id = generateUUID()
-                val currentDateTime = currentDateTime()
                 val tenant = tenant.value.toRoom(
-                    id = id,
-                    createdAt = currentDateTime,
-                    joiningDateTime = currentDateTime,
-                    ownerId = "1",
+                    ownerId = "1"
                 )
                 Log.d("TENANTGREAT",tenant.toString())
                 repository.insertTenant(tenant = tenant)

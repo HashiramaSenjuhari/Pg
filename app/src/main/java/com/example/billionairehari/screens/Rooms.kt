@@ -422,6 +422,7 @@ fun RoomCard(
                 HorizontalDivider(color = Color.Black.copy(0.1f))
                 Spacer(modifier = Modifier.padding(vertical = 6.dp))
                 RoomCardContent(
+                    id = room_detail.id,
                     name = room_detail.name,
                     available = available,
                     beds = room_detail.bed_count,
@@ -480,6 +481,7 @@ fun RoomCardHeader(
 
 @Composable
 fun RoomCardContent(
+    id:String,
     name:String,
     beds:Int,
     tenant_count:Int,
@@ -558,7 +560,7 @@ fun RoomCardContent(
             if(available >= 1){
                 AppButton(
                     onClick = {
-                        current_action.value = MODAL_TYPE.ADD_TENANT(room = name)
+                        current_action.value = MODAL_TYPE.ADD_TENANT(room = id to name)
                     },
                     containerColor = Color.Black.copy(0.8f),
                     contentColor = Color.White,

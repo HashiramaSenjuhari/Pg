@@ -71,7 +71,6 @@ import com.example.billionairehari.model.Room
 import com.example.billionairehari.model.Tenant
 import com.example.billionairehari.layout.component.ROw
 import com.example.billionairehari.model.TenantRentRecord
-import com.example.billionairehari.viewmodels.GetRoomTenantCountViewModel
 import com.google.android.material.snackbar.Snackbar
 import kotlinx.coroutines.CoroutineScope
 import com.example.billionairehari.R
@@ -82,7 +81,7 @@ import com.example.billionairehari.icons.AddTenantIcon
 sealed class MODAL_TYPE {
     object ADD_ROOM: MODAL_TYPE()
     object NONE: MODAL_TYPE()
-    data class ADD_TENANT(val room:String? = null): MODAL_TYPE()
+    data class ADD_TENANT(val room: Pair<String,String>? = null): MODAL_TYPE()
     data class UPDATE_TENANT(val tenant: Tenant): MODAL_TYPE()
     data class UPDATE_ROOM(val id: String): MODAL_TYPE()
     data class UPDATE_TENANT_RENT(val tenantRentDetails: TenantDao.TenantWithRoomRentCard? = null): MODAL_TYPE()
@@ -245,7 +244,6 @@ fun FloatingButton(
     is_open: MutableState<Boolean>,
     current_action: MutableState<MODAL_TYPE>
 ){
-    Log.d("Floating","${route_size}${path}")
     if(route_size == 1 && path == "rooms"){
         FloatingActionButton(
             onClick = {
@@ -255,21 +253,6 @@ fun FloatingButton(
             containerColor =  Color(0xFFB2B0E8)
         ) {
             Icon(AddRoom, contentDescription = "")
-        }
-    }
-    if(route?.size == 2 && path == "rooms"){
-        val id = navBackStack.value?.arguments?.getString("roomId")
-//        val room_id = hiltViewModel<GetRoomTenantCountViewModel, GetRoomTenantCountViewModel.GetRoomTenantCountFactory>{
-//                factory -> factory.create(id!!)
-//        }
-        FloatingActionButton(
-            onClick = {
-                current_action.value = MODAL_TYPE.ADD_TENANT(room = "")
-                is_open.value = true
-            },
-            containerColor =  Color(0xFFB2B0E8)
-        ) {
-            Icon(AddTenantIcon, contentDescription = "")
         }
     }
     if(route?.size == 1 && path == "tenants"){

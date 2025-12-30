@@ -334,7 +334,6 @@ fun RoomCards(
             RoomCard(
                 room_detail = room,
                 onClick = {
-                    Log.d("IDDD",room.id)
                     navController.navigate("rooms/${room.id}")
                 },
                 current_action = current_action
@@ -355,7 +354,7 @@ fun StaticSearchBar(
         modifier = Modifier
             .fillMaxWidth()
             .border(1.dp, color = Color.Black.copy(0.1f), shape = CircleShape)
-            .padding(vertical = if(filter) 3.dp else 13.dp, horizontal = 13.dp)
+            .padding(vertical = 13.dp, horizontal = 13.dp)
             .clickable(
                 enabled = true,
                 onClick = onClick,
@@ -364,7 +363,8 @@ fun StaticSearchBar(
             ),
     ){
         ROw(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier.fillMaxWidth()
+                .padding(end = 6.dp),
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
             ROw(
@@ -378,14 +378,17 @@ fun StaticSearchBar(
                 Text(placeholder, fontSize = 16.sp, color = Color.Black.copy(0.6f))
             }
             if(filter){
-                IconButton(
-                    onClick = onClickFilter
-                ){
-                    Icon(
-                        FilterIcon,
-                        contentDescription = ""
-                    )
-                }
+                Icon(
+                    FilterIcon,
+                    contentDescription = "",
+                    modifier = Modifier
+                        .size(20.dp)
+                        .clickable(
+                            interactionSource = MutableInteractionSource(),
+                            indication = null,
+                            onClick = onClickFilter
+                        )
+                )
             }
         }
     }
@@ -519,9 +522,9 @@ fun RoomCardContent(
                                 "All Paid"
                             }else {
                                 if(due_count == 1){
-                                    "${due_count.toString()} person"
+                                    "${due_count} person"
                                 }else{
-                                    "${due_count.toString()} persons"
+                                    "${due_count} persons"
                                 }
                             },
                             color = if(!isDue) Color(0xFF008236) else Color.Red,

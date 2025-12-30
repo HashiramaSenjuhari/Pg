@@ -130,14 +130,15 @@ fun DashboardScreen(
 }
 
 
-fun formatIndianRupee(number:String) :String {
-    val length = number.length
-    if(length <= 3) return number
+fun formatIndianRupee(number:Int) :String {
+    val rupee = number.toString()
+    val length = rupee.length
+    if(length <= 3) return rupee
 
     val currency = StringBuilder()
     var count = 0
     for(i in length - 1 downTo 0){
-        currency.append(number[i])
+        currency.append(rupee[i])
         count ++
         if(count == 3 || (count > 3 && (count - 3) % 2 == 0) && i != 0){
             currency.append(",")

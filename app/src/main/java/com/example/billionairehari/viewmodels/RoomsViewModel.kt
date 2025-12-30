@@ -48,21 +48,17 @@ class RoomsViewModel @Inject constructor(
 ) : ViewModel() {
     private val _type = MutableStateFlow<FILTER>(FILTER.DEFAULT)
     val type = _type.asStateFlow()
-    init {
-        viewModelScope.launch {
-            val rooms = repository.getTables()
-            Log.d("BillionaireHariGreat",rooms.toString())
-        }
-    }
+    private val room_list = repository.getRoomCardsFlow(ownerId = "1")
 
     val rooms: StateFlow<List<RoomDao.RoomCard>> = combine(
-        _type.debounce(300) ,repository.getRoomCardsFlow("1")
+        _type.debounce(300),
+        room_list
     ){
         type, rooms ->
         when(type){
             FILTER.DEFAULT -> rooms
             FILTER.AVAILABLE -> rooms.filter { roomCard -> roomCard.tenant_count < roomCard.bed_count }
-            FILTER.RENT_DUE -> rooms.filter { roomCard -> roomCard.due_day > 0 }
+            FILTER.RENT_DUE -> rooms.filter { roomCard -> roomCard.not_paid > 0 }
         }
     }.stateIn(
         scope = viewModelScope,

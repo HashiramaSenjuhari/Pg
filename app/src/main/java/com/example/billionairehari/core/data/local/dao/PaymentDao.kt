@@ -29,10 +29,11 @@ interface PaymentDao {
         SELECT SUM(amount) AS revenue
          FROM payments
          WHERE 
-            strftime('%Y-%m',payment_date) >= strftime('%Y-%m','now','-' || :month || ' months') AND strftime('%Y-%m',payment_date) < strftime('%Y-%m','now','start of month')
+            strftime('%Y-%m',payment_date) >= strftime('%Y-%m','now','-' || :month || ' months') 
+            AND strftime('%Y-%m',payment_date) < strftime('%Y-%m','now','start of month')
             AND owner_id = :ownerId
     """)
-    fun getLastNTotalRevenue(ownerId:String,month:Int): Revenue
+    fun getLastNTotalRevenue(ownerId:String,month:Int): Flow<Revenue>
 
     @Query("""
         SELECT SUM(amount) AS revenue
@@ -41,15 +42,15 @@ interface PaymentDao {
             strftime('%Y-%m',payment_date) = strftime('%Y-%m','now')
             AND owner_id = :ownerId
     """)
-    fun getCurrentTotalRevenue(ownerId:String): Revenue
+    fun getCurrentTotalRevenue(ownerId:String): Flow<Revenue>
 
     @Query("""
         SELECT SUM(amount) AS revenue
         FROM payments
         WHERE
-            payment_date >= :startDate AND payment_date <= :endDate
+            payment_date BETWEEN :startDate AND :endDate
             AND owner_id = :ownerId
     """)
-    fun getRangeTotalRevene(ownerId:String,startDate:String,endDate:String): Revenue
+    fun getRangeTotalRevene(ownerId:String,startDate:String,endDate:String): Flow<Revenue>
     // ###############################################################################################
 }

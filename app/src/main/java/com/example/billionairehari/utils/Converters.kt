@@ -24,11 +24,11 @@ fun Long.toDateString(): String {
 
 fun Long.toFriendlyDate(): String {
     val date = Date(this)
-    return dateZoneFormat(date.time)
+    return dateZoneFormat(date.time, format = "dd MMM yyyy")
 }
 
-fun dateZoneFormat(date:Long):String{
-    val format = DateTimeFormatter.ofPattern("dd MMM yyyy")
+fun dateZoneFormat(date:Long,format:String = "yyyy-MM-dd"):String{
+    val format = DateTimeFormatter.ofPattern(format)
         .withZone(ZoneId.of("Asia/Kolkata"))
     return format.format(ZonedDateTime.ofInstant(
         Instant.ofEpochMilli(date),

@@ -50,10 +50,12 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.billionairehari.components.DateFilterSheet
 import com.example.billionairehari.components.convertLocalToLong
 import com.example.billionairehari.components.convertMilliToDate
 import com.example.billionairehari.components.mergeDates
+import com.example.billionairehari.core.data.local.dao.PaymentDao
 import com.example.billionairehari.screens.formatIndianRupee
 import com.example.billionairehari.utils.toFriendlyDate
 import com.example.billionairehari.viewmodels.DateRangeType
@@ -100,7 +102,7 @@ fun DashboardBoard(
                 BriefBoard(
                     is_open = is_open,
                     percentage = "",
-                    revenue = amount.value.revenue.toString()
+                    revenue = amount.value.revenue
                 )
                 if(is_open.value){
                     Text("Billionaire")
@@ -200,7 +202,7 @@ fun DashboardBoard(
 
 @Composable
 fun BriefBoard(
-    revenue:String,
+    revenue:Int,
     percentage:String,
     is_open: MutableState<Boolean>
 ){

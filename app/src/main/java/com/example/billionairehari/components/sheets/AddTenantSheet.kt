@@ -413,13 +413,14 @@ fun RoomSearchCard(
     onClick:() -> Unit
 ){
     val isAvailable = if(available > 0) true else false
+    val textColor = if(isAvailable) Color.Black else Color.Black.copy(0.4f)
         ROw(
             modifier = Modifier
                 .clickable(
                     onClick = onClick,
-                    interactionSource = MutableInteractionSource(),
-                    indication = null,
-                    role = Role.Button
+                    role = Role.Button,
+                    enabled = isAvailable,
+
                 ).fillMaxWidth()
                 .drawBehind{
                     drawLine(
@@ -434,15 +435,15 @@ fun RoomSearchCard(
             Column(
                 verticalArrangement = Arrangement.spacedBy(6.dp)
             ) {
-                Text(name,fontSize= 16.sp)
+                Text(name,fontSize= 16.sp, color = textColor)
                 Text(location, fontSize = 13.sp,color = Color.Black.copy(0.6f))
             }
             Badge(
                 modifier = Modifier.clip(CircleShape)
                     .width(80.dp)
                     .background(
-                        if(isAvailable) Color.Green else {
-                            Color.Red
+                        if(isAvailable) Color(0xFF5ec639) else {
+                            Color(0xFFff595d)
                         }
                     )
                     .padding(vertical = 6.dp),

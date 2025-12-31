@@ -22,6 +22,11 @@ fun Long.toDateString(): String {
     return dateZoneFormat(datetime.time)
 }
 
+fun Long.toDateFormat(format:String = "dd-MM-yyyy") : String {
+    val date = Date(this)
+    return dateZoneFormat(date = date.time, format = format)
+}
+
 fun Long.toFriendlyDate(): String {
     val date = Date(this)
     return dateZoneFormat(date.time, format = "dd MMM yyyy")

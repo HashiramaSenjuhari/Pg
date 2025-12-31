@@ -248,7 +248,7 @@ fun RoomScreen(
                     beds = data.bed_count,
                     due_date = data.due_day,
                     filled = data.tenantCount,
-                    rent_due = data.dueCount
+                    rent_due = data.paidCount
                 )
             }
 
@@ -280,7 +280,7 @@ fun RoomScreen(
             )
             PriceDetails(
                 deposit = data.deposit,
-                current_rent_due = data.dueCount,
+                current_rent_due = data.paidCount,
                 room_rent = data.rent_price
             )
             val features = data.features.split(",").toList()
@@ -532,9 +532,13 @@ fun RoomBriefDetail(
                 text = "${filled}/${beds}",
                 width = 1f
             )
+            val dueCount = filled - rent_due
+            Log.d("DUECOUNT","${rent_due} ${filled} ${dueCount}")
             DetailCard(
                 icon = BedIcon,
                 title = "Due Count",
+                text = if(dueCount > 0) "${dueCount}" else "All Paid",
+                textColor = if(dueCount > 0) 0xFFff2929 else 0xFF00d100,
                 width = 1f
             )
         }
@@ -547,7 +551,7 @@ fun DetailCard(
     title:String,
     text:String = "All paid",
     width: Float = .5f,
-    textColor:Long = 0xFFB2B0E8
+    textColor:Long = 0xFF3B38A0
 ){
     ROw(
         modifier = Modifier.clip(RoundedCornerShape(13.dp))
@@ -574,7 +578,7 @@ fun DetailCard(
                     }
                 }
                 Box {
-                    Text(text,fontSize = 16.sp,color = Color(0xFF3B38A0))
+                    Text(text,fontSize = 16.sp,color = Color(textColor))
                 }
             }
             Text(title, fontSize = 13.sp,color = Color.Black.copy(alpha = 0.6f))

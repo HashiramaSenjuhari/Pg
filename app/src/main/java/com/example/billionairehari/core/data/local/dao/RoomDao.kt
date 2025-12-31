@@ -41,7 +41,7 @@ interface RoomDao {
         val due_day:String = "",
         val location:String = "",
         val owner_id:String = "",
-        val dueCount:Int = 0,
+        val paidCount:Int = 0,
         val tenantCount:Int = 0
     )
 
@@ -57,11 +57,14 @@ interface RoomDao {
         COALESCE(r.due_day,'') AS due_day,
         COALESCE(r.location,'No Location') AS location,
         COALESCE(r.owner_id,'Unknown') AS owner_id,
-        COALESCE(COUNT(DISTINCT p.id),0) AS dueCount,
+        COALESCE(COUNT(DISTINCT p.tenant_id),0) AS paidCount,
         COALESCE(COUNT(DISTINCT t.id),0) AS tenantCount
         FROM rooms r
-        LEFT JOIN payments p ON p.room_id = r.id AND strftime('%Y-%m',p.payment_date) = strftime('%Y-%m','now')
-        LEFT JOIN tenants t ON t.room_id = r.id AND t.is_active = false
+        LEFT JOIN tenants t ON t.room_id = r.id AND t.is_active = true
+        LEFT JOIN payments p ON 
+            p.room_id = r.id 
+            AND strftime('%Y-%m',p.payment_date) = strftime('%Y-%m','now') 
+            AND p.tenant_id = t.id
         WHERE r.id = :roomId AND r.owner_id = :ownerId
     """)
     fun getRoomFlow(roomId:String,ownerId:String): Flow<RoomWithTenantAndDueCount>

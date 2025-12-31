@@ -58,6 +58,6 @@ fun SearchBar(
             .background(Color.White)
             .border(1.dp, color = Color.Black.copy(alpha = 0.1f), shape = RoundedCornerShape(24.dp))
             .padding(horizontal = 13.dp),
-        textStyle = TextStyle(textMotion = TextMotion.Animated)
+        textStyle = TextStyle(textMotion = TextMotion.Animated, fontSize = 16.sp)
     )
 }

@@ -385,7 +385,7 @@ fun ModalUi(
                 val tenant = value.tenantRentDetails
                 RecordRentPriceModal(
                     tenantWithRentCard = tenant,
-                    is_open = is_open
+                    current_action = current_action
                 )
             }
             else -> {}

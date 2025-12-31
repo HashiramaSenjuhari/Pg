@@ -12,6 +12,7 @@ import com.example.billionairehari.core.data.local.entity.PaymentStatus
 import com.example.billionairehari.core.data.local.entity.PaymentType
 import com.example.billionairehari.core.data.repository.PaymentRepository
 import com.example.billionairehari.core.data.repository.TenantRepository
+import com.example.billionairehari.layout.MODAL_TYPE
 import com.example.billionairehari.utils.combineDaytoCurrentDate
 import com.example.billionairehari.utils.currentDateTime
 import com.example.billionairehari.utils.currentMonthInt
@@ -135,7 +136,9 @@ class RecordRentViewModel @Inject constructor(
         )
     }
 
-    fun submit(is_open: MutableState<Boolean>){
+    fun submit(
+        current_action: MutableState<MODAL_TYPE>
+    ){
         val current_value = _record.value
         Log.d("CLICKED",current_value.toString())
 
@@ -165,8 +168,9 @@ class RecordRentViewModel @Inject constructor(
                 val payment_data =  current_data.toRoom(
                     ownerId = "1"
                 )
+                Log.d("BILLIONAIREGREATHARI",payment_data.toString())
                 repository.insertPayment(payment = payment_data)
-                is_open.value = false
+                current_action.value = MODAL_TYPE.NONE
             }catch(error: Exception){
 
             }finally {

@@ -116,6 +116,7 @@ import com.example.billionairehari.components.dialogs.BottomTenantSearchCard
 import com.example.billionairehari.core.data.local.dao.TenantDao
 import com.example.billionairehari.core.data.local.entity.PaymentType
 import com.example.billionairehari.layout.BottomDialogSearchScreen
+import com.example.billionairehari.layout.MODAL_TYPE
 import com.example.billionairehari.model.TenantRentRecord
 import com.example.billionairehari.screens.StaticSearchBar
 import com.example.billionairehari.utils.currentMonth
@@ -125,8 +126,8 @@ import com.example.billionairehari.viewmodels.TenantSearchCard
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun RecordRentPriceModal(
-    is_open: MutableState<Boolean>,
     tenantWithRentCard: TenantDao.TenantWithRoomRentCard? = null,
+    current_action: MutableState<MODAL_TYPE>,
     viewmodel: RecordRentViewModel = hiltViewModel()
 ){
     val query = viewmodel.query.collectAsState()
@@ -171,7 +172,6 @@ fun RecordRentPriceModal(
                     is_search_open.value = true
                 }
             )
-            Log.d("BILLIONAREGREATHARI",data.amountError ?: "")
             Input(
                 modifier = Modifier.fillMaxWidth(),
                 label = "Paying Now",
@@ -227,7 +227,7 @@ fun RecordRentPriceModal(
         ){
             AppButton(
                 onClick = {
-                    viewmodel.submit(is_open = is_open)
+                    viewmodel.submit(current_action = current_action)
                 },
                 containerColor = Color.Black.copy(0.9f),
                 contentColor = Color.White,

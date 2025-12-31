@@ -1,5 +1,7 @@
 package com.example.billionairehari.layout
 
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
@@ -64,7 +66,19 @@ fun BottomDialogSearchScreen(
                             onChangeValue(it)
                         },
                         trailingIcon = {
-
+                            if(value.length > 0) {
+                                Icon(
+                                    Icons.Filled.Close,
+                                    contentDescription = "",
+                                    modifier = Modifier.clickable(
+                                        interactionSource = MutableInteractionSource(),
+                                        indication = null,
+                                        onClick = {
+                                            onChangeValue("")
+                                        }
+                                    )
+                                )
+                            }
                         },
                         placeholder = "Search Room",
                         modifier = Modifier.focusRequester(focusRequester = focusRequester)

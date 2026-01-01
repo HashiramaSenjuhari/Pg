@@ -1,5 +1,6 @@
 package com.example.billionairehari.core.data.local.dao
 
+import android.health.connect.datatypes.units.Percentage
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.Query
@@ -54,25 +55,29 @@ interface PaymentDao {
     fun getRangeTotalRevene(ownerId:String,startDate:String,endDate:String): Flow<Revenue>
     // ###############################################################################################
 
+    data class Percentag(
+        val prev_total:Int,
+        val total: Float
+    )
+
     @Query("""
         SELECT
+        SUM(CASE WHEN strftime('%Y-%m',payment_date) = strftime('%Y-%m','now','-1 month') THEN amount END) AS prev_total,
         CASE 
-            WHEN SUM(CASE WHEN strftime('%Y-%m',amount) = strftime('%Y-%m','now','-1 months') THEN amount END) > 0
-            THEN
+            WHEN
+                SUM(CASE WHEN strftime('%Y-%m',payment_date) = strftime('%Y-%m','now','-1 month') THEN amount END) > 0
+                THEN 
                 ROUND(
-                    (
-                        (
-                            SUM(CASE WHEN strftime('%Y-%m',amount) = strftime('%Y-%m','now') THEN amount END) -
-                            SUM(CASE WHEN strftime('%Y-%m',amount) = strftime('%Y-%m','now','-1 months') THEN amount END)
-                        )/
-                        SUM(CASE WHEN strftime('%Y-%m',amount) = strftime('%Y-%m','now','-1 months') THEN amount END)
-                    ) * 100,2
-                )
-            ELSE 0.0
-            END
+                    ((SUM(CASE WHEN strftime('%Y-%m',payment_date) = strftime('%Y-%m','now') THEN amount END) /
+                    SUM(CASE WHEN strftime('%Y-%m',payment_date) = strftime('%Y-%m','now','-1 month') THEN amount END))
+                    - 1) * 100
+                ,1)
+            ELSE
+                0.0
+        END AS total
         FROM payments
         WHERE
             owner_id = :ownerId
     """)
-    fun getPercentage(ownerId:String):Flow<Int>
+    fun getPercentage(ownerId:String):Flow<Percentag>
 }

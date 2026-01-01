@@ -1,5 +1,6 @@
 package com.example.billionairehari.core.data.repository
 
+import android.health.connect.datatypes.units.Percentage
 import android.icu.util.Calendar
 import android.util.Log
 import com.example.billionairehari.core.ApiResult
@@ -58,5 +59,5 @@ class PaymentRepository @Inject constructor(
         }
     }
 
-    override fun getPercentage(ownerId: String): Flow<Int> = paymentDao.getPercentage(ownerId = ownerId)
+    override fun getPercentage(ownerId: String): Flow<PaymentDao.Percentag> = paymentDao.getPercentage(ownerId = ownerId)
 }

@@ -20,7 +20,7 @@ interface PaymentDao {
         SELECT SUM(p.amount) AS revenue
         FROM payments p
         WHERE
-            strftime('%Y-%m',payment_date) = strftime('%Y-%m','now')
+            strftime('%Y-%m-%d',payment_date) = strftime('%Y-%m','now') || '-' || strftime('%d',payment_date)
             AND p.owner_id = :ownerId
     """)
     fun getTotalRevenue(ownerId:String): Flow<Revenue>
@@ -40,7 +40,7 @@ interface PaymentDao {
         SELECT SUM(amount) AS revenue
         FROM payments
         WHERE
-            strftime('%Y-%m',payment_date) = strftime('%Y-%m','now')
+            strftime('%Y-%m-%d',payment_date) = strftime('%Y-%m','now') || '-' || strftime('%d',payment_date)
             AND owner_id = :ownerId
     """)
     fun getCurrentTotalRevenue(ownerId:String): Flow<Revenue>

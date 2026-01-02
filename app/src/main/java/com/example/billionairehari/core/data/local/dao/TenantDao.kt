@@ -191,11 +191,19 @@ interface TenantDao {
 
     @Query(
         """
+        WITH prev_month AS (
+            SELECT
+            p.id,
+            p.tenant_id
+            FROM payments p
+            WHERE strftime('%Y-%m',p.payment_date) = strftime('%Y-%m','now','-1 month') AND p.payment_date = 'PAID'
+        )
         SELECT COUNT(DISTINCT t.id) AS notPaid
         FROM tenants t
         INNER JOIN rooms r ON r.id = t.room_id
+        LEFT JOIN prev_month pmp ON pmp.tenant_id = t.id
         LEFT JOIN payments p ON p.tenant_id = t.id
-            AND strftime('%Y-%m',p.payment_date) = strftime('%Y-%m','now')
+            AND strftime('%Y-%m',p.payment_date) < strftime('%Y-%m','now') || '-' || r.due_day AND pmp.id IS NOT NULL
         WHERE r.owner_id = :ownerId AND t.is_active = true AND p.id IS NULL
     """
     )
@@ -218,8 +226,9 @@ interface TenantDao {
         val tenantName:String = "",
         val roomId:String = "",
         val roomName:String = "",
-        val dueDay:String = "",
-        val rentPrice: Int = 0
+        val dueDay:Int = 0,
+        val rentPrice: Int = 0,
+        val paymentAmount:Int = 0
     )
 
     @Query("""
@@ -229,10 +238,16 @@ interface TenantDao {
         r.id AS roomId,
         r.name AS roomName,
         r.due_day AS dueDay,
-        r.rent_price AS rentPrice
+        r.rent_price AS rentPrice,
+        CASE
+            WHEN r.rent_price - SUM(COALESCE(p.amount,0)) > 0 THEN r.rent_price - SUM(COALESCE(p.amount,0))
+            ELSE 0
+        END AS paymentAmount
         FROM tenants t
         INNER JOIN rooms r ON r.id = t.room_id AND r.owner_id = t.owner_id
+        LEFT JOIN payments p ON p.tenant_id = t.id AND strftime('%Y-%m',p.payment_date) = strftime('%Y-%m','now')
         WHERE t.owner_id = :ownerId AND t.is_active = true
+        GROUP BY t.id,t.name
     """)
     fun getTenantSearchCards(ownerId:String): Flow<List<TenantWithRoomRentCard>>
 

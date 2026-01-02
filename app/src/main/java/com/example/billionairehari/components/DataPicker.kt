@@ -19,6 +19,7 @@ import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.SelectableDates
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
@@ -36,8 +37,56 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.billionairehari.icons.CalendarIcon
 import java.time.LocalDate
+import java.util.Calendar
 import java.util.Date
 import java.util.Locale
+import java.util.TimeZone
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun CustomDatePick(
+    date:Int,
+    onDateChange: (Long?) -> Unit,
+    onDismiss:() -> Unit
+){
+    val datePickerState = rememberDatePickerState(
+        selectableDates = object : SelectableDates {
+            override fun isSelectableDate(utcTimeMillis: Long): Boolean {
+                val cal = Calendar.getInstance(TimeZone.getTimeZone("Asia/Kolkata")).apply {
+                    timeInMillis = utcTimeMillis
+                }
+                return cal.get(Calendar.DAY_OF_MONTH) == date
+            }
+
+            override fun isSelectableYear(year: Int): Boolean = true
+        }
+    )
+    DatePickerDialog(
+        confirmButton = {
+            TextButton(
+                onClick = {
+                    onDateChange(datePickerState.selectedDateMillis)
+                    onDismiss()
+                }
+            ) {
+                Text("Ok")
+            }
+        },
+        dismissButton = {
+            TextButton(
+                onClick = onDismiss
+            ){
+                Text("Cancel")
+            }
+        },
+        onDismissRequest = onDismiss,
+        modifier = Modifier.fillMaxSize()
+    ) {
+        DatePicker(
+            state = datePickerState
+        )
+    }
+}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -125,6 +174,67 @@ fun DateInput(
             onDateChange = {
                 current_date ->
                     onDate(current_date!!)
+            },
+            onDismiss = {
+                is_open.value = false
+            }
+        )
+    }
+}
+
+
+@Composable
+fun CustomDateInput(
+    label:String,
+    payment_date:Int,
+    onDate:(Long) -> Unit,
+    date:Long,
+    error:String? = null,
+    modifier:Modifier = Modifier.border(1.dp,color = Color(0xFFBEBEBE),shape = RoundedCornerShape(13.dp)),
+    fontSize: TextUnit = 12.sp
+) {
+    val interactionSource = remember { MutableInteractionSource() }
+    val is_open = rememberSaveable { mutableStateOf<Boolean>(false) }
+
+    val dateFormat = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
+    val dateFormats = if (date != 0L) dateFormat.format(Date(date)) else "DD/MM/YYYY"
+
+    if(interactionSource.collectIsPressedAsState().value){
+        is_open.value = true
+    }
+    Column {
+        OutlinedInput(
+            modifier = Modifier.then(modifier),
+            value = dateFormats,
+            onValueChange = {},
+            interactionSource = interactionSource,
+            label = label,
+            label_font_size = 12.sp,
+            trailingIcon = {
+                IconButton(
+                    onClick = {
+                        is_open.value = true
+                    }
+                ) {
+                    Icon(
+                        imageVector = CalendarIcon,
+                        contentDescription = "calender",
+                        modifier = Modifier.size(20.dp)
+                    )
+                }
+            },
+            readOnly = true
+        )
+        if(error != null){
+            Text(error!!, color = Color.Red,fontSize = 12.sp,modifier = Modifier.padding(top = 6.dp))
+        }
+    }
+    if(is_open.value) {
+        CustomDatePick(
+            date = payment_date,
+            onDateChange = {
+                    current_date ->
+                onDate(current_date!!)
             },
             onDismiss = {
                 is_open.value = false

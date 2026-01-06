@@ -48,7 +48,7 @@ fun String.fromDateLong() : Long {
     return LocalDate.parse(this).toEpochDay()
 }
 
-fun combineDaytoCurrentDate(day:String):String {
-    return "${currentYear()}-${currentMonthInt()}-${day.padStart(2,'0')}"
+fun combineDaytoCurrentDate(day:Int):String {
+    return "${currentYear()}-${currentMonthInt()}-${day.toString().padStart(2,'0')}"
 }
 

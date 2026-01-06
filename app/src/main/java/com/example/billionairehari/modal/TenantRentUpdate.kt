@@ -110,6 +110,7 @@ import kotlin.math.exp
 import kotlin.system.exitProcess
 import com.example.billionairehari.R
 import com.example.billionairehari.components.AppButton
+import com.example.billionairehari.components.CustomDateInput
 import com.example.billionairehari.components.ErrorText
 import com.example.billionairehari.components.Label
 import com.example.billionairehari.components.dialogs.BottomTenantSearchCard
@@ -191,35 +192,38 @@ fun RecordRentPriceModal(
                 error = data.amountError,
                 readOnly = data.isLoading
             )
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(6.dp),
-                verticalAlignment = Alignment.Top
-            ) {
-                Column(
-                    verticalArrangement = Arrangement.spacedBy(6.dp)
-                ){
-                    DateInput(
-                        label = "Payment Date",
-                        modifier = Modifier.fillMaxWidth(0.5f),
-                        onDate = {
-                            if(!data.isLoading){
-                                viewmodel.update_payment_date(it)
-                            }
-                        },
-                        date = data.paymentDate
-                    )
-                    if(data.dateError != null){
-                        Text(data.dateError, fontSize = 12.sp, color = Color.Red)
-                    }
-                }
-                PaymentMethod(
-                    current_option = data.paymentType,
-                    onChangeOption = {
-                        if(!data.isLoading){
-                            viewmodel.update_payment_method(it)
+            if(selectedTenantCard.value != null){
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(6.dp),
+                    verticalAlignment = Alignment.Top
+                ) {
+                    Column(
+                        verticalArrangement = Arrangement.spacedBy(6.dp)
+                    ){
+                        CustomDateInput(
+                            payment_date = selectedTenantCard.value?.dueDay ?: 0,
+                            label = "Payment Date",
+                            modifier = Modifier.fillMaxWidth(0.5f),
+                            onDate = {
+                                if(!data.isLoading){
+                                    viewmodel.update_payment_date(it)
+                                }
+                            },
+                            date = data.paymentDate
+                        )
+                        if(data.dateError != null){
+                            Text(data.dateError, fontSize = 12.sp, color = Color.Red)
                         }
                     }
-                )
+                    PaymentMethod(
+                        current_option = data.paymentType,
+                        onChangeOption = {
+                            if(!data.isLoading){
+                                viewmodel.update_payment_method(it)
+                            }
+                        }
+                    )
+                }
             }
         }
         Box(
@@ -466,6 +470,10 @@ fun TenantPreview(
                             " Due on ${currentMonth()} ${details.dueDay}",
                             fontSize = 13.sp,
                             color = Color.Black.copy(0.3f),
+                        )
+                        Text(
+                            "${details.paymentAmount}",
+                            fontSize = 13.sp
                         )
                     }
                 }

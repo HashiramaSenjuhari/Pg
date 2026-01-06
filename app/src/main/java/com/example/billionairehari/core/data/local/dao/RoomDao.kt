@@ -38,7 +38,7 @@ interface RoomDao {
         val rent_price:Int = 0,
         val deposit:Int = 0,
         val features:String = "",
-        val due_day:String = "",
+        val due_day:Int= 0,
         val location:String = "",
         val owner_id:String = "",
         val paidCount:Int = 0,
@@ -47,18 +47,18 @@ interface RoomDao {
 
     @Query("""
         SELECT 
-        COALESCE(r.id,'Unknown ID') AS id,
-        COALESCE(r.name,'Unknown Room') AS name,
-        COALESCE(r.images,'') AS images,
-        COALESCE(r.bed_count,0) AS bed_count,
-        COALESCE(r.rent_price,0) AS rent_price,
-        COALESCE(r.deposit,0) AS deposit,
-        COALESCE(r.features,'') AS features,
-        COALESCE(r.due_day,'') AS due_day,
-        COALESCE(r.location,'No Location') AS location,
-        COALESCE(r.owner_id,'Unknown') AS owner_id,
-        COALESCE(COUNT(DISTINCT p.tenant_id),0) AS paidCount,
-        COALESCE(COUNT(DISTINCT t.id),0) AS tenantCount
+        r.id AS id,
+        r.name AS name,
+        r.images AS images,
+        r.bed_count AS bed_count,
+        r.rent_price AS rent_price,
+        r.deposit AS deposit,
+        r.features AS features,
+        r.due_day AS due_day,
+        r.location AS location,
+        r.owner_id AS owner_id,
+        COUNT(DISTINCT p.tenant_id) AS paidCount,
+        COUNT(DISTINCT t.id) AS tenantCount
         FROM rooms r
         LEFT JOIN tenants t ON t.room_id = r.id AND t.is_active = true
         LEFT JOIN payments p ON 

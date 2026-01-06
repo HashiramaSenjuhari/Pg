@@ -34,11 +34,14 @@ class TenantRepository @Inject constructor(
     ): Flow<TenantDao.TenantDetails> = tenantDao
         .getTenant(tenantId = tenantId, ownerId = ownerId)
 
-    override fun getPaidCount(ownerId: String): Flow<TenantDao.RentPaid> = tenantDao
+    override fun getPaidCount(ownerId: String): Flow<Int> = tenantDao
         .getRentPaidFlow(ownerId = ownerId)
 
-    override fun getNotPaidCount(ownerId: String): Flow<TenantDao.RentNotPaid> = tenantDao
+    override fun getNotPaidCount(ownerId: String): Flow<Int> = tenantDao
         .getRentNotPaidFlow(ownerId = ownerId)
+
+    override fun getPartialPaidCount(ownerId: String): Flow<Int> = tenantDao
+        .getRentPartialPaid(ownerId = ownerId)
 
     override fun getTenantRecentPayments(
         ownerId: String,

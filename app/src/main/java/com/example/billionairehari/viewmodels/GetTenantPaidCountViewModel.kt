@@ -14,16 +14,22 @@ import javax.inject.Inject
 class GetTenantPaidCountViewModel @Inject constructor(
     private val repository: TenantRepository
 ) : ViewModel() {
-    val paid: StateFlow<TenantDao.RentPaid> = repository.getPaidCount(ownerId = "1")
+    val paid: StateFlow<Int> = repository.getPaidCount(ownerId = "1")
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5000),
-            initialValue = TenantDao.RentPaid(rentPaid = 0)
+            initialValue = 0
         )
-    val not_paid: StateFlow<TenantDao.RentNotPaid> = repository.getNotPaidCount(ownerId = "1")
+    val not_paid: StateFlow<Int> = repository.getNotPaidCount(ownerId = "1")
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5000),
-            initialValue = TenantDao.RentNotPaid(notPaid = 0)
+            initialValue = 0
+        )
+    val partial_paid: StateFlow<Int> = repository.getPartialPaidCount(ownerId = "1")
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = 0
         )
 }

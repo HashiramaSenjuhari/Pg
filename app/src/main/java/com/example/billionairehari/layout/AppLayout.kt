@@ -41,12 +41,15 @@ import com.example.billionairehari.components.contacts.ContactScreen
 import com.example.billionairehari.components.sheets.SelectedType
 import com.example.billionairehari.screens.AuthScreen
 import com.example.billionairehari.screens.DashboardScreen
+import com.example.billionairehari.screens.PaymentHistory
 import com.example.billionairehari.screens.RoomScreen
 import com.example.billionairehari.screens.search.RoomSearchComponentScreen
 import com.example.billionairehari.screens.RoomsScreen
 import com.example.billionairehari.screens.TenantScreen
 import com.example.billionairehari.screens.search.TenantSearchComponentScreen
 import com.example.billionairehari.screens.TenantsScreen
+import com.example.billionairehari.utils.DIALOG_TYPE
+import com.example.billionairehari.utils.MODAL_TYPE
 import com.example.billionairehari.viewmodels.RoomsViewModel
 import okhttp3.internal.wait
 
@@ -239,7 +242,7 @@ fun AppLayout(
             )
         }
         composable(
-            route = Destinations.TENANT_HISTORY,
+            route = Destinations.TENANT_RENT_HISTORY,
             arguments = listOf(
                 navArgument(name = Arguments.TENANT_ID_ARGS){
                     type = NavType.StringType
@@ -294,6 +297,14 @@ fun AppLayout(
         ){
             AuthScreen(
                 modifier = Modifier.padding(padding),
+                navController = navController
+            )
+        }
+        composable(
+            route = Destinations.PAYMENTS_ROUTE
+        ){
+            PaymentHistory(
+                modifier = Modifier.padding(paddingValues = padding),
                 navController = navController
             )
         }

@@ -77,22 +77,8 @@ import com.example.billionairehari.R
 import com.example.billionairehari.core.data.local.dao.TenantDao
 import com.example.billionairehari.icons.AddRoom
 import com.example.billionairehari.icons.AddTenantIcon
-
-sealed class MODAL_TYPE {
-    object ADD_ROOM: MODAL_TYPE()
-    object NONE: MODAL_TYPE()
-    data class ADD_TENANT(val room: Pair<String,String>? = null): MODAL_TYPE()
-    data class UPDATE_TENANT(val tenant: Tenant): MODAL_TYPE()
-    data class UPDATE_ROOM(val id: String): MODAL_TYPE()
-    data class UPDATE_TENANT_RENT(val tenantRentDetails: TenantDao.TenantWithRoomRentCard? = null): MODAL_TYPE()
-    data class ANNOUNCE(val reveivers:List<SelectedType>? = null): MODAL_TYPE()
-}
-
-sealed class DIALOG_TYPE {
-    data class DELETE_ROOM(val id:String): DIALOG_TYPE()
-    data class DELETE_TENANT(val id:String): DIALOG_TYPE()
-    object NONE: DIALOG_TYPE()
-}
+import com.example.billionairehari.utils.DIALOG_TYPE
+import com.example.billionairehari.utils.MODAL_TYPE
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -100,7 +86,7 @@ fun MainLayout(
     navController: NavHostController = rememberNavController(),
     context: Context = LocalContext.current,
     scope: CoroutineScope = rememberCoroutineScope(),
-    startDestination:String = Destinations.DASHBOARD_ROUTE
+    startDestination:String = Destinations.PAYMENTS_ROUTE
 ){
     // states
     val scrollState = rememberScrollState()

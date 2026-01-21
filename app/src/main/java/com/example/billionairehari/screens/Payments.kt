@@ -20,10 +20,12 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
+import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -35,17 +37,24 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import com.example.billionairehari.Destinations
 import com.example.billionairehari.layout.DynamicShowcaseScreen
 import com.example.billionairehari.layout.component.ROw
 import com.example.billionairehari.R
+import com.example.billionairehari.viewmodels.GetAllPaymentHistoryViewModel
 
 @Composable
 fun PaymentHistory(
     modifier:Modifier = Modifier,
-    navController: NavController
+    navController: NavController,
+    viewmodel: GetAllPaymentHistoryViewModel = hiltViewModel()
 ){
     val scrollState = rememberScrollState()
+
+    val payments = viewmodel.history.collectAsState()
+
     DynamicShowcaseScreen(
         title = "Payments History",
         navController = navController,
@@ -62,7 +71,18 @@ fun PaymentHistory(
                 .padding(bottom = 240.dp),
             verticalArrangement = Arrangement.spacedBy(1.dp)
         ) {
-            // TODO display the payment Card
+            payments.value.forEach {
+                PaymentCard(
+                    name = it.tenantName,
+                    roomName = it.roomName,
+                    amount = it.amount,
+                    onClick = {
+                        navController.navigate("${Destinations.PAYMENTS_ROUTE}/${it.id}")
+                    },
+                    paymentDate = it.paymentDate,
+                    dueDate = it.dueDate
+                )
+            }
         }
     }
 }
@@ -73,6 +93,7 @@ fun PaymentCard(
     roomName:String,
     amount:Int,
     paymentDate:String,
+    dueDate:String,
     onClick:() -> Unit
 ){
     Surface(
@@ -119,7 +140,11 @@ fun PaymentCard(
                         verticalArrangement = Arrangement.spacedBy(6.dp)
                     ) {
                         Text(name, fontSize = 16.sp)
-                        Text(roomName, fontSize = 13.sp, color = Color.Black.copy(0.6f))
+                        ROw(
+                            horizontalArrangement = Arrangement.spacedBy(9.dp)
+                        ) {
+                            Text(roomName, color = Color.Black.copy(0.6f))
+                        }
                     }
                 }
             }

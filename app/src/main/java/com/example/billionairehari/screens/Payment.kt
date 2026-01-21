@@ -2,17 +2,21 @@ package com.example.billionairehari.screens
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.AccountCircle
+import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Person
@@ -21,6 +25,7 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -35,6 +40,9 @@ import androidx.compose.ui.text.toUpperCase
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavController
+import com.example.billionairehari.Destinations
+import com.example.billionairehari.Screens
 import com.example.billionairehari.components.AppButton
 import com.example.billionairehari.components.dashboard.ActionButton
 import com.example.billionairehari.core.data.local.entity.PaymentStatus
@@ -45,7 +53,8 @@ import com.example.billionairehari.viewmodels.GetPaymentDetailViewModel
 
 @Composable
 fun Payment(
-    id:String
+    id:String,
+    navController: NavController
 ){
     val viewmodel:GetPaymentDetailViewModel = hiltViewModel(
         creationCallback = { factory: GetPaymentDetailViewModel.GetPaymentDetailFactory ->
@@ -58,13 +67,19 @@ fun Payment(
         PaymentScreen(
             paymentStatus = details.value.payment_status,
             createdAt = "01:32 on 24 Jul 2026",
+            onClick = {
+                navController.popBackStack()
+            }
         )
         PaymentDetailCard(
             name = details.value.tenantName,
             roomName = details.value.roomName,
             amountPaid = details.value.amount,
             paymentType = details.value.payment_type,
-            onClickHistory = {},
+            dueDate = details.value.due_date,
+            onClickHistory = {
+                navController.navigate("${Screens.TENANT_PAYMENTS_SCREEN}/${details.value.tenantId}")
+            },
             onClickEdit = {},
             onClickShare = {}
         )
@@ -74,7 +89,8 @@ fun Payment(
 @Composable
 fun PaymentScreen(
     paymentStatus: PaymentStatus,
-    createdAt:String
+    createdAt:String,
+    onClick:() -> Unit
 ){
     val isPaid = if(paymentStatus == PaymentStatus.PAID) true else false
     val paymentHeaderStatus = if(isPaid) "Paid Completely" else "Paid Partial"
@@ -86,16 +102,26 @@ fun PaymentScreen(
         ROw(
             modifier = Modifier.fillMaxWidth()
                 .background(Color(headerContainerColor))
-                .padding(top = 34.dp, start = 13.dp, end = 13.dp, bottom = 13.dp),
-            horizontalArrangement = Arrangement.spacedBy(36.dp)
+                .padding(top = 30.dp, start = 6.dp, end = 13.dp, bottom = 3.dp),
+            horizontalArrangement = Arrangement.spacedBy(24.dp)
         ) {
-            Icon(Icons.AutoMirrored.Default.ArrowBack, contentDescription = "",modifier = Modifier.size(24.dp))
+            IconButton(
+                onClick = onClick
+            ) {
+                Icon(
+                    Icons.AutoMirrored.Default.ArrowBack,
+                    contentDescription = "",
+                    modifier = Modifier.size(30.dp)
+                )
+            }
             Column(
-                modifier = Modifier.fillMaxWidth(),
-                verticalArrangement = Arrangement.Center
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .offset(y = -3.dp),
+                verticalArrangement = Arrangement.spacedBy(1.dp)
             ) {
                 Text(paymentHeaderStatus, fontSize = 16.sp, fontWeight = FontWeight.SemiBold)
-                Text("01:32 on 24 Jul 2026" ,fontSize = 13.sp)
+                Text(createdAt ,fontSize = 13.sp, color = Color.White.copy(0.9f))
             }
         }
     }
@@ -106,7 +132,8 @@ fun PaymentUserDetail(
     name:String,
     roomName:String,
     amountPaid:Int,
-    paymentType: PaymentType
+    paymentType: PaymentType,
+    dueDate: String
 ){
     Column(
         modifier = Modifier
@@ -151,6 +178,7 @@ fun PaymentDetailCard(
     roomName:String,
     amountPaid:Int,
     paymentType: PaymentType,
+    dueDate:String,
     onClickHistory:() -> Unit,
     onClickEdit:() -> Unit,
     onClickShare:() -> Unit
@@ -172,8 +200,22 @@ fun PaymentDetailCard(
                 name = name,
                 roomName = roomName,
                 amountPaid = amountPaid,
-                paymentType = paymentType
+                paymentType = paymentType,
+                dueDate = dueDate
             )
+            ROw(
+                modifier = Modifier.fillMaxWidth()
+                    .padding(vertical = 6.dp),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                ROw(
+                    horizontalArrangement = Arrangement.spacedBy(4.dp)
+                ) {
+                    Icon(Icons.Default.DateRange, contentDescription = "",modifier = Modifier.size(19.dp))
+                    Text("Due Date", fontSize = 13.sp, color = Color.Black.copy(0.6f), fontWeight = FontWeight.SemiBold)
+                }
+                Text(dueDate, fontWeight = FontWeight.SemiBold)
+            }
             HorizontalDivider(color = Color.Black.copy(0.09f))
             ROw(
                 modifier = Modifier.fillMaxWidth(),

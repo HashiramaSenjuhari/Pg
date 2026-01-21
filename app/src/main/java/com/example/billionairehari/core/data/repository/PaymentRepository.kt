@@ -60,4 +60,11 @@ class PaymentRepository @Inject constructor(
     }
 
     override fun getPercentage(ownerId: String): Flow<PaymentDao.Percentag> = paymentDao.getPercentage(ownerId = ownerId)
+    override fun getPaymentsHistory(ownerId: String): Flow<List<PaymentDao.PaymentCard>> = paymentDao.getPaymentHistory(ownerId = ownerId)
+    override fun getPaymentDetail(
+        ownerId: String,
+        paymentId: String
+    ): Flow<PaymentDao.PaymentDetail> = paymentDao.getPayment(ownerId = ownerId, id = paymentId)
+    override fun getTenantPaymentHistory(ownerId:String,id:String): Flow<List<PaymentDao.PaymentCard>> = paymentDao
+        .getTenantPaymentHistory(ownerId = ownerId,id = id)
 }

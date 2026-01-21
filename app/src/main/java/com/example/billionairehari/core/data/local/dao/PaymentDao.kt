@@ -1,10 +1,13 @@
 package com.example.billionairehari.core.data.local.dao
 
 import android.health.connect.datatypes.units.Percentage
+import androidx.room.ColumnInfo
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.Query
 import com.example.billionairehari.core.data.local.entity.Payment
+import com.example.billionairehari.core.data.local.entity.PaymentStatus
+import com.example.billionairehari.core.data.local.entity.PaymentType
 import kotlinx.coroutines.flow.Flow
 
 @Dao
@@ -80,4 +83,94 @@ interface PaymentDao {
             owner_id = :ownerId
     """)
     fun getPercentage(ownerId:String):Flow<Percentag>
+
+    data class PaymentCard(
+        val id:String,
+        val tenantName:String,
+        val roomName:String,
+        val dueDate:String,
+        val paymentDate:String,
+        val amount:Int
+    )
+
+    @Query("""
+        SELECT
+            p.id,
+            t.name AS tenantName,
+            r.name AS roomName,
+            p.payment_date AS paymentDate,
+            p.due_date AS dueDate,
+            p.amount
+        FROM payments p
+        LEFT JOIN (
+            SELECT id,name,room_id FROM tenants
+        ) AS t ON t.id = p.tenant_id
+        LEFT JOIN (
+            SELECT id,name FROM rooms
+        ) AS r ON r.id = t.room_id
+        WHERE p.owner_id = :ownerId
+        ORDER BY p.created_at DESC
+    """)
+    fun getPaymentHistory(ownerId:String): Flow<List<PaymentCard>>
+
+    @Query("""
+        SELECT
+            p.id,
+            t.name AS tenantName,
+            r.name AS roomName,
+            p.payment_date AS paymentDate,
+            p.due_date AS dueDate,
+            p.amount
+        FROM payments p
+        LEFT JOIN (
+            SELECT id,name,room_id FROM tenants
+        ) AS t ON t.id = p.tenant_id
+        LEFT JOIN (
+            SELECT id,name FROM rooms
+        ) AS r ON r.id = t.room_id
+        WHERE p.owner_id = :ownerId
+        AND p.tenant_id = :id
+        ORDER BY p.created_at DESC
+    """)
+    fun getTenantPaymentHistory(ownerId:String,id:String): Flow<List<PaymentCard>>
+
+    data class PaymentDetail(
+        val id:String = "",
+        val amount:Int = 0,
+        val payment_status: PaymentStatus = PaymentStatus.PAID,
+        val payment_type: PaymentType = PaymentType.CASH,
+        val payment_date:String = "",
+        val due_date:String = "",
+        val created_at:String = "",
+        val tenantId:String = "",
+        val tenantName:String = "",
+        val roomName:String = ""
+    )
+
+    @Query("""
+        SELECT
+            p.id,
+            t.id AS tenantId,
+            t.name AS tenantName,
+            r.name AS roomName,
+            p.amount,
+            p.payment_status,
+            p.payment_type,
+            p.payment_date,
+            p.due_date,
+            p.created_at
+        FROM payments p
+        LEFT JOIN (
+            SELECT id,name,room_id FROM tenants
+        ) AS t ON t.id = p.tenant_id
+        LEFT JOIN (
+            SELECT id,name FROM rooms
+        ) AS r On r.id = t.room_id
+        WHERE p.owner_id = :ownerId AND 
+        p.id = :id
+        ORDER BY p.payment_date DESC
+    """)
+    fun getPayment(id:String,ownerId:String): Flow<PaymentDetail>
+
+
 }

@@ -11,4 +11,7 @@ interface PaymentRepositoryInterface {
     suspend fun insertPayment(payment: Payment)
     fun getRevenue(ownerId:String,type: DateRangeType): Flow<PaymentDao.Revenue>
     fun getPercentage(ownerId:String): Flow<PaymentDao.Percentag>
+    fun getPaymentsHistory(ownerId:String): Flow<List<PaymentDao.PaymentCard>>
+    fun getPaymentDetail(ownerId:String,paymentId:String): Flow<PaymentDao.PaymentDetail>
+    fun getTenantPaymentHistory(ownerId:String,id:String): Flow<List<PaymentDao.PaymentCard>>
 }

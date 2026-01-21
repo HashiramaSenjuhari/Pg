@@ -13,7 +13,7 @@ enum class PaymentType {
 }
 
 
-enum class PaymentStatus { NOT_PAID,PARTIAL,PAID }
+enum class PaymentStatus { PARTIAL,PAID }
 
 @Entity(
     tableName = "payments",

@@ -1,5 +1,6 @@
 package com.example.billionairehari.components.dashboard
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -20,6 +21,7 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalRippleConfiguration
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -28,8 +30,10 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -40,8 +44,8 @@ import com.example.billionairehari.icons.AnnounceIcon
 import com.example.billionairehari.icons.ContactIcon
 import com.example.billionairehari.icons.RoomIcon
 import com.example.billionairehari.icons.TenantIcon
-import com.example.billionairehari.layout.MODAL_TYPE
 import com.example.billionairehari.model.Room
+import com.example.billionairehari.utils.MODAL_TYPE
 import com.example.billionairehari.viewmodels.AddRoomViewModel
 import com.example.billionairehari.viewmodels.UpdateRoomViewModel
 
@@ -58,7 +62,6 @@ fun ActionBar(
     current_action: MutableState<MODAL_TYPE>
 ){
     val actions = listOf<Action>(
-
         Action(name = "Announce", icon = AnnounceIcon, action = {
             is_open.value = true
             current_action.value = MODAL_TYPE.ANNOUNCE(reveivers = emptyList())
@@ -291,33 +294,36 @@ private fun ValidateRoom(
 fun ActionButton(
     name:String,
     icon: ImageVector,
-    onClick:() -> Unit
+    onClick:() -> Unit,
+    containerColor:Color = Color.Transparent,
+    contentColor:Color = Color.Black,
+    border: BorderStroke = BorderStroke(width = 1.3.dp, color = Color.Black.copy(0.1f))
 ){
     DisableRippleEffect {
         Button(
             onClick = onClick,
             colors = ButtonDefaults.buttonColors(
                 containerColor = Color.Transparent,
-                contentColor = Color.Black
+                contentColor = contentColor
             ),
             contentPadding = PaddingValues(horizontal = 13.dp, vertical = 6.dp),
-            shape = RoundedCornerShape(0.dp),
             modifier = Modifier.wrapContentSize()
-                .indication(interactionSource = remember { MutableInteractionSource() }, indication = null)
         ) {
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(4.dp)
+                verticalArrangement = Arrangement.spacedBy(6.dp)
             ) {
                 Icon(
                     icon,
                     contentDescription = name,
-                    modifier = Modifier.border(width = 1.3.dp, color = Color.Black.copy(0.1f),shape = CircleShape)
-                        .background(Color.White)
+                    modifier = Modifier
+                        .clip(CircleShape)
+                        .border(border = border, shape = CircleShape)
+                        .background(containerColor)
                         .padding(16.dp),
                     tint = Color(0xFF404040)
                 )
-                Text(name, fontSize =12.sp,color = Color(0xFF404040), textAlign = TextAlign.Center)
+                Text(name, fontSize = 12.sp,color = Color.Black, textAlign = TextAlign.Center, fontWeight = FontWeight.Normal)
             }
         }
     }

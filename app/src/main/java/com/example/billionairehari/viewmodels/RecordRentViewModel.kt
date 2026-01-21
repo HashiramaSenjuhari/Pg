@@ -12,8 +12,9 @@ import com.example.billionairehari.core.data.local.entity.PaymentStatus
 import com.example.billionairehari.core.data.local.entity.PaymentType
 import com.example.billionairehari.core.data.repository.PaymentRepository
 import com.example.billionairehari.core.data.repository.TenantRepository
-import com.example.billionairehari.layout.MODAL_TYPE
+import com.example.billionairehari.utils.MODAL_TYPE
 import com.example.billionairehari.utils.combineDaytoCurrentDate
+import com.example.billionairehari.utils.currentDate
 import com.example.billionairehari.utils.currentDateTime
 import com.example.billionairehari.utils.currentMonthInt
 import com.example.billionairehari.utils.currentYear
@@ -38,7 +39,7 @@ import kotlin.coroutines.CoroutineContext
 data class RecordDataUiState(
     val tenantAndRent: TenantDao.TenantWithRoomRentCard? = null,
     val amount:String = "",
-    val paymentDate:Long = 0L,
+    val dueDate:Long = 0L,
     val paymentType: PaymentType = PaymentType.CASH,
 
     val isLoading:Boolean = false,
@@ -64,8 +65,8 @@ fun RecordDataUiState.toRoom(ownerId:String) : Payment = Payment(
     amount = amount.toInt(),
     paymentType = paymentType,
     paymentStatus = paymentStatus,
-    dueDate = combineDaytoCurrentDate(tenantAndRent?.dueDay!!),
-    paymentDate = paymentDate.toDateString(),
+    dueDate = dueDate.toDateString(),
+    paymentDate = currentDate(),
     updatedAt = currentDateTime(),
     createdAt = currentDateTime()
 )
@@ -125,7 +126,7 @@ class RecordRentViewModel @Inject constructor(
 
     fun update_payment_date(date:Long) {
         _record.value = _record.value.copy(
-            paymentDate = date,
+            dueDate = date,
             dateError = null
         )
     }
@@ -136,6 +137,9 @@ class RecordRentViewModel @Inject constructor(
         )
     }
 
+    fun refresh(){
+        _record.value = RecordDataUiState()
+    }
     fun submit(
         current_action: MutableState<MODAL_TYPE>
     ){
@@ -144,7 +148,7 @@ class RecordRentViewModel @Inject constructor(
 
         /** Error handling **/
         _record.value = _record.value.copy(
-            dateError = validateDate(current_value.paymentDate),
+            dateError = validateDate(current_value.dueDate),
             tenantError = validateTenant(tenant = current_value.tenantAndRent),
             amountError = validateAmount(current_value.amount)
         )
@@ -174,7 +178,7 @@ class RecordRentViewModel @Inject constructor(
             }catch(error: Exception){
 
             }finally {
-                _record.value = RecordDataUiState()
+                refresh()
             }
         }
     }

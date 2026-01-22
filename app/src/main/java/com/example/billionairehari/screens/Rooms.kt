@@ -166,15 +166,17 @@ import com.example.billionairehari.components.DropDown
 import com.example.billionairehari.core.data.local.dao.RoomDao
 import com.example.billionairehari.icons.CalendarIcon
 import com.example.billionairehari.icons.Rupee
-import com.example.billionairehari.layout.DIALOG_TYPE
 import com.example.billionairehari.layout.DynamicShowcaseScreen
-import com.example.billionairehari.layout.MODAL_TYPE
 import com.example.billionairehari.layout.component.ROw
+import com.example.billionairehari.modal.FilterDialog
+import com.example.billionairehari.modal.FilterModal
 import com.example.billionairehari.model.Room
 import com.example.billionairehari.model.RoomCardDetails
 import com.example.billionairehari.model.Tenant
+import com.example.billionairehari.utils.DIALOG_TYPE
+import com.example.billionairehari.utils.MODAL_TYPE
 import com.example.billionairehari.utils.currentMonth
-import com.example.billionairehari.viewmodels.FILTER
+import com.example.billionairehari.viewmodels.ROOM_FILTER
 import com.example.billionairehari.viewmodels.RoomsViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlin.text.toFloat
@@ -189,17 +191,19 @@ fun RoomsScreen(
     viewmodel: RoomsViewModel = hiltViewModel()
 ) {
 
-    val type = viewmodel.type.collectAsState()
     val scrollState = rememberScrollState()
 
     /** viewmodel - start **/
-    val filtered_rooms = viewmodel.rooms.collectAsState()
-    Log.d("Rooms",filtered_rooms.toString())
+    val rooms = viewmodel.rooms.collectAsState()
     /** viewmodel - end **/
 
-    val filter_type = mutableStateOf<FILTER>(type.value)
+    val filter_type = remember { mutableStateOf<ROOM_FILTER>(ROOM_FILTER.DEFAULT) }
 
-    val final_rooms = filtered_rooms.value
+    val final_rooms = when(filter_type.value){
+        ROOM_FILTER.DEFAULT -> rooms.value
+        ROOM_FILTER.RENT_DUE -> rooms.value.filter { it -> it.not_paid > 0 }
+        ROOM_FILTER.AVAILABLE -> rooms.value.filter { it -> it.tenant_count < it.bed_count }
+    }
 
     val is_open = rememberSaveable { mutableStateOf<Boolean>(false) }
 
@@ -221,97 +225,44 @@ fun RoomsScreen(
         )
     }
     if(is_open.value){
-        FilterDialog(
+        RoomFilterDialog(
             is_open = is_open,
             onReset = {
                 is_open.value = false
-                viewmodel.update_filter(FILTER.DEFAULT)
             },
             onFilter = {
                 is_open.value = false
-                viewmodel.update_filter(filter_type.value)
+                filter_type.value = it
             },
             filter_type = filter_type
         )
     }
 }
 
-data class FilterType(
+data class FilterType<T>(
     val name:String,
-    val filter: FILTER
+    val filter: T
 )
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun FilterDialog(
-    filter_type:MutableState<FILTER>,
+fun RoomFilterDialog(
+    filter_type:MutableState<ROOM_FILTER>,
     is_open: MutableState<Boolean>,
-    onFilter:() -> Unit,
+    onFilter:(ROOM_FILTER) -> Unit,
     onReset:() -> Unit
 ){
-    val filter_types = listOf<FilterType>(
-        FilterType(name = "Available", filter = FILTER.AVAILABLE),
-        FilterType(name = "Rent Due", filter = FILTER.RENT_DUE)
+    val filter_types = listOf<FilterType<ROOM_FILTER>>(
+        FilterType(name = "Available", filter = ROOM_FILTER.AVAILABLE),
+        FilterType(name = "Rent Due", filter =  ROOM_FILTER.RENT_DUE)
     )
-
-    ModalBottomSheet(
-        sheetState = rememberModalBottomSheetState(),
-        dragHandle = null,
-        containerColor = Color.White,
-        onDismissRequest = {
-            is_open.value = false
-        },
-        scrimColor = Color.Black.copy(0.1f)
-    ){
-        Column(
-            modifier = Modifier.fillMaxWidth()
-                .background(Color.White)
-                .padding(vertical = 24.dp,horizontal = 16.dp),
-        ){
-            Column(
-                verticalArrangement = Arrangement.spacedBy(24.dp)
-            ) {
-                Text(
-                    "Select Option to Filter",
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.SemiBold
-                )
-                Column(
-                    verticalArrangement = Arrangement.spacedBy(13.dp)
-                ) {
-                    filter_types.forEach {
-                        (name, filter) ->
-                        FilterOption(
-                            onClick = {
-                                filter_type.value = filter
-                            },
-                            option = name,
-                            selected = filter_type.value == filter
-                        )
-                    }
-                }
-                ROw(
-                    horizontalArrangement = Arrangement.spacedBy(13.dp)
-                ) {
-                    AppButton(
-                        onClick = onReset,
-                        modifier = Modifier.fillMaxWidth(0.5f),
-                        border = BorderStroke(1.dp, color = Color.Black.copy(0.3f))
-                    ) {
-                        Text("Reset")
-                    }
-                    AppButton(
-                        onClick = onFilter,
-                        modifier = Modifier.fillMaxWidth(1f),
-                        containerColor = Color.Black.copy(0.9f),
-                        contentColor = Color.White
-                    ) {
-                        Text("Apply")
-                    }
-                }
-            }
-        }
-    }
+    FilterModal<ROOM_FILTER>(
+        title = "Select Option To Filter",
+        filter_types = filter_types,
+        onReset = onReset,
+        onFilter = onFilter,
+        is_open = is_open,
+        filter_type = filter_type
+    )
 }
 
 @Composable
@@ -330,7 +281,7 @@ fun RoomCards(
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
         final_rooms.forEach {
-                room ->
+            room ->
             RoomCard(
                 room_detail = room,
                 onClick = {

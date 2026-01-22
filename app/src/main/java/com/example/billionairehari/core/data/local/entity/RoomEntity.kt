@@ -26,7 +26,7 @@ data class Room(
     @ColumnInfo(name = "rent_price") var rentPrice: Int,
     var deposit:Int,
     var features: List<String>,
-    @ColumnInfo(name = "due_day") var dueDate:Int, // DD
+    @ColumnInfo(name = "due_day") var dueDate:String, // DD
     var location:String,
     @ColumnInfo(name = "owner_id", index = true) val ownerId:String,
 

@@ -89,7 +89,7 @@ interface RoomDao {
         END AS paymentStatus
         FROM rooms r
         JOIN tenants t ON t.room_id = r.id AND t.is_active = true
-        LEFT JOIN payments p ON p.tenant_id = t.id
+        LEFT JOIN payments p ON p.tenant_id = t.id AND p.due_date = strftime('%Y-%m','now') || '-' || r.due_day
         WHERE r.owner_id = :ownerId AND r.id = :roomId
         GROUP BY t.id
     """)

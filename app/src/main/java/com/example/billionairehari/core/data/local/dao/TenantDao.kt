@@ -29,15 +29,15 @@ interface TenantDao {
             ELSE 0 
         END AS paymentStatus
         FROM tenants t
-        LEFT JOIN rooms r ON t.room_id = r.id
+        INNER JOIN rooms r ON t.room_id = r.id
         LEFT JOIN (
             SELECT
             p.*,
             SUM(p.amount) AS totalAmount
             FROM payments p
-            WHERE strftime('%Y-%m',p.payment_date) = strftime('%Y-%m','now')
             GROUP BY p.tenant_id
-        ) AS p ON p.tenant_id = t.id
+        ) AS p ON p.tenant_id = t.id 
+        AND p.due_date = strftime('%Y-%m','now') || '-' || r.due_day
         WHERE t.owner_id = :ownerId AND t.is_active = true
     """)
     fun getTenantsCardFlow(ownerId:String) : Flow<List<TenantCardDetails>>
@@ -188,12 +188,13 @@ interface TenantDao {
 
     @Query(
         """
-        SELECT COUNT(DISTINCT t.id) AS notPaid
+        SELECT COUNT(t.id) AS notPaid
         FROM tenants t
         INNER JOIN rooms r ON r.id = t.room_id
         LEFT JOIN payments p ON p.tenant_id = t.id
-            AND strftime('%Y-%m-%d',p.payment_date) = strftime('%Y-%m','now') || '-' || printf('%02d',r.due_day)
+            AND strftime('%Y-%m-%d',p.due_date) = strftime('%Y-%m','now') || '-' || r.due_day
         WHERE r.owner_id = :ownerId AND t.is_active = true AND p.id IS NULL
+        GROUP BY t.id
     """
     )
     fun getRentNotPaidFlow(ownerId: String): Flow<Int>
@@ -202,9 +203,15 @@ interface TenantDao {
         SELECT COUNT(DISTINCT t.id) AS rentPaid
         FROM tenants t
         INNER JOIN rooms r ON r.id = t.room_id
-        INNER JOIN payments p ON p.tenant_id = t.id
-            AND strftime('%Y-%m-%d',p.payment_date) = strftime('%Y-%m','now') || '-' || printf('%02d',r.due_day)
-        WHERE t.owner_id = :ownerId AND t.is_active = true
+        INNER JOIN (
+            SELECT
+                tenant_id,
+                due_date,
+                SUM(amount) AS totalAmount
+            FROM payments
+        ) AS p ON p.tenant_id = t.id
+            AND p.due_date = strftime('%Y-%m','now') || '-' || r.due_day
+        WHERE t.owner_id = :ownerId AND t.is_active = true AND p.totalAmount >= r.rent_price
     """)
     fun getRentPaidFlow(ownerId:String) : Flow<Int>
 
@@ -217,12 +224,13 @@ interface TenantDao {
             SELECT
                 SUM(amount) AS totalAmount,
                 payment_date,
+                due_date,
                 tenant_id
             FROM payments
-            WHERE strftime('%Y-%m',payment_date) = strftime('%Y-%m','now')
             GROUP BY tenant_id
             HAVING totalAmount > 0
         ) AS p ON p.tenant_id = t.id
+        AND p.due_date = strftime('%Y-%m','now') || '-' || r.due_day
         WHERE t.owner_id = :ownerId
             AND t.is_active = true
          AND p.totalAmount < r.rent_price

@@ -63,58 +63,32 @@ fun TenantSearchComponentScreen(
         },
         onClickBack = {
             navController.popBackStack()
-        }
-    ) {
-        when(state){
-            is SearchUiState.Data<TenantDao.TenantCardDetails> -> {
-                val size = state.data.size
-                if(size == 0){
-                    Column(
-                        modifier = Modifier.fillMaxSize(),
-                        verticalArrangement = Arrangement.Center,
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                        Column(
-                            horizontalAlignment = Alignment.CenterHorizontally,
-                            verticalArrangement = Arrangement.spacedBy(24.dp)
-                        ) {
-                            Image(painter = painterResource(R.drawable.ic_launcher_background), contentDescription = "")
-                            Column(
-                                horizontalAlignment = Alignment.CenterHorizontally,
-                                verticalArrangement = Arrangement.spacedBy(13.dp)
-                            ) {
-                                Text("No results found", fontWeight = FontWeight.SemiBold, fontSize = 14.sp)
-                                Text("Check the spelling or try different word", color = Color.Black.copy(0.6f))
-                            }
-                        }
-                    }
-                }
-                else {
-                    state.data.forEach {
-                        TenantCard(
-                            tenant = it.toTenantData(),
-                            onClick = {
-                                viewmodel.save_recent_search()
-                                navController.navigate("${Screens.TENANTS_SCREEN}/${it.id}")
-                            },
-                            onCLickMessage = {},
-                            onClickCall = {}
-                        )
-                    }
-                }
-            }
-            is SearchUiState.Default -> {
-                RecentSearchBoard(
-                    onClear = {
-                        viewmodel.clearRecentSearch()
+        },
+        state = state,
+        defaultState = {
+            RecentSearchBoard(
+                onClear = {
+                    viewmodel.clearRecentSearch()
+                },
+                onPlaceQuery = {
+                    viewmodel.update_query(it)
+                },
+                names = recent_search.value
+            )
+        },
+        dataState = {
+            it.forEach {
+                TenantCard(
+                    tenant = it.toTenantData(),
+                    onClick = {
+                        viewmodel.save_recent_search()
+                        navController.navigate("${Screens.TENANTS_SCREEN}/${it.id}")
                     },
-                    onPlaceQuery = {
-                        viewmodel.update_query(it)
-                    },
-                    names = recent_search.value
+                    onCLickMessage = {},
+                    onClickCall = {}
                 )
             }
-            SearchUiState.Loading -> {}
-        }
-    }
+        },
+        loadingState = {}
+    )
 }

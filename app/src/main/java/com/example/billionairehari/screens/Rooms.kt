@@ -168,7 +168,6 @@ import com.example.billionairehari.icons.CalendarIcon
 import com.example.billionairehari.icons.Rupee
 import com.example.billionairehari.layout.DynamicShowcaseScreen
 import com.example.billionairehari.layout.component.ROw
-import com.example.billionairehari.modal.FilterDialog
 import com.example.billionairehari.modal.FilterModal
 import com.example.billionairehari.model.Room
 import com.example.billionairehari.model.RoomCardDetails
@@ -229,6 +228,7 @@ fun RoomsScreen(
             is_open = is_open,
             onReset = {
                 is_open.value = false
+                filter_type.value = ROOM_FILTER.DEFAULT
             },
             onFilter = {
                 is_open.value = false

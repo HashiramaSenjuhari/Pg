@@ -106,16 +106,30 @@ import com.example.billionairehari.R
 import com.example.billionairehari.core.data.local.dao.TenantDao
 import com.example.billionairehari.core.data.local.entity.PaymentStatus
 import com.example.billionairehari.layout.DynamicShowcaseScreen
+import com.example.billionairehari.modal.FilterModal
 import com.example.billionairehari.modal.payment_method
+
+
+enum class TENANT_FILTERS { NOT_PAID,PAID,PARTIAL_PAID,ALL }
+
+val tenant_filters = listOf<FilterType<TENANT_FILTERS>>(
+    FilterType<TENANT_FILTERS>(name = "Paid", filter = TENANT_FILTERS.PAID),
+    FilterType<TENANT_FILTERS>(name = "Not Paid", filter = TENANT_FILTERS.NOT_PAID),
+    FilterType<TENANT_FILTERS>(name = "Partial Paid", filter = TENANT_FILTERS.PARTIAL_PAID)
+)
 
 
 @Composable
 fun TenantsScreen(
     modifier:Modifier,
-    navController: NavController
+    navController: NavController,
+    filterState: TENANT_FILTERS = TENANT_FILTERS.ALL
 ) {
     val context = LocalContext.current
     val scrollState = rememberScrollState()
+
+    val is_open = remember { mutableStateOf<Boolean>(false) }
+    val filter_type = remember { mutableStateOf<TENANT_FILTERS>(filterState) }
 
     DynamicShowcaseScreen(
         title = "Tenants",
@@ -123,12 +137,31 @@ fun TenantsScreen(
         scrollState = scrollState,
         navController = navController,
         search_route = Destinations.TENANT_SEARCH_ROUTE,
-        onClickFilter = {}
+        onClickFilter = {
+            is_open.value = true
+        }
     ) {
         TenantCards(
             scrollState = scrollState,
             context = context,
-            navController = navController
+            navController = navController,
+            filterState = filter_type.value
+        )
+    }
+    if(is_open.value){
+        FilterModal<TENANT_FILTERS>(
+            title = "Select Option to Filter",
+            is_open = is_open,
+            filter_types = tenant_filters,
+            filter_type = filter_type,
+            onFilter = {
+                is_open.value = false
+                filter_type.value = it
+            },
+            onReset = {
+                is_open.value = false
+                filter_type.value = TENANT_FILTERS.ALL
+            }
         )
     }
 }
@@ -159,9 +192,15 @@ fun TenantCards(
     scrollState: ScrollState,
     context: Context,
     navController: NavController,
+    filterState: TENANT_FILTERS,
     viewmodel: TenantsViewModel = hiltViewModel()
 ){
-    val tenants = viewmodel.tenants.collectAsState()
+    val tenants_detail = viewmodel.tenants.collectAsState()
+    val tenants = when(filterState){
+        TENANT_FILTERS.ALL -> tenants_detail.value
+        else -> tenants_detail.value.filter { it -> it.paymentStatus == filterState.ordinal }
+    }
+
     Column(
         modifier = Modifier
             .clip(RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp))
@@ -169,7 +208,7 @@ fun TenantCards(
             .verticalScroll(state = scrollState)
             .padding(bottom = 240.dp)
     ) {
-        tenants.value.sortedBy { it -> it.name.first().uppercase() }.forEach {
+        tenants.sortedBy { it -> it.name.first().uppercase() }.forEach {
             it ->
                     TenantCard(
                         tenant = it.toData(),

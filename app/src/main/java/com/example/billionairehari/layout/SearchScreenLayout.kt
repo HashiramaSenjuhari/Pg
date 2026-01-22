@@ -5,6 +5,8 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -20,16 +22,21 @@ import androidx.compose.ui.unit.sp
 import com.example.billionairehari.R
 import com.example.billionairehari.components.RecentSearchBoard
 import com.example.billionairehari.components.SearchInput
+import com.example.billionairehari.core.data.local.dao.RoomDao
+import com.example.billionairehari.viewmodels.SearchUiState
 
 
 @Composable
-fun SearchScreenLayout(
+fun <T>SearchScreenLayout(
     label:String,
     modifier:Modifier,
     query:String,
     onChangeQuery:(String) -> Unit,
     onClickBack:() -> Unit,
-    ResultScreen:@Composable () -> Unit
+    state: SearchUiState<T>,
+    defaultState:@Composable () -> Unit,
+    dataState:@Composable (data: List<T>) -> Unit,
+    loadingState:@Composable () -> Unit
 ){
     /** Focus Requester **/
     val focusRequester = remember { FocusRequester() }
@@ -55,11 +62,50 @@ fun SearchScreenLayout(
             focus = focusRequester,
             onClickBack = onClickBack
         )
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-        ) {
-            ResultScreen.invoke()
-        }
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .verticalScroll(
+                        rememberScrollState()
+                    ),
+                verticalArrangement = Arrangement.spacedBy(6.dp)
+            ) {
+
+                when(state){
+                    SearchUiState.Default -> {
+                        defaultState.invoke()
+                    }
+                    is SearchUiState.Data<T> -> {
+                        val size = state.data.size
+                        if(size == 0){
+                            Column(
+                                modifier = Modifier.fillMaxSize(),
+                                verticalArrangement = Arrangement.Center,
+                                horizontalAlignment = Alignment.CenterHorizontally
+                            ) {
+                                Column(
+                                    horizontalAlignment = Alignment.CenterHorizontally,
+                                    verticalArrangement = Arrangement.spacedBy(24.dp)
+                                ) {
+                                    Image(painter = painterResource(R.drawable.ic_launcher_background), contentDescription = "")
+                                    Column(
+                                        horizontalAlignment = Alignment.CenterHorizontally,
+                                        verticalArrangement = Arrangement.spacedBy(13.dp)
+                                    ) {
+                                        Text("No results found", fontWeight = FontWeight.SemiBold, fontSize = 14.sp)
+                                        Text("Check the spelling or try different word", color = Color.Black.copy(0.6f))
+                                    }
+                                }
+                            }
+                        }
+                        else {
+                            dataState.invoke(state.data)
+                        }
+                    }
+                    SearchUiState.Loading -> {
+                        loadingState.invoke()
+                    }
+                }
+            }
     }
 }

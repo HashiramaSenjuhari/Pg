@@ -27,7 +27,7 @@ import kotlin.collections.forEach
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun <T>FilterDialog(
+fun <T>FilterModal(
     title:String,
     filter_types: List<FilterType<T>>,
     onReset:() -> Unit,

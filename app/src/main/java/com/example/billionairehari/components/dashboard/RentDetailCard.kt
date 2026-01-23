@@ -3,6 +3,10 @@ package com.example.billionairehari.components.dashboard
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsHoveredAsState
+import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -20,14 +24,19 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.role
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -41,6 +50,9 @@ import com.example.billionairehari.viewmodels.GetTenantPaidCountViewModel
 
 @Composable
 fun Details(
+    onClickPaid:() -> Unit,
+    onClickNotPaid:() -> Unit,
+    onClickPartialPaid:() -> Unit,
     rent_paid: GetTenantPaidCountViewModel = hiltViewModel()
 ){
     val paid = rent_paid.paid.collectAsState()
@@ -49,7 +61,6 @@ fun Details(
     Column(
         modifier = Modifier.wrapContentHeight()
     ) {
-        Text("Rent Info", fontSize = 16.sp,modifier = Modifier.offset(x = 16.dp))
         Row(
             modifier = Modifier.fillMaxWidth()
                 .padding(vertical = 13.dp, horizontal = 13.dp),
@@ -62,15 +73,19 @@ fun Details(
             ) {
                 RentDetailCard(
                     modifier = Modifier.fillMaxWidth()
+                        .shadow(elevation = 1.dp, shape = RoundedCornerShape(13.dp), spotColor = Color.Black.copy(0.1f))
                         .border(1.dp, color = Color.Black.copy(0.1f), shape = RoundedCornerShape(13.dp)),
                     type = RentDetailType.PAID,
                     count = paid.value,
+                    onClick = onClickPaid
                 )
                 RentDetailCard(
                     modifier = Modifier.fillMaxWidth()
+                        .shadow(elevation = 1.dp, shape = RoundedCornerShape(13.dp), spotColor = Color.Black.copy(0.1f))
                         .border(1.dp, color = Color.Black.copy(0.1f), shape = RoundedCornerShape(13.dp)),
                     type = RentDetailType.PARTIAL_PAID,
                     count = partial_paid.value,
+                    onClick = onClickPartialPaid
                 )
             }
             Column(
@@ -85,7 +100,8 @@ fun Details(
                 RentDetailCard(
                     modifier = Modifier.fillMaxWidth(),
                     type = RentDetailType.NOT_PAID,
-                    count = not_paid.value
+                    count = not_paid.value,
+                    onClick = onClickNotPaid
                 )
                 Box(
                     modifier = Modifier.padding(horizontal = 6.dp, vertical = 6.dp)
@@ -104,7 +120,7 @@ fun Details(
                             horizontalArrangement = Arrangement.spacedBy(6.dp)
                         ) {
                             Icon(RemaindIcon, contentDescription = "", tint =  Color(0xFF1B1B1B), modifier =  Modifier.size(16.dp))
-                            Text("Remaind To Pay", fontSize = 12.sp, color =  Color(0xFF1B1B1B))
+                            Text("Remaind To Pay", fontSize = 12.sp)
                         }
                     }
                 }
@@ -123,14 +139,17 @@ enum class RentDetailType {
 fun RentDetailCard(
     modifier:Modifier = Modifier,
     type: RentDetailType,
-    count:Int
+    count:Int,
+    onClick:() -> Unit
 ){
-    Column {
+    Surface(
+        modifier = Modifier
+            .clip(RoundedCornerShape(13.dp)),
+        onClick = onClick
+    ) {
         Row(
             modifier = Modifier.then(modifier)
-                .shadow(elevation = 1.dp, shape = RoundedCornerShape(13.dp), spotColor = Color.Black.copy(0.1f))
                 .background(Color.White)
-                .clip(RoundedCornerShape(13.dp))
                 .padding(13.dp),
             verticalAlignment = Alignment.Top,
             horizontalArrangement = Arrangement.SpaceBetween

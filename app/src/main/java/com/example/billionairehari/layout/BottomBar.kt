@@ -1,8 +1,15 @@
 package com.example.billionairehari.layout
 
+import android.transition.Fade
 import android.util.Log
+import androidx.compose.animation.Crossfade
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.core.Easing
+import androidx.compose.animation.core.FastOutLinearInEasing
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.PathEasing
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -50,11 +57,17 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.composables.TicketsIcon
+import com.example.billionairehari.Arguments
+import com.example.billionairehari.Destinations
 import com.example.billionairehari.NavigationAction
+import com.example.billionairehari.Query
+import com.example.billionairehari.Screens
 import com.example.billionairehari.components.AppButton
+import com.example.billionairehari.icons.ContactIcon
 import com.example.billionairehari.icons.Dashboard
 import com.example.billionairehari.icons.Rooms
 import com.example.billionairehari.icons.TenantsIcon
+import com.example.billionairehari.screens.TENANT_FILTERS
 
 @Composable
 fun BottomBar(
@@ -62,18 +75,18 @@ fun BottomBar(
     navigation: NavigationAction){
 
     val bars = listOf<MainBar>(
-        MainBar(id = 0,name = "Dashboard",route = "dashboard", icon = Dashboard, navigation = {
+        MainBar(id = 0,name = "Dashboard",route = Destinations.DASHBOARD_ROUTE, icon = Dashboard, navigation = {
             navigation.navigateToDashboard()
         }),
-        MainBar(id = 1,name = "Rooms",route = "rooms",icon = Rooms, navigation = {
+        MainBar(id = 1,name = "Rooms",route = Destinations.ROOMS_ROUTE,icon = Rooms, navigation = {
             navigation.navigateToRooms()
         }),
-        MainBar(id = 2,name = "Tenants",route = "tenants",icon = TenantsIcon, navigation = {
+        MainBar(id = 2,name = "Tenants",route = "${Screens.TENANTS_SCREEN}?${Query.FILTER_QUERY}=${Arguments.TENANT_FILTER_TYPE}",icon = TenantsIcon, navigation = {
             navigation.navigateToTenants()
         }),
-//        MainBar(id = 3,name = "Tickets",route = "tickets",icon = TicketsIcon,navigation = {
-//            navigation.navigateToContacts()
-//        })
+        MainBar(id = 3,name = "Payments",route = Destinations.PAYMENTS_ROUTE,icon = TicketsIcon,navigation = {
+            navigation.navigateToPaymentHistory()
+        })
     )
 
     val selectedDestination = rememberSaveable { mutableStateOf(bars[0].name) }
@@ -92,11 +105,11 @@ fun BottomBar(
     ) {
         Row(
             modifier = Modifier.fillMaxWidth()
-                .padding(horizontal = 30.dp),
+                .padding(horizontal = 13.dp),
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
             bars.forEach { bar ->
-                val selected = route == bar.route
+                val selected = if(route == bar.route) true else if(route.startsWith("tenants?") && bar.route.startsWith("tenants?")) true else false
                 val color = animateColorAsState(
                     targetValue = if(selected) Color.Black else Color.Black.copy(0.6f)
                 )
@@ -108,47 +121,35 @@ fun BottomBar(
                         .width(70.dp)
                         .fillMaxHeight()
                         .clickable(
-                        enabled = true,
-                        onClick = {
-                            if(!selected){
-                                bar.navigation()
-                            }
-                        },
-                        role = Role.Button,
-                        interactionSource = MutableInteractionSource(),
-                        indication = null
-                    ),
-                    horizontalAlignment = Alignment.CenterHorizontally
+                            enabled = true,
+                            onClick = {
+                                if(!selected){
+                                    bar.navigation()
+                                }
+                            },
+                            role = Role.Button,
+                            interactionSource = MutableInteractionSource(),
+                            indication = null
+                        ),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center
                 ) {
-                    Box(
-                        modifier = Modifier
-                            .animateContentSize()
-                            .clip(RoundedCornerShape(bottomStart = 13.dp, bottomEnd = 13.dp))
-                            .fillMaxWidth()
-                            .height(2.dp)
-                            .background(top_color.value)
-                    )
                     Column(
-                        modifier = Modifier.fillMaxHeight(),
-                        verticalArrangement = Arrangement.Center,
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.spacedBy(3.dp)
                     ) {
-                        Column(
-                            horizontalAlignment = Alignment.CenterHorizontally,
-                            verticalArrangement = Arrangement.spacedBy(3.dp)
-                        ) {
-                            Icon(
-                                bar.icon,
-                                contentDescription = "",
-                                modifier = Modifier.size(26.dp),
-                                tint = color.value
-                            )
-                            Text(
-                                bar.name,
-                                fontSize = 13.sp,
-                                color = color.value,
-                                fontWeight = if(selected) FontWeight.SemiBold else FontWeight.Normal
-                            )
-                        }
+                        Icon(
+                            bar.icon,
+                            contentDescription = "",
+                            modifier = Modifier.size(26.dp),
+                            tint = color.value
+                        )
+                        Text(
+                            bar.name,
+                            fontSize = 13.sp,
+                            color = color.value,
+                            fontWeight = if(selected) FontWeight.Medium else FontWeight.Normal
+                        )
                     }
                 }
             }

@@ -74,6 +74,7 @@ import com.example.billionairehari.model.TenantRentRecord
 import com.google.android.material.snackbar.Snackbar
 import kotlinx.coroutines.CoroutineScope
 import com.example.billionairehari.R
+import com.example.billionairehari.Screens
 import com.example.billionairehari.core.data.local.dao.TenantDao
 import com.example.billionairehari.icons.AddRoom
 import com.example.billionairehari.icons.AddTenantIcon
@@ -140,7 +141,7 @@ fun MainLayout(
 //            )
 //        },
         bottomBar = {
-            if(route_size == 1 && !listOf("auth","room_search","tenant_search").contains(path)){
+            if(route_size == 1 && !listOf("auth","room_search","tenant_search","payment_search").contains(path)){
                 BottomBar(
                     route = destination?.route ?: "dashboard",
                     navigation = navigation

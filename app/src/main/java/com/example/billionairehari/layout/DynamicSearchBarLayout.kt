@@ -27,11 +27,11 @@ import androidx.core.view.WindowInsetsControllerCompat
 import androidx.navigation.NavController
 import com.example.billionairehari.layout.component.ROw
 import com.example.billionairehari.screens.StaticSearchBar
-import com.example.billionairehari.viewmodels.FILTER
 
 
 @Composable
 fun DynamicShowcaseScreen(
+    isFilterActive:Boolean = false,
     scrollState: ScrollState,
     navController: NavController,
     title: String,
@@ -65,6 +65,7 @@ fun DynamicShowcaseScreen(
             onClickSearch = {
                 navController.navigate(search_route)
             },
+            isFilterActive = isFilterActive,
             fontSize = fontSize.value.sp,
             spacing = spacing.value
         )
@@ -74,12 +75,13 @@ fun DynamicShowcaseScreen(
 
 @Composable
 fun DynamicTopHeader(
+    isFilterActive: Boolean,
     title:String,
     placeholder:String,
     spacing: Dp,
     fontSize: TextUnit,
     onClickSearch: () -> Unit,
-    onClickFilter: () -> Unit
+    onClickFilter: () -> Unit,
 ){
     Column(
         verticalArrangement = Arrangement.spacedBy(space = spacing),
@@ -95,7 +97,8 @@ fun DynamicTopHeader(
         StaticSearchBar(
             placeholder = placeholder,
             onClick = onClickSearch,
-            onClickFilter = onClickFilter
+            onClickFilter = onClickFilter,
+            isFilterActive = isFilterActive
         )
     }
 }

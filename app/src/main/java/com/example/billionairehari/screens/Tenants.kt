@@ -108,14 +108,21 @@ import com.example.billionairehari.core.data.local.entity.PaymentStatus
 import com.example.billionairehari.layout.DynamicShowcaseScreen
 import com.example.billionairehari.modal.FilterModal
 import com.example.billionairehari.modal.payment_method
+import kotlin.String
+import kotlin.collections.mapOf
 
 
-enum class TENANT_FILTERS { NOT_PAID,PAID,PARTIAL_PAID,ALL }
+object TENANT_FILTERS {
+    const val NOT_PAID = 0
+    const val PAID = 1
+    const val PARTIAL_PAID = 2
+    const val ALL = 3
+}
 
-val tenant_filters = listOf<FilterType<TENANT_FILTERS>>(
-    FilterType<TENANT_FILTERS>(name = "Paid", filter = TENANT_FILTERS.PAID),
-    FilterType<TENANT_FILTERS>(name = "Not Paid", filter = TENANT_FILTERS.NOT_PAID),
-    FilterType<TENANT_FILTERS>(name = "Partial Paid", filter = TENANT_FILTERS.PARTIAL_PAID)
+val tenant_filters = listOf<FilterType<Int>>(
+    FilterType<Int>(name = "Paid", filter = TENANT_FILTERS.PAID),
+    FilterType<Int>(name = "Not Paid", filter = TENANT_FILTERS.NOT_PAID),
+    FilterType<Int>(name = "Partial Paid", filter = TENANT_FILTERS.PARTIAL_PAID)
 )
 
 
@@ -123,19 +130,22 @@ val tenant_filters = listOf<FilterType<TENANT_FILTERS>>(
 fun TenantsScreen(
     modifier:Modifier,
     navController: NavController,
-    filterState: TENANT_FILTERS = TENANT_FILTERS.ALL
+    filterState: Int = TENANT_FILTERS.PAID
 ) {
     val context = LocalContext.current
     val scrollState = rememberScrollState()
 
     val is_open = remember { mutableStateOf<Boolean>(false) }
-    val filter_type = remember { mutableStateOf<TENANT_FILTERS>(filterState) }
+    val filter_type = remember { mutableStateOf<Int>(filterState) }
+    val is_filter_active = remember(filter_type.value) { mutableStateOf<Boolean>(filter_type.value != TENANT_FILTERS.ALL) }
+    Log.d("BILLIONAIREHARIGREAT","${is_filter_active.value} ${filter_type.value}")
 
     DynamicShowcaseScreen(
         title = "Tenants",
         placeholder = "Search Tenant",
         scrollState = scrollState,
         navController = navController,
+        isFilterActive = is_filter_active.value,
         search_route = Destinations.TENANT_SEARCH_ROUTE,
         onClickFilter = {
             is_open.value = true
@@ -149,7 +159,7 @@ fun TenantsScreen(
         )
     }
     if(is_open.value){
-        FilterModal<TENANT_FILTERS>(
+        FilterModal<Int>(
             title = "Select Option to Filter",
             is_open = is_open,
             filter_types = tenant_filters,
@@ -192,13 +202,13 @@ fun TenantCards(
     scrollState: ScrollState,
     context: Context,
     navController: NavController,
-    filterState: TENANT_FILTERS,
+    filterState: Int,
     viewmodel: TenantsViewModel = hiltViewModel()
 ){
     val tenants_detail = viewmodel.tenants.collectAsState()
     val tenants = when(filterState){
         TENANT_FILTERS.ALL -> tenants_detail.value
-        else -> tenants_detail.value.filter { it -> it.paymentStatus == filterState.ordinal }
+        else -> tenants_detail.value.filter { it -> it.paymentStatus == filterState }
     }
 
     Column(

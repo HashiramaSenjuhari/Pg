@@ -79,19 +79,22 @@ import androidx.credentials.CredentialManager
 import androidx.navigation.NavAction
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
+import com.example.billionairehari.Arguments
 import com.example.billionairehari.Destinations
 import com.example.billionairehari.NavigationAction
+import com.example.billionairehari.Query
+import com.example.billionairehari.Screens
 import com.example.billionairehari.components.AppButton
 import com.example.billionairehari.components.dashboard.ActionBar
 import com.example.billionairehari.components.dashboard.DashboardBoard
-import com.example.billionairehari.components.dashboard.RentDetails
+import com.example.billionairehari.components.dashboard.Details
 import com.example.billionairehari.components.dashboard.TopBar
 import com.example.billionairehari.components.sheets.AddRoomSheet
 import com.example.billionairehari.components.sheets.AnnounceSheet
 import com.example.billionairehari.components.sheets.BottomModalLayout
 import com.example.billionairehari.icons.ContactIcon
 import com.example.billionairehari.icons.RemaindIcon
-import com.example.billionairehari.layout.MODAL_TYPE
+import com.example.billionairehari.utils.MODAL_TYPE
 import com.example.billionairehari.viewmodels.AnnounceModel
 import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
 import kotlinx.coroutines.CoroutineScope
@@ -102,7 +105,8 @@ import java.util.Date
 
 @Composable
 fun DashboardScreen(
-    navController: NavigationAction,
+    navActions: NavigationAction,
+    navController: NavController,
     coroutine: CoroutineScope,
     current_action: MutableState<MODAL_TYPE>,
     is_open: MutableState<Boolean>,
@@ -117,15 +121,25 @@ fun DashboardScreen(
     ) {
         TopBar(
             name = "Billionaire's Pg",
-            navActions = navController
+            navActions = navActions
         )
         DashboardBoard()
         ActionBar(
-            navAction = navController,
+            navAction = navActions,
             is_open = is_open,
             current_action = current_action
         )
-        RentDetails()
+        Details(
+            onClickPaid = {
+                navController.navigate("${Screens.TENANTS_SCREEN}?${Query.FILTER_QUERY}=${TENANT_FILTERS.PAID}")
+            },
+            onClickNotPaid = {
+                navController.navigate("${Screens.TENANTS_SCREEN}?${Query.FILTER_QUERY}=${TENANT_FILTERS.NOT_PAID}")
+            },
+            onClickPartialPaid = {
+                navController.navigate("${Screens.TENANTS_SCREEN}?${Query.FILTER_QUERY}=${TENANT_FILTERS.PARTIAL_PAID}")
+            }
+        )
     }
 }
 

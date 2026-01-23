@@ -84,6 +84,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavController
 import androidx.room.util.copy
 import coil.compose.AsyncImage
 import com.example.billionairehari.components.AppButton
@@ -97,6 +98,7 @@ import com.example.billionairehari.utils.currentMonth
 import com.example.billionairehari.viewmodels.TenantViewModel
 import com.google.android.material.chip.Chip
 import com.example.billionairehari.R
+import com.example.billionairehari.Screens
 import com.example.billionairehari.viewmodels.UiState
 
 val tenantDropDowns = listOf<DropDownParams>(
@@ -109,7 +111,7 @@ fun TenantScreen(
     id:String,
     modifier:Modifier,
     context:Context,
-    onNavigateToHistory:() -> Unit
+    navController: NavController
 ) {
     val viewmodel: TenantViewModel = hiltViewModel(
         creationCallback = { factory: TenantViewModel.TenantViewModelFactory ->
@@ -201,7 +203,12 @@ fun TenantScreen(
                 )
                 RentHistory(
                     payment_details = payment_history.value,
-                    onNavigateToHistory = onNavigateToHistory
+                    onNavigateToHistory = {
+                        navController.navigate("${Screens.TENANT_PAYMENTS_SCREEN}/${id}")
+                    },
+                    onNavigateToPaymentDetail = {
+                        navController.navigate("${Screens.PAYMENTS_SCREEN}/${it}")
+                    }
                 )
                 Box(
                     modifier = Modifier
@@ -488,7 +495,8 @@ val history = listOf<RentHistory>(
 @Composable
 fun RentHistory(
     payment_details:List<TenantDao.PaymentCard>,
-    onNavigateToHistory: () -> Unit
+    onNavigateToHistory: () -> Unit,
+    onNavigateToPaymentDetail: (String) -> Unit
 ){
     Column(
         modifier = Modifier.padding(6.dp),
@@ -516,10 +524,13 @@ fun RentHistory(
                         rent ->
                     TableRow(
                         month = rent.paymentDate,
-                        amount = rent.amountPaid.toString(),
+                        amount = rent.amountPaid, // fix
                         paid_date = rent.paymentDate,
-                        amount_paid = rent.amountPaid.toString(),
-                        due_date = rent.dueDate
+                        amount_paid = rent.amountPaid,
+                        due_date = rent.dueDate,
+                        onClick = {
+                            onNavigateToPaymentDetail(rent.id)
+                        }
                     )
                 }
             }
@@ -543,15 +554,16 @@ fun RentHistory(
 @Composable
 fun TableRow(
     month:String,
-    amount:String,
-    amount_paid:String,
+    amount:Int,
+    amount_paid:Int,
     paid_date:String,
-    due_date:String
+    due_date:String,
+    onClick:() -> Unit
 ){
-    val remaning_amount = (amount.toIntOrNull() ?: 0) - (amount_paid.toIntOrNull() ?: 0)
+    val remaning_amount = amount - amount_paid
     val paid_status = when {
         remaning_amount == 0 -> "paid"
-        remaning_amount < (amount.toIntOrNull() ?: 0) -> "partially paid"
+        remaning_amount < amount -> "partially paid"
         else -> "not paid"
     }
     Card(
@@ -563,7 +575,8 @@ fun TableRow(
         ),
         shape = RoundedCornerShape(16.dp),
         border = BorderStroke(color = Color.Black.copy(alpha = 0.06f), width = 1.dp),
-        modifier = Modifier.fillMaxWidth()
+        modifier = Modifier.fillMaxWidth(),
+        onClick = onClick
     ) {
         Column(
             modifier = Modifier.fillMaxWidth().padding(13.dp),

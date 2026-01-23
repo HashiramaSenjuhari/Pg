@@ -197,6 +197,7 @@ fun RoomsScreen(
     /** viewmodel - end **/
 
     val filter_type = remember { mutableStateOf<ROOM_FILTER>(ROOM_FILTER.DEFAULT) }
+    val isFilterActive = remember(filter_type.value) { mutableStateOf<Boolean>(filter_type.value != ROOM_FILTER.DEFAULT) }
 
     val final_rooms = when(filter_type.value){
         ROOM_FILTER.DEFAULT -> rooms.value
@@ -214,7 +215,8 @@ fun RoomsScreen(
         search_route = Destinations.ROOM_SEARCH_ROUTE,
         onClickFilter = {
             is_open.value = true
-        }
+        },
+        isFilterActive = isFilterActive.value
     ) {
         RoomCards(
             scrollState = scrollState,
@@ -224,7 +226,7 @@ fun RoomsScreen(
         )
     }
     if(is_open.value){
-        RoomFilterDialog(
+        RoomFilterModal(
             is_open = is_open,
             onReset = {
                 is_open.value = false
@@ -245,7 +247,7 @@ data class FilterType<T>(
 )
 
 @Composable
-fun RoomFilterDialog(
+fun RoomFilterModal(
     filter_type:MutableState<ROOM_FILTER>,
     is_open: MutableState<Boolean>,
     onFilter:(ROOM_FILTER) -> Unit,
@@ -299,7 +301,8 @@ fun StaticSearchBar(
     placeholder:String,
     onClick: () -> Unit,
     filter:Boolean = true,
-    onClickFilter:() -> Unit
+    onClickFilter:() -> Unit,
+    isFilterActive:Boolean = false
 ){
     Box(
         modifier = Modifier
@@ -329,17 +332,25 @@ fun StaticSearchBar(
                 Text(placeholder, fontSize = 16.sp, color = Color.Black.copy(0.6f))
             }
             if(filter){
-                Icon(
-                    FilterIcon,
-                    contentDescription = "",
-                    modifier = Modifier
-                        .size(20.dp)
-                        .clickable(
-                            interactionSource = MutableInteractionSource(),
-                            indication = null,
-                            onClick = onClickFilter
-                        )
-                )
+                Box(
+                    modifier = Modifier.size(24.dp),
+                    contentAlignment = Alignment.Center
+                ){
+                    Icon(
+                        FilterIcon,
+                        contentDescription = "",
+                        modifier = Modifier
+                            .size(20.dp)
+                            .clickable(
+                                interactionSource = MutableInteractionSource(),
+                                indication = null,
+                                onClick = onClickFilter
+                            )
+                    )
+                    if(isFilterActive){
+                        Box(modifier = Modifier.offset(x = 9.dp, y = -9.dp).clip(CircleShape).size(13.dp).background(Color(0xff198754)))
+                    }
+                }
             }
         }
     }

@@ -4,6 +4,7 @@ import com.example.billionairehari.core.ApiResult
 import com.example.billionairehari.core.data.interfaces.OwnerRepositoryInterface
 import com.example.billionairehari.core.data.local.dao.OwnerDao
 import com.example.billionairehari.core.data.local.entity.Owner
+import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 
 class OwnerRepository @Inject constructor(
@@ -13,6 +14,7 @@ class OwnerRepository @Inject constructor(
         ownerDao.insertOwner(owner = owner)
     }
 
+    override fun getFirstDate(ownerId: String): Flow<String> = ownerDao.getFirstDate(ownerId = ownerId)
     override suspend fun getOwner(phone: String): Owner = ownerDao.getOwner(phone = phone)
 
     override suspend fun updateOwner(ownerId: String): Int {

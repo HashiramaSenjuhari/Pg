@@ -1,6 +1,8 @@
 package com.example.billionairehari.screens
 
+import android.icu.text.DateFormat
 import android.text.Layout
+import android.util.Log
 import android.widget.GridLayout
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
@@ -66,7 +68,11 @@ import com.example.billionairehari.components.AppButton
 import com.example.billionairehari.core.data.local.entity.PaymentStatus
 import com.example.billionairehari.core.data.local.entity.PaymentType
 import com.example.billionairehari.layout.ModalUi
+import com.example.billionairehari.utils.currentMonth
 import com.example.billionairehari.viewmodels.GetAllPaymentHistoryViewModel
+import java.time.LocalDate
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
 
 enum class PaymentFilterType {
     MONTHS,
@@ -81,6 +87,20 @@ fun PaymentHistory(
 ){
     val scrollState = rememberScrollState()
     val payments = viewmodel.history.collectAsState()
+    val date = viewmodel.first_date.collectAsState()
+
+    val months = mutableListOf<Pair<String,String>>()
+    if(date.value != ""){
+        var startingMonth = LocalDate.parse(date.value) // parse only "YYYY-mm-dd" for one parameter else use DateTimeFormatter as second paramter
+        startingMonth = startingMonth.minusMonths(6)
+        var endMonth = LocalDate.now()
+        while(endMonth.isAfter(startingMonth)){
+            val currentMonthAndYear = endMonth.format(DateTimeFormatter.ofPattern("MMM YYYY"))
+            val currentDate = endMonth.format(DateTimeFormatter.ofPattern("YYYY-MM-DD"))
+            months.add(currentMonthAndYear to currentDate)
+            endMonth = endMonth.minusMonths(1)
+        }
+    }
 
     val is_open = remember { mutableStateOf<Boolean>(false) }
 
@@ -123,7 +143,7 @@ fun PaymentHistory(
 
     if(is_open.value){
         PaymentFilterModal(
-            months = listOf("Jan 2026","Feb 2026","Mar 2026","Apr 2026","May 2026","Jun 2026"),
+            months = months,
             is_open = is_open,
             filter_type = filter_type,
             monthsSelected = monthsSelected,
@@ -139,7 +159,7 @@ fun PaymentHistory(
 @Composable
 fun PaymentFilterModal(
     is_open: MutableState<Boolean>,
-    months:List<String>,
+    months:List<Pair<String,String>>,
     filter_type: MutableState<PaymentFilterType>,
     monthsSelected: SnapshotStateList<String>,
     paymentTypesSelected: SnapshotStateList<PaymentType>,
@@ -234,7 +254,7 @@ fun FilterLayout(
     filter_type: PaymentFilterType,
     paymentTypes: SnapshotStateList<PaymentType>,
     monthsSelected: SnapshotStateList<String>,
-    months:List<String>
+    months:List<Pair<String,String>>
 ){
 
     Column(
@@ -270,7 +290,7 @@ fun FilterLayout(
 
 @Composable
 fun MonthFilters(
-    months:List<String>,
+    months:List<Pair<String,String>>,
     monthsSelected:List<String>,
     onFilterClick:(String) -> Unit
 ){
@@ -278,10 +298,10 @@ fun MonthFilters(
         months.forEach {
             month ->
             FilterCheckBox(
-                name = month,
-                checked = monthsSelected.contains(month),
+                name = month.first,
+                checked = monthsSelected.contains(month.second),
                 onCheckedChange = {
-                    onFilterClick(month)
+                    onFilterClick(month.second)
                 }
             )
         }

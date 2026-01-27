@@ -10,6 +10,8 @@ import com.example.billionairehari.core.data.local.entity.Payment
 import com.example.billionairehari.utils.toDateFormat
 import com.example.billionairehari.utils.toDateString
 import com.example.billionairehari.viewmodels.DateRangeType
+import com.example.billionairehari.viewmodels.FilterOption
+import com.example.billionairehari.viewmodels.PaymentType
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
@@ -60,11 +62,15 @@ class PaymentRepository @Inject constructor(
     }
 
     override fun getPercentage(ownerId: String): Flow<PaymentDao.Percentag> = paymentDao.getPercentage(ownerId = ownerId)
-    override fun getPaymentsHistory(ownerId: String): Flow<List<PaymentDao.PaymentCard>> = paymentDao.getPaymentHistory(ownerId = ownerId)
+    override fun getPaymentsHistory(ownerId: String,paymentTypes:List<String>,paymentDates: List<String>): Flow<List<PaymentDao.PaymentCard>> {
+        Log.d("PAYMENT_DEBUG",paymentDates.toString())
+        return paymentDao.getPaymentHistory(ownerId = "1", paymentTypes = paymentTypes)
+    }
     override fun getPaymentDetail(
         ownerId: String,
         paymentId: String
     ): Flow<PaymentDao.PaymentDetail> = paymentDao.getPayment(ownerId = ownerId, id = paymentId)
     override fun getTenantPaymentHistory(ownerId:String,id:String): Flow<List<PaymentDao.PaymentCard>> = paymentDao
         .getTenantPaymentHistory(ownerId = ownerId,id = id)
+
 }

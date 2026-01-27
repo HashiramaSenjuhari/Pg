@@ -8,6 +8,7 @@ import androidx.room.Query
 import com.example.billionairehari.core.data.local.entity.Payment
 import com.example.billionairehari.core.data.local.entity.PaymentStatus
 import com.example.billionairehari.core.data.local.entity.PaymentType
+import com.example.billionairehari.viewmodels.FilterOption
 import kotlinx.coroutines.flow.Flow
 
 @Dao
@@ -90,7 +91,8 @@ interface PaymentDao {
         val roomName:String,
         val dueDate:String,
         val paymentDate:String,
-        val amount:Int
+        val amount:Int,
+        val paymentType: PaymentType
     )
 
     @Query("""
@@ -98,9 +100,10 @@ interface PaymentDao {
             p.id,
             t.name AS tenantName,
             r.name AS roomName,
-            p.payment_date AS paymentDate,
+            strftime('%Y-%m-01',p.payment_date) AS paymentDate,
             p.due_date AS dueDate,
-            p.amount
+            p.amount,
+            p.payment_type AS paymentType
         FROM payments p
         LEFT JOIN (
             SELECT id,name,room_id FROM tenants
@@ -109,9 +112,14 @@ interface PaymentDao {
             SELECT id,name FROM rooms
         ) AS r ON r.id = t.room_id
         WHERE p.owner_id = :ownerId
+        AND p.payment_type IN (:paymentTypes)
         ORDER BY p.created_at DESC
     """)
-    fun getPaymentHistory(ownerId:String): Flow<List<PaymentCard>>
+    fun getPaymentHistory(ownerId:String,paymentTypes: List<String>): Flow<List<PaymentCard>>
+
+//    AND (:shouldFilterDates = 0 OR
+//    strftime('%Y-%m-01',p.payment_date) IN ('2026-01-01')
+//    )
 
     @Query("""
         SELECT
@@ -120,7 +128,8 @@ interface PaymentDao {
             r.name AS roomName,
             p.payment_date AS paymentDate,
             p.due_date AS dueDate,
-            p.amount
+            p.amount,
+            p.payment_type AS paymentType
         FROM payments p
         LEFT JOIN (
             SELECT id,name,room_id FROM tenants
@@ -171,6 +180,4 @@ interface PaymentDao {
         ORDER BY p.payment_date DESC
     """)
     fun getPayment(id:String,ownerId:String): Flow<PaymentDetail>
-
-
 }

@@ -74,7 +74,8 @@ interface RoomDao {
         val name:String,
         val image:String,
         val phoneNumber:String,
-        val paymentStatus:Int
+        val paymentStatus:Int,
+        val amountToPay:Int
     )
     @Query("""
         SELECT
@@ -86,7 +87,11 @@ interface RoomDao {
             WHEN p.id IS NOT NULL AND SUM(p.amount) >= r.rent_price THEN 1 
             WHEN p.id IS NOT NULL AND SUM(p.amount) > 0 THEN 2
             ELSE 0 
-        END AS paymentStatus
+        END AS paymentStatus,
+        CASE
+            WHEN r.rent_price - SUM(COALESCE(p.amount,0)) > 0 THEN r.rent_price - SUM(p.amount)
+            ELSE 0
+        END AS amountToPay
         FROM rooms r
         JOIN tenants t ON t.room_id = r.id AND t.is_active = true
         LEFT JOIN payments p ON p.tenant_id = t.id AND p.due_date = strftime('%Y-%m','now') || '-' || r.due_day

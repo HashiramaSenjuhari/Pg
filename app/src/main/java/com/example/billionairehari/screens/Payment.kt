@@ -1,5 +1,6 @@
 package com.example.billionairehari.screens
 
+import android.util.Log
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -49,7 +50,10 @@ import com.example.billionairehari.core.data.local.entity.PaymentStatus
 import com.example.billionairehari.core.data.local.entity.PaymentType
 import com.example.billionairehari.icons.ClockIcon
 import com.example.billionairehari.layout.component.ROw
+import com.example.billionairehari.utils.formatDate
 import com.example.billionairehari.viewmodels.GetPaymentDetailViewModel
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 
 @Composable
 fun Payment(
@@ -62,11 +66,13 @@ fun Payment(
         }
     )
     val details = viewmodel.paymentDetails.collectAsState()
+    val createdAt = details.value.createdAt.formatDate("DD MMM YYYY")
+    val dueDate = details.value.due_date.formatDate("dd MMM YYYY")
 
     Column {
         PaymentScreen(
             paymentStatus = details.value.payment_status,
-            createdAt = "01:32 on 24 Jul 2026",
+            createdAt = "${details.value.paymentTime} on ${createdAt}",
             onClick = {
                 navController.popBackStack()
             }
@@ -76,7 +82,7 @@ fun Payment(
             roomName = details.value.roomName,
             amountPaid = details.value.amount,
             paymentType = details.value.payment_type,
-            dueDate = details.value.due_date,
+            dueDate = dueDate,
             onClickHistory = {
                 navController.navigate("${Screens.TENANT_PAYMENTS_SCREEN}/${details.value.tenantId}")
             },
@@ -132,8 +138,7 @@ fun PaymentUserDetail(
     name:String,
     roomName:String,
     amountPaid:Int,
-    paymentType: PaymentType,
-    dueDate: String
+    paymentType: PaymentType
 ){
     Column(
         modifier = Modifier
@@ -200,8 +205,7 @@ fun PaymentDetailCard(
                 name = name,
                 roomName = roomName,
                 amountPaid = amountPaid,
-                paymentType = paymentType,
-                dueDate = dueDate
+                paymentType = paymentType
             )
             ROw(
                 modifier = Modifier.fillMaxWidth()

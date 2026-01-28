@@ -82,7 +82,7 @@ enum class PaymentFilterType {
     PAYMENTS_TYPES
 }
 
-class MutableStatehashSet<T> {
+class mutableStateSetOf<T> {
     private val internalSet = mutableSetOf<T>()
     val items = mutableStateOf<Set<T>>(emptySet())
 
@@ -92,16 +92,18 @@ class MutableStatehashSet<T> {
         }
     }
 
-    fun contains(item:T) : Boolean = item in internalSet
     fun remove(item:T){
         if(internalSet.remove(item)){
-            items.value = internalSet
+            items.value = internalSet.toSet()
         }
     }
+
+    fun contains(item:T) : Boolean = item in items.value
     fun clear(){
         internalSet.clear()
-        items.value = emptySet()
+        items.value = internalSet
     }
+    val size: Int get() = items.value.size
 }
 
 @Composable
@@ -110,8 +112,8 @@ fun PaymentHistory(
     navController: NavController,
     viewmodel: GetAllPaymentHistoryViewModel = hiltViewModel()
 ){
-    val monthsSelected = remember { mutableStateListOf<String>() }
-    val paymentTypesSelected = remember { mutableStateListOf<String>() }
+    val monthsSelected = remember { mutableStateSetOf<String>() }
+    val paymentTypesSelected = remember { mutableStateSetOf<String>() }
 
     val scrollState = rememberScrollState()
     val payments = viewmodel.uiState.collectAsState()
@@ -127,7 +129,7 @@ fun PaymentHistory(
         },
         search_route = Destinations.PAYMENT_SEARCH_ROUTE,
         scrollState = scrollState,
-        isFilterActive = monthsSelected.isNotEmpty() || paymentTypesSelected.isNotEmpty()
+        isFilterActive = monthsSelected.items.value.isNotEmpty() || paymentTypesSelected.items.value.isNotEmpty()
     ) {
         Column(
             modifier = Modifier
@@ -179,7 +181,7 @@ fun PaymentHistory(
             monthsSelected = monthsSelected,
             paymentTypesSelected = paymentTypesSelected,
             onApplyChange = {
-                viewmodel.update_payment_filters(types = paymentTypesSelected.toList(), months = monthsSelected.toList())
+                viewmodel.update_payment_filters(types = paymentTypesSelected.items.value.toList(), months = monthsSelected.items.value.toList())
                 is_open.value = false
             },
             onClickClear = {
@@ -198,8 +200,8 @@ fun PaymentFilterModal(
     is_open: MutableState<Boolean>,
     months:List<Pair<String,String>>,
     filter_type: MutableState<PaymentFilterType>,
-    monthsSelected: SnapshotStateList<String>,
-    paymentTypesSelected: SnapshotStateList<String>,
+    monthsSelected: mutableStateSetOf<String>,
+    paymentTypesSelected: mutableStateSetOf<String>,
     onClickClear:() -> Unit,
     onApplyChange:() -> Unit
 ) {
@@ -287,8 +289,8 @@ fun FilterCheckBox(
 @Composable
 fun FilterLayout(
     filter_type: PaymentFilterType,
-    paymentTypes: SnapshotStateList<String>,
-    monthsSelected: SnapshotStateList<String>,
+    paymentTypes: mutableStateSetOf<String>,
+    monthsSelected: mutableStateSetOf<String>,
     months:List<Pair<String,String>>
 ){
 
@@ -300,7 +302,7 @@ fun FilterLayout(
         when(filter_type){
             PaymentFilterType.MONTHS -> MonthFilters(
                 months = months,
-                monthsSelected = monthsSelected.toList(),
+                monthsSelected = monthsSelected.items.value.toList(),
                 onFilterClick = {
                     if(monthsSelected.contains(it)){
                         monthsSelected.remove(it)
@@ -345,7 +347,7 @@ fun MonthFilters(
 
 @Composable
 fun PaymentStatusFilterOptions(
-    types: SnapshotStateList<String>,
+    types: mutableStateSetOf<String>,
     onFilterClicked:(String) -> Unit
 ){
     listOf("UPI","CASH").forEach {

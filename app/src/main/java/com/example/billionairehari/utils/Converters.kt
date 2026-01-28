@@ -52,3 +52,8 @@ fun combineDaytoCurrentDate(day:Int):String {
     return "${currentYear()}-${currentMonthInt()}-${day.toString().padStart(2,'0')}"
 }
 
+/** String Date Formatter **/
+fun String.formatDate(format:String): String {
+    val localDate = LocalDate.parse(this)
+    return localDate.format(DateTimeFormatter.ofPattern(format))
+}

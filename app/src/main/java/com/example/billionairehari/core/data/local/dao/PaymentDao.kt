@@ -100,7 +100,7 @@ interface PaymentDao {
             p.id,
             t.name AS tenantName,
             r.name AS roomName,
-            strftime('%Y-%m-01',p.payment_date) AS paymentDate,
+            strftime('%Y-%m-%d',p.created_at) AS paymentDate,
             p.due_date AS dueDate,
             p.amount,
             p.payment_type AS paymentType
@@ -154,11 +154,12 @@ interface PaymentDao {
         val payment_status: PaymentStatus = PaymentStatus.PAID,
         val payment_type: PaymentType = PaymentType.CASH,
         val payment_date:String = "",
-        val due_date:String = "",
-        val created_at:String = "",
+        val due_date:String = "2026-07-24",
+        val paymentTime:String = "",
         val tenantId:String = "",
         val tenantName:String = "",
-        val roomName:String = ""
+        val roomName:String = "",
+        val createdAt:String = "2026-07-24"
     )
 
     @Query("""
@@ -172,7 +173,8 @@ interface PaymentDao {
             p.payment_type,
             p.payment_date,
             p.due_date,
-            p.created_at
+            strftime('%H:%M',p.created_at) AS paymentTime,
+            strftime('%Y-%m-%d',created_at) AS createdAt
         FROM payments p
         LEFT JOIN (
             SELECT id,name,room_id FROM tenants

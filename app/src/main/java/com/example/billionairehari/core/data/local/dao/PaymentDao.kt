@@ -112,10 +112,15 @@ interface PaymentDao {
             SELECT id,name FROM rooms
         ) AS r ON r.id = t.room_id
         WHERE p.owner_id = :ownerId
-        AND p.payment_type IN (:paymentTypes)
+        AND (:shouldFilterByPayment = 0 OR 
+            p.payment_type IN (:paymentTypes)
+        ) 
+        AND (:shouldFilterByDates = 0 OR
+            strftime('%Y-%m-01',p.payment_date) IN (:dates)
+        )
         ORDER BY p.created_at DESC
     """)
-    fun getPaymentHistory(ownerId:String,paymentTypes: List<String>): Flow<List<PaymentCard>>
+    fun getPaymentHistory(ownerId:String,shouldFilterByPayment:Boolean,shouldFilterByDates:Boolean,paymentTypes: List<String>,dates:List<String>): Flow<List<PaymentCard>>
 
 //    AND (:shouldFilterDates = 0 OR
 //    strftime('%Y-%m-01',p.payment_date) IN ('2026-01-01')

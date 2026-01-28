@@ -126,7 +126,8 @@ fun PaymentHistory(
             is_open.value = true
         },
         search_route = Destinations.PAYMENT_SEARCH_ROUTE,
-        scrollState = scrollState
+        scrollState = scrollState,
+        isFilterActive = monthsSelected.isNotEmpty() || paymentTypesSelected.isNotEmpty()
     ) {
         Column(
             modifier = Modifier
@@ -184,6 +185,7 @@ fun PaymentHistory(
             onClickClear = {
                 paymentTypesSelected.clear()
                 monthsSelected.clear()
+                viewmodel.refresh()
                 is_open.value = false
             }
         )

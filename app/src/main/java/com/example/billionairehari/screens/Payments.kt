@@ -178,11 +178,12 @@ fun PaymentHistory(
             monthsSelected = monthsSelected,
             paymentTypesSelected = paymentTypesSelected,
             onApplyChange = {
-                viewmodel.update_payment_filters(types = paymentTypesSelected.toList(), dates = monthsSelected.toList())
+                viewmodel.update_payment_filters(types = paymentTypesSelected.toList(), months = monthsSelected.toList())
                 is_open.value = false
             },
             onClickClear = {
-                viewmodel.clear()
+                paymentTypesSelected.clear()
+                monthsSelected.clear()
                 is_open.value = false
             }
         )

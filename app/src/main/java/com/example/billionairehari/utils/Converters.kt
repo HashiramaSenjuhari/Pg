@@ -57,3 +57,9 @@ fun String.formatDate(format:String): String {
     val localDate = LocalDate.parse(this)
     return localDate.format(DateTimeFormatter.ofPattern(format))
 }
+
+/** String to Date Long **/
+fun String.toDateLong(format:String): Long {
+    val localDate = LocalDate.parse(this)
+    return localDate.atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli()
+}

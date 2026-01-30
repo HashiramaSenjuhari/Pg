@@ -157,7 +157,7 @@ fun PaymentHistory(
     val date = viewmodel.first_date.collectAsState()
 
     val months = mutableListOf<Pair<String,String>>()
-    if(date.value != ""){
+    if(date.value != null){
         var startingMonth = LocalDate.parse(date.value) // parse only "YYYY-mm-dd" for one parameter else use DateTimeFormatter as second paramter
         startingMonth = startingMonth.minusMonths(6)
         var endMonth = LocalDate.now()
@@ -168,7 +168,6 @@ fun PaymentHistory(
             endMonth = endMonth.minusMonths(1)
         }
     }
-
 
 
     val filter_type = remember { mutableStateOf<PaymentFilterType>(PaymentFilterType.MONTHS) }

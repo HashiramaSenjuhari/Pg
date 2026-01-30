@@ -102,7 +102,7 @@ fun MainLayout(
     // mutableState
     val is_open = rememberSaveable { mutableStateOf<Boolean>(true) }
     val is_dialog_open = rememberSaveable { mutableStateOf<Boolean>(false) }
-    val current_action = remember { mutableStateOf<MODAL_TYPE>(MODAL_TYPE.NONE) }
+    val current_action = remember { mutableStateOf<MODAL_TYPE>(MODAL_TYPE.UPDATE_TENANT_RENT()) }
     val current_dialog_action = remember { mutableStateOf<DIALOG_TYPE>(DIALOG_TYPE.NONE) }
 
     val title = when (current_action.value){
@@ -323,7 +323,8 @@ fun ModalUi(
             current_action.value = MODAL_TYPE.NONE
         },
         sheetState = sheetState,
-        is_open = is_open
+        is_open = is_open,
+        shouldDismissOnBackPress = true
     ) {
         when (val value = current_action.value){
             MODAL_TYPE.NONE -> {}
@@ -371,7 +372,11 @@ fun ModalUi(
             is MODAL_TYPE.UPDATE_TENANT_RENT -> {
                 val tenant = value.tenantRentDetails
                 RecordRentPriceModal(
+                    paymentId = value.paymentId,
                     tenantWithRentCard = tenant,
+                    amount = value.amount,
+                    paymentDate = value.paymentDate,
+                    paymentType = value.paymentType,
                     current_action = current_action
                 )
             }

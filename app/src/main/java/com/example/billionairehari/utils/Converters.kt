@@ -9,30 +9,18 @@ import java.time.format.DateTimeFormatter
 import java.util.Date
 import java.util.TimeZone
 
+const val FRIENDLY_DATE_FORMAT = "dd MM YYYY"
+const val DATE_FORMAT = "dd-MM-yyyy"
+const val SQL_DATE_FORMAT = "yyyy-MM-dd"
 
 /** Long to String Converter **/
 
-fun Long.toDateTimeString() : String {
+fun Long.toDateFormat(format:String = DATE_FORMAT) : String {
     val date = Date(this)
-    return dateZoneFormat(date.time)
+    return dateZoneFormat(date.time, format = format)
 }
 
-fun Long.toDateString(): String {
-    val datetime = Date(this)
-    return dateZoneFormat(datetime.time)
-}
-
-fun Long.toDateFormat(format:String = "dd-MM-yyyy") : String {
-    val date = Date(this)
-    return dateZoneFormat(date = date.time, format = format)
-}
-
-fun Long.toFriendlyDate(): String {
-    val date = Date(this)
-    return dateZoneFormat(date.time, format = "dd MMM yyyy")
-}
-
-fun dateZoneFormat(date:Long,format:String = "yyyy-MM-dd"):String{
+fun dateZoneFormat(date:Long,format:String = SQL_DATE_FORMAT):String{
     val format = DateTimeFormatter.ofPattern(format)
         .withZone(ZoneId.of("Asia/Kolkata"))
     return format.format(ZonedDateTime.ofInstant(
@@ -59,7 +47,7 @@ fun String.formatDate(format:String): String {
 }
 
 /** String to Date Long **/
-fun String.toDateLong(format:String): Long {
-    val localDate = LocalDate.parse(this)
-    return localDate.atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli()
+fun String.toDateLong(format:String = SQL_DATE_FORMAT): Long {
+    val localDate = LocalDate.parse(this, DateTimeFormatter.ofPattern(format))
+    return localDate.atStartOfDay(ZoneId.of("Asia/Kolkata")).toInstant().toEpochMilli()
 }

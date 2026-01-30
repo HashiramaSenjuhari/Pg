@@ -31,6 +31,7 @@ import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -46,11 +47,14 @@ import com.example.billionairehari.Destinations
 import com.example.billionairehari.Screens
 import com.example.billionairehari.components.AppButton
 import com.example.billionairehari.components.dashboard.ActionButton
+import com.example.billionairehari.core.data.local.dao.TenantDao
 import com.example.billionairehari.core.data.local.entity.PaymentStatus
 import com.example.billionairehari.core.data.local.entity.PaymentType
 import com.example.billionairehari.icons.ClockIcon
 import com.example.billionairehari.layout.component.ROw
+import com.example.billionairehari.utils.MODAL_TYPE
 import com.example.billionairehari.utils.formatDate
+import com.example.billionairehari.utils.toDateLong
 import com.example.billionairehari.viewmodels.GetPaymentDetailViewModel
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
@@ -58,8 +62,10 @@ import java.time.format.DateTimeFormatter
 @Composable
 fun Payment(
     id:String,
-    navController: NavController
+    navController: NavController,
+    current_action: MutableState<MODAL_TYPE>
 ){
+    Log.d("RENT_DEBUG",id)
     val viewmodel:GetPaymentDetailViewModel = hiltViewModel(
         creationCallback = { factory: GetPaymentDetailViewModel.GetPaymentDetailFactory ->
             factory.create(id)
@@ -68,6 +74,7 @@ fun Payment(
     val details = viewmodel.paymentDetails.collectAsState()
     val createdAt = details.value.createdAt.formatDate("DD MMM YYYY")
     val dueDate = details.value.due_date.formatDate("dd MMM YYYY")
+    val paymentDate = details.value.due_date.toDateLong("yyyy-MM-dd")
 
     Column {
         PaymentScreen(
@@ -86,7 +93,23 @@ fun Payment(
             onClickHistory = {
                 navController.navigate("${Screens.TENANT_PAYMENTS_SCREEN}/${details.value.tenantId}")
             },
-            onClickEdit = {},
+            onClickEdit = {
+                current_action.value = MODAL_TYPE.UPDATE_TENANT_RENT(
+                    tenantRentDetails = TenantDao.TenantWithRoomRentCard(
+                        id = details.value.tenantId,
+                        paymentAmount = details.value.amount,
+                        roomName = details.value.roomName,
+                        roomId = details.value.roomId,
+                        tenantName = details.value.tenantName,
+                        dueDay = details.value.due_date,
+                        rentPrice = details.value.rentPrice
+                    ),
+                    paymentType = details.value.payment_type,
+                    paymentDate = paymentDate,
+                    amount = details.value.amount.toString(),
+                    paymentId = id
+                )
+            },
             onClickShare = {}
         )
     }

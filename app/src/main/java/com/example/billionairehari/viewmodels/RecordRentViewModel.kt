@@ -13,13 +13,15 @@ import com.example.billionairehari.core.data.local.entity.PaymentType
 import com.example.billionairehari.core.data.repository.PaymentRepository
 import com.example.billionairehari.core.data.repository.TenantRepository
 import com.example.billionairehari.utils.MODAL_TYPE
+import com.example.billionairehari.utils.SQL_DATE_FORMAT
 import com.example.billionairehari.utils.combineDaytoCurrentDate
 import com.example.billionairehari.utils.currentDate
 import com.example.billionairehari.utils.currentDateTime
 import com.example.billionairehari.utils.currentMonthInt
 import com.example.billionairehari.utils.currentYear
 import com.example.billionairehari.utils.generateUUID
-import com.example.billionairehari.utils.toDateString
+import com.example.billionairehari.utils.toDateFormat
+import com.example.billionairehari.utils.toDateLong
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -37,6 +39,7 @@ import kotlin.coroutines.CoroutineContext
 
 
 data class RecordDataUiState(
+    val id:String? = null,
     val tenantAndRent: TenantDao.TenantWithRoomRentCard? = null,
     val amount:String = "",
     val dueDate:Long = 0L,
@@ -57,7 +60,7 @@ data class RecordDataUiState(
 }
 
 fun RecordDataUiState.toRoom(ownerId:String) : Payment = Payment(
-    id = generateUUID(),
+    id = id!!,
     ownerId = ownerId,
     tenantId = tenantAndRent?.id!!,
     roomId = tenantAndRent?.roomId!!,
@@ -65,7 +68,7 @@ fun RecordDataUiState.toRoom(ownerId:String) : Payment = Payment(
     amount = amount.toInt(),
     paymentType = paymentType,
     paymentStatus = paymentStatus,
-    dueDate = dueDate.toDateString(),
+    dueDate = dueDate.toDateFormat(SQL_DATE_FORMAT),
     paymentDate = currentDate(),
     updatedAt = currentDateTime(),
     createdAt = currentDateTime()
@@ -110,10 +113,19 @@ class RecordRentViewModel @Inject constructor(
     private val _record: MutableState<RecordDataUiState> = mutableStateOf(RecordDataUiState())
     val record: State<RecordDataUiState> get() = _record
 
+    fun update_payment_id(id:String){
+        _record.value = _record.value.copy(
+            id = id
+        )
+    }
     fun update_tenant(tenant: TenantDao.TenantWithRoomRentCard){
         _record.value = _record.value.copy(
             tenantAndRent = tenant,
-            tenantError = null
+            amount = tenant.rentPrice.toString(),
+            dueDate = tenant.dueDay.toDateLong("yyyy-MM-dd"),
+            tenantError = null,
+            amountError = null,
+            dateError = null
         )
     }
 
@@ -124,11 +136,13 @@ class RecordRentViewModel @Inject constructor(
         )
     }
 
-    fun update_payment_date(date:Long) {
-        _record.value = _record.value.copy(
-            dueDate = date,
-            dateError = null
-        )
+    fun update_payment_date(date:Long?) {
+        if(date != null){
+            _record.value = _record.value.copy(
+                dueDate = date,
+                dateError = null
+            )
+        }
     }
 
     fun update_payment_method(method: PaymentType){
@@ -154,29 +168,36 @@ class RecordRentViewModel @Inject constructor(
         )
         val current_error = _record.value
         Log.d("ERRORSGREAT",current_error.toString())
-        if(current_error.dateError != null
-            || current_error.tenantError != null
-            || current_error.amountError != null){
+        if(current_error.dateError != null){
             return
         }
+        if(current_error.tenantError != null){
+            return
+        }
+        if(current_error.amountError != null) return
 
         /** Saving to room **/
         viewModelScope.launch(Dispatchers.IO) {
             try {
-                val current_data = _record.value
+                var current_data = _record.value
                 _record.value = _record.value.copy(
                     isLoading = true
                 )
+                if(current_data.id == null){
+                    current_data = current_data.copy(
+                        id = generateUUID()
+                    )
+                }
                 Log.d("RentCARD",_record.value.toString())
 
                 val payment_data =  current_data.toRoom(
                     ownerId = "1"
                 )
-                Log.d("BILLIONAIREGREATHARI",payment_data.toString())
+                Log.d("RENT_DEBUG",payment_data.toString())
                 repository.insertPayment(payment = payment_data)
                 current_action.value = MODAL_TYPE.NONE
             }catch(error: Exception){
-
+                Log.d("RENT_DEBUG",error.toString())
             }finally {
                 refresh()
             }

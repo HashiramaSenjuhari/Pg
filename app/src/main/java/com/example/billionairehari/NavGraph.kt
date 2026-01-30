@@ -67,7 +67,6 @@ class NavigationAction (private val navController: NavHostController) {
                 saveState = true
             }
             launchSingleTop = true
-            restoreState = true
         }
     }
     fun navigateToRooms(){

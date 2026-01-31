@@ -149,6 +149,7 @@ fun TenantScreen(
                         roomName = tenant.tenantRoomName
                     )
                 }
+                Log.d("PAYMENT_DATE",tenant.paymentStatus.toString())
                 TenantRentDetail(
                     paymentStatus = tenant.paymentStatus,
                     dueDate = tenant.dueDate
@@ -339,6 +340,7 @@ fun TenantRentDetail(
             color = Color.Yellow
         )
     }
+    Log.d("PAYMENT_DATE","${tenantRentCardUi}")
 
     Column(
         verticalArrangement = Arrangement.spacedBy(13.dp)
@@ -350,7 +352,7 @@ fun TenantRentDetail(
                 title = "Rent Paid (current month)",
                 icon = CalendarIcon,
                 text = tenantRentCardUi.status,
-                textColor = tenantRentCardUi.color.value.toLong()
+                textColor = tenantRentCardUi.color
             )
             DetailCard(
                 title = "Rent Due Date",
@@ -420,7 +422,6 @@ fun TenantDetailShowcase(
         }
     }
 }
-
 
 
 @Composable

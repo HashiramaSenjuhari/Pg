@@ -140,7 +140,6 @@ import com.example.billionairehari.icons.EditIcon
 import com.example.billionairehari.icons.ShareIcon
 import com.example.billionairehari.icons.TenantIcon
 import com.example.billionairehari.layout.ChildLayout
-import com.example.billionairehari.layout.MODAL_TYPE
 import com.example.billionairehari.layout.component.ROw
 import com.example.billionairehari.model.Room
 import com.example.billionairehari.model.TenantRentRecord
@@ -151,7 +150,9 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 import com.example.billionairehari.R
 import com.example.billionairehari.core.data.local.dao.TenantDao
+import com.example.billionairehari.utils.MODAL_TYPE
 import com.example.billionairehari.utils.currentMonth
+import com.example.billionairehari.utils.formatDate
 import java.time.LocalDate
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
@@ -163,7 +164,8 @@ val fake_tenants = listOf(
         image = "",
         name = "BillionaireHari",
         phoneNumber = "",
-        paymentStatus = 2
+        paymentStatus = 2,
+        amountToPay = 0
     )
 )
 
@@ -246,7 +248,7 @@ fun RoomScreen(
                 )
                 RoomBriefDetail(
                     beds = data.bed_count,
-                    due_date = data.due_day,
+                    due_date = data.due_date,
                     filled = data.tenantCount,
                     rent_due = data.paidCount
                 )
@@ -265,9 +267,10 @@ fun RoomScreen(
                         id = it.id,
                         roomId = data.id,
                         rentPrice = data.rent_price,
-                        dueDay = data.due_day,
+                        dueDay = data.due_date,
                         roomName = data.name,
-                        tenantName = it.name
+                        tenantName = it.name,
+                        paymentAmount = it.amountToPay
                     )
                     current_action.value = MODAL_TYPE.UPDATE_TENANT_RENT(tenantRentDetails = details)
                 },
@@ -520,7 +523,7 @@ fun RoomBriefDetail(
             DetailCard(
                 icon = BedIcon,
                 title = "Due Date",
-                text = "${currentMonth()} ${due_date}"
+                text = due_date.formatDate("MMM DD, yyyy")
             )
         }
         Column(

@@ -7,6 +7,7 @@ import android.util.Log
 import androidx.navigation.NavHostController
 
 object Screens {
+    const val HOME_SCREEN = "home"
     const val DASHBOARD_SCREEN = "dashboard"
     const val ROOMS_SCREEN = "rooms"
     const val TENANTS_SCREEN = "tenants"
@@ -37,6 +38,7 @@ object Query {
 }
 
 object Destinations {
+    const val HOME_ROUTE = Screens.HOME_SCREEN
     const val DASHBOARD_ROUTE = Screens.DASHBOARD_SCREEN
     const val ROOMS_ROUTE = Screens.ROOMS_SCREEN
     const val ROOM_ROUTE = "${Screens.ROOMS_SCREEN}/{${Arguments.ROOM_ID_ARGS}}"
@@ -60,8 +62,8 @@ object Destinations {
 }
 
 class NavigationAction (private val navController: NavHostController) {
-    fun navigateToDashboard(){
-        navController.navigate(Destinations.DASHBOARD_ROUTE)
+    fun navigateToHome(){
+        navController.navigate(Destinations.HOME_ROUTE)
         {
             popUpTo(navController.graph.startDestinationId) {
                 saveState = true
@@ -72,6 +74,15 @@ class NavigationAction (private val navController: NavHostController) {
     fun navigateToRooms(){
         navController.navigate(Destinations.ROOMS_ROUTE) {
             popUpTo(navController.graph.startDestinationId) {
+                saveState = true
+            }
+            launchSingleTop = true
+            restoreState = true
+        }
+    }
+    fun navigateToDashboard(){
+        navController.navigate(Destinations.DASHBOARD_ROUTE){
+            popUpTo(navController.graph.startDestinationId){
                 saveState = true
             }
             launchSingleTop = true
@@ -125,31 +136,4 @@ class NavigationAction (private val navController: NavHostController) {
             restoreState = true
         }
     }
-//    fun navigateToPaidPage(){
-//        navController.navigate(Destinations.PAID_ROUTE){
-//            popUpTo(navController.graph.startDestinationId){
-//                saveState = true
-//            }
-//            launchSingleTop = true
-//            restoreState = true
-//        }
-//    }
-//    fun navigateToNotPaidPage(){
-//        navController.navigate(Destinations.NOT_PAID_ROUTE){
-//            popUpTo(navController.graph.startDestinationId){
-//                saveState = true
-//            }
-//            launchSingleTop = true
-//            restoreState = true
-//        }
-//    }
-//    fun navigateToPartialPaidPage(){
-//        navController.navigate(Destinations.PARTIAL_PAID_ROUTE){
-//            popUpTo(navController.graph.startDestinationId){
-//                saveState = true
-//            }
-//            launchSingleTop = true
-//            restoreState = true
-//        }
-//    }
 }

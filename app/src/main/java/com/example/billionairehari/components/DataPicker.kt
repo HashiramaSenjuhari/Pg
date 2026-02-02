@@ -8,6 +8,7 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -15,7 +16,11 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.DatePicker
+import androidx.compose.material3.DatePickerColors
+import androidx.compose.material3.DatePickerDefaults
 import androidx.compose.material3.DatePickerDialog
+import androidx.compose.material3.DatePickerFormatter
+import androidx.compose.material3.DisplayMode
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -35,8 +40,10 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.DialogProperties
 import com.example.billionairehari.icons.CalendarIcon
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.util.Calendar
 import java.util.Date
 import java.util.Locale
@@ -45,45 +52,64 @@ import java.util.TimeZone
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CustomDatePick(
-    date:Int,
     onDateChange: (Long?) -> Unit,
-    onDismiss:() -> Unit
+    onDismiss:() -> Unit,
+    selectedDate:Long? = null
 ){
     val datePickerState = rememberDatePickerState(
-        selectableDates = object : SelectableDates {
-            override fun isSelectableDate(utcTimeMillis: Long): Boolean {
-                val cal = Calendar.getInstance(TimeZone.getTimeZone("Asia/Kolkata")).apply {
-                    timeInMillis = utcTimeMillis
-                }
-                return cal.get(Calendar.DAY_OF_MONTH) == date
-            }
-
-            override fun isSelectableYear(year: Int): Boolean = true
-        }
+        initialSelectedDateMillis = selectedDate,
+//        selectableDates = object: SelectableDates {
+//            override fun isSelectableDate(utcTimeMillis: Long): Boolean {
+//                return super.isSelectableDate(utcTimeMillis)
+//            }
+//
+//            override fun isSelectableYear(year: Int): Boolean {
+//                return super.isSelectableYear(year)
+//            }
+//        }
     )
     DatePickerDialog(
+        modifier = Modifier.fillMaxSize(),
+        onDismissRequest = onDismiss,
         confirmButton = {
-            TextButton(
+            AppButton(
+                containerColor = Color.Black,
+                contentColor = Color.White,
                 onClick = {
                     onDateChange(datePickerState.selectedDateMillis)
                     onDismiss()
-                }
+                },
+                padding = PaddingValues(horizontal = 13.dp)
             ) {
-                Text("Ok")
+                Text("Confirm")
             }
         },
         dismissButton = {
-            TextButton(
-                onClick = onDismiss
-            ){
+            AppButton(
+                onClick = onDismiss,
+                padding = PaddingValues(horizontal = 13.dp)
+            ) {
                 Text("Cancel")
             }
         },
-        onDismissRequest = onDismiss,
-        modifier = Modifier.fillMaxSize()
+        colors = DatePickerDefaults.colors(
+            containerColor = Color.White
+        )
     ) {
         DatePicker(
-            state = datePickerState
+            colors = DatePickerDefaults.colors(
+                containerColor = Color.White,
+                selectedDayContainerColor = Color.Black,
+                selectedDayContentColor = Color.White,
+                todayDateBorderColor = Color.Transparent,
+                todayContentColor = Color.Black,
+                selectedYearContainerColor = Color.Black
+            ),
+            state = datePickerState,
+            dateFormatter = DatePickerDefaults.dateFormatter(selectedDateSkeleton = "billionaire"),
+            title = null,
+            headline = null,
+            showModeToggle = false
         )
     }
 }
@@ -231,7 +257,7 @@ fun CustomDateInput(
     }
     if(is_open.value) {
         CustomDatePick(
-            date = payment_date,
+            selectedDate = 0L,
             onDateChange = {
                     current_date ->
                 onDate(current_date!!)

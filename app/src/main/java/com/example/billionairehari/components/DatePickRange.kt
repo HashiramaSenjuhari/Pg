@@ -62,8 +62,10 @@ import androidx.compose.ui.window.DialogProperties
 import com.example.billionairehari.components.dashboard.DisableRippleEffect
 import com.example.billionairehari.layout.component.ROw
 import com.example.billionairehari.utils.currentMonthStartAndEndInMilli
-import com.example.billionairehari.utils.toFriendlyDate
-import com.example.billionairehari.viewmodels.DateRangeType
+import com.example.billionairehari.utils.toDateFormat
+import com.example.billionairehari.utils.toDateLong
+import com.example.billionairehari.viewmodels.DateFilter
+import com.example.billionairehari.viewmodels.DynamicFilter
 import kotlinx.coroutines.selects.select
 import java.text.SimpleDateFormat
 import java.time.LocalDate
@@ -79,7 +81,6 @@ data class MonthFilterOption(
 )
 
 val options = listOf<MonthFilterOption>(
-    MonthFilterOption(name = "Default",0),
     MonthFilterOption(name = "Last 1 month",value = 1),
     MonthFilterOption(name = "Last 3 month",value = 3),
     MonthFilterOption(name = "Last 6 month",value = 6),
@@ -90,24 +91,15 @@ val options = listOf<MonthFilterOption>(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DateFilterSheet(
-    selectedOption: DateRangeType,
+    selectedOption: DateFilter,
     is_open: MutableState<Boolean>,
     sheetState: SheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
     onDismiss:() -> Unit,
-    onConfirm:(DateRangeType) -> Unit
+    onConfirm:(DateFilter) -> Unit
 ){
     val currentMonth = currentMonthStartAndEndInMilli()
-    val startDate = remember { mutableStateOf<Long>(currentMonth.first) }
-    val endDate = remember { mutableStateOf<Long>(currentMonth.second) }
-    LaunchedEffect(Unit) {
-        if(selectedOption is DateRangeType.Dynamic){
-            if(selectedOption.startDate != null && selectedOption.endDate != null){
-                startDate.value = selectedOption.startDate
-                endDate.value = selectedOption.endDate
-            }
-        }
-    }
-    val selected = remember { mutableStateOf<DateRangeType>(selectedOption) }
+    val selected = remember { mutableStateOf<DateFilter>(selectedOption) }
+    val isDynaicOpen = remember { mutableStateOf<Boolean>(false) }
 
     ModalBottomSheet(
         sheetState = sheetState,
@@ -134,10 +126,13 @@ fun DateFilterSheet(
                 /** static radio buttons **/
                 options.forEach { option ->
                     FilterOption(
-                        selected = selected.value == DateRangeType.Static(option.value),
+                        selected = selected.value.static == option.value,
                         onClick = {
-                            if(selected.value != DateRangeType.Static(option.value)){
-                                selected.value = DateRangeType.Static(option.value)
+                            if(selected.value.static != option.value){
+                                selected.value = selected.value.copy(
+                                    static = option.value
+                                )
+                                isDynaicOpen.value = false
                             }
                         },
                         option = option.name
@@ -150,32 +145,33 @@ fun DateFilterSheet(
                 ) {
                     FilterOption(
                         option = "Select Date Range",
-                        selected = selected.value is DateRangeType.Dynamic,
+                        selected = selected.value.dynamic != null,
                         onClick = {
-                            selected.value = DateRangeType.Dynamic()
+                            isDynaicOpen.value = true
                         }
                     )
                     /** Date Dialog open if custom date button is selected **/
-                    if(selected.value is DateRangeType.Dynamic){
-                        CustomDatePicker(
-                            is_open = is_open,
-                            startDateInMilli = startDate.value,
-                            onChangeStart = {
-                                startDate.value = it
-                            },
-                            endDateInMilli = endDate.value,
-                            onChangeEnd = {
-                                endDate.value = it
-                            }
-                        )
-                    }
+//                    if(isDynaicOpen.value || selected.value.dynamic != null){
+//                        CustomDatePicker(
+//                            is_open = is_open,
+//                            startDateInMilli = selected.value.dynamic?.startDate?.toDateLong("yyyy-MM-dd"),
+//                            onChangeStart = {
+//                                dynamic.value = dynamic.value.copy(
+//                                    startDate = it.toDateFormat("yyyy-MM-dd")
+//                                )
+//                            },
+//                            endDateInMilli = selected.value.dynamic?.endDate?.toDateLong("yyyy-MM-dd"),
+//                            onChangeEnd = {
+//                                dynamic.value = dynamic.value.copy(
+//                                    endDate = it.toDateFormat("yyyy-MM-dd")
+//                                )
+//                            }
+//                        )
+//                    }
                 }
             }
             AppButton(
                 onClick = {
-                    if(selected.value is DateRangeType.Dynamic){
-                        selected.value = DateRangeType.Dynamic(startDate = startDate.value, endDate = endDate.value)
-                    }
                     onConfirm(selected.value)
                 },
                 modifier = Modifier.fillMaxWidth(),
@@ -235,12 +231,27 @@ fun convertMilliToDate(milli:Long): String{
 
 @Composable
 fun CustomDatePicker(
-    startDateInMilli: Long,
-    endDateInMilli: Long,
+    startDateInMilli: Long? = null,
+    endDateInMilli: Long? = null,
     is_open: MutableState<Boolean>,
     onChangeStart:(Long) -> Unit,
     onChangeEnd:(Long) -> Unit
 ){
+
+    /** custom date selection part **/
+    val localDate = LocalDate.now()
+
+    val startDate = localDate.withDayOfMonth(1)
+    val endDate = localDate.withDayOfMonth(localDate.lengthOfMonth())
+
+    val defaultStartDateInMilli = remember { mutableStateOf<Long>(
+        convertLocalToLong(startDate)
+        )
+    }
+    val defaultEndDateInMilli = remember { mutableStateOf<Long>(
+        convertLocalToLong(endDate)
+        )
+    }
     // date dialog state
     val firstDateDialog = remember { mutableStateOf<Boolean>(false) }
     val nextDateDialog = remember { mutableStateOf<Boolean>(false) }
@@ -255,7 +266,7 @@ fun CustomDatePicker(
         ) {
             OutlinedInput(
                 modifier = Modifier.fillMaxWidth(0.5f),
-                value = startDateInMilli.toFriendlyDate() ?: "",
+                value = startDateInMilli?.toDateFormat("DD MM YYYY") ?: defaultStartDateInMilli.value.toDateFormat("DD MM YYYY"),
                 onValueChange = {},
                 readOnly = true,
                 onClick = {
@@ -273,7 +284,7 @@ fun CustomDatePicker(
             OutlinedInput(
                 modifier = Modifier.fillMaxWidth(),
                 label = "End Date",
-                value = endDateInMilli.toFriendlyDate() ?: "",
+                value = endDateInMilli?.toDateFormat("DD MM YYYY") ?: defaultEndDateInMilli.value.toDateFormat("DD MM YYYY"),
                 readOnly = true,
                 onValueChange = {
 
@@ -296,7 +307,7 @@ fun CustomDatePicker(
                     onChangeStart(it)
                 }
             },
-            selectedDate = startDateInMilli
+            selectedDate = startDateInMilli ?: defaultStartDateInMilli.value
         )
     }
     if(nextDateDialog.value){
@@ -307,7 +318,7 @@ fun CustomDatePicker(
                     onChangeEnd(it)
                 }
             },
-            selectedDate = endDateInMilli
+            selectedDate = endDateInMilli ?: defaultEndDateInMilli.value
         )
     }
 }
